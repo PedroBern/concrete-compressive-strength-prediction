@@ -3,3 +3,8 @@
 .RData
 .Ruserdata
 .DS_Store
+/generated/*.log
+/generated/*.tex
+/generated/*_cache/
+/generated/*_files/
+*.Rproj
