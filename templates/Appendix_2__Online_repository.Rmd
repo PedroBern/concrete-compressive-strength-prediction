@@ -2,9 +2,7 @@
 
 # Appendix 2 - Online repository {#appendix2}
 
-All the code used to generate this work is available on *GitHub* at the following link:
-
-- https://github.com/pedrobern/concrete-compressive-strength-prediction
+https://github.com/pedrobern/concrete-compressive-strength-prediction
 
 </EN>
 
@@ -12,9 +10,7 @@ All the code used to generate this work is available on *GitHub* at the followin
 
 # Appendix 2 - Repositório online {#appendix2}
 
-Todo o código utilizado para gerar esse trabalho está disponível no *GitHub* no link a seguir:
-
-- https://github.com/pedrobern/concrete-compressive-strength-prediction
+https://github.com/pedrobern/concrete-compressive-strength-prediction
 
 </PT>
 
