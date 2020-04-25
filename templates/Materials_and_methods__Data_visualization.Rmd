@@ -22,7 +22,7 @@ A tabela \ref{tab:stat-summ} apresenta os dados estatísticos das variáveis con
 &nbsp; 
 
 ```{r stat-summ, echo=FALSE}
-#<EN># Table - Descriptive statistics - continuous variables/EN>
+#<EN># Table - Descriptive statistics - continuous variables</EN>
 #<PT># Tabela - Estatística descritiva - variáveis contínuas</PT>
 
 summ <- t(
@@ -69,7 +69,7 @@ kable(
 
 
 ```{r stat-summ-categorical, echo=FALSE, fig.height=4, fig.cap = cap}
-#<EN># Figure - Descriptive statistics - categorical variables/EN>
+#<EN># Figure - Descriptive statistics - categorical variables</EN>
 #<PT># Figura - Estatística descritiva - variáveis discretas</PT>
 
 #<EN>
@@ -179,7 +179,7 @@ A figura \ref{fig:correlation} apresenta a correlação das variáveis para cada
 &nbsp; 
 
 ```{r correlation, echo=F, fig.height=4, fig.cap=cap}
-#<EN># Figure - Correlation grouped by age/EN>
+#<EN># Figure - Correlation grouped by age</EN>
 #<PT># Figura - Correlações em cada idade</PT>
 
 cor_dat <- dat %>% select(-c(id))
@@ -258,6 +258,8 @@ melt_dat_final %>%
 ```
 
 ```{r correlation-mpa, echo=F, fig.height=3, fig.cap=cap}
+#<EN># Figure - Correlation over time</EN>
+#<PT># Figura - Correlações no tempo</PT>
 
 #<EN>
 cap <- "Correlation of variables with compressive strength over time"
@@ -297,7 +299,7 @@ A interpretação da figura \ref{fig:correlation-mpa} sugere que a resistência 
 &nbsp; 
 
 ```{r mix-app-mpa, echo=F, fig.cap=cap,fig.height=3.5, warning=FALSE}
-#<EN># Figure - Relationship between approximated mix, water, MPa and age/EN>
+#<EN># Figure - Relationship between approximated mix, water, MPa and age</EN>
 #<PT># Figura - Relação entre o traço aproximado, água, MPa e idade</PT>
 
 #<EN>
@@ -329,7 +331,8 @@ mix_dat <- mix_dat %>%
                           `coarse_aggregate_/_cement`)) %>%
   drop_na()
 
-mix_dat$day <- factor(mix_dat$day)
+lvls <- paste("day_",c("3","7","14","28","56","100"), sep="")
+mix_dat$day <- factor(mix_dat$day, levels=lvls)
 levels(mix_dat$day) <- labs
 
 min_x <- min(mix_dat$`water_/_cement`)
@@ -359,7 +362,7 @@ mix_dat %>%
 ```
 
 ```{r mix-mpa, echo=F, fig.cap=cap, fig.height=3.5, warning=FALSE, message=F}
-#<EN># Figure - Relationship between concrete main features/EN>
+#<EN># Figure - Relationship between concrete main features</EN>
 #<PT># Figura - Relação das principais características do concreto</PT>
 
 #<EN>
@@ -430,7 +433,7 @@ A figura \ref{fig:vars-distribution} mostra a distribuição das variáveis nas 
 &nbsp; 
 
 ```{r vars-distribution, echo=F, fig.height=10, fig.cap=cap, warning=FALSE, message = F}
-#<EN># Figure - Variables distribution/EN>
+#<EN># Figure - Variables distribution</EN>
 #<PT># Figura - Distribuição das variáveis</PT>  
 
 #<EN>
@@ -482,7 +485,7 @@ De outra forma, a figura \ref{fig:vars-distribution-time} mostra a distribuiçã
 </PT>
 
 ```{r vars-distribution-time, echo=F, fig.height=10, fig.cap=cap, warning=FALSE, message=F}
-#<EN># Figure - Variables distribution grouped by age/EN>
+#<EN># Figure - Variables distribution grouped by age</EN>
 #<PT># Figura - Distribuição das variáveis agrupadas por idade</PT>  
 
 days_labs <- c("3","7","14","28","56","100")
@@ -549,7 +552,7 @@ Na figura \ref{fig:pca}, utilizando uma classificação alternativa, foi realiza
 </PT>
 
 ```{r pca, echo=F, fig.height=3, fig.cap=cap}
-#<EN># Figure - Principal component analysis on ingredients/EN>
+#<EN># Figure - Principal component analysis on ingredients</EN>
 #<PT># Figura - Análise componente principal nos ingredientes</PT>  
 
 #<EN>
