@@ -1,0 +1,1700 @@
+---
+title:
+  Prevendo a resisência à compressão do concreto com técnicas de machine learning
+date: "Abril 22, 2020"
+author: "Pedro Bernardino Alves Moreira"
+indent: true
+abstract:
+  A resistência à compressão é a principal característica do concreto. Esse trabalho utilizou um conjunto de amostras amplamente utilizado para construir 6 modelos de previsão dessa característica, cada um específicamente para uma idade, 3, 7, 14, 28, 56 e 100 dias a partir de 7 ingredientes (água, cimento, agregado miúdo, agregado graúdo, cinza volante, escória granulada de alto forno e superplastificantes) e 6 relações entre os principais ingredientes (água/cimento, agregado miúdo/cimento, agregado graúdo/cimento, agregado miúdo/agregado graúdo, água/agregado graúdo e água/agregado miúdo) para fazer a previsão. Foi utilizado o algorítimo *Parallel Random Forest* (*parRF* do pacote *caret* de linguagem *R*). Os resultados foram satisfatórios sendo o melhor para o modelo de 3 dias (*RMSE* de 3,31) e pior para o modelo de 100 dias (*RMSE* de 5,85). O modelo de 28 dias apresentou *RMSE* de 4,72. O trabalho indicou que a separação em um modelo para cada idade é promissora e foi capaz de gerar resultados compatíveis ou melhores que outros estudos, abrindo espaço para construção de novos modelos seguindo essa proposta, mas utilizando algorítimos diferentes ou a combinação de diversos algorítimos.
+output:
+  pdf_document:
+    keep_tex: yes
+    number_sections: yes
+    toc_depth: 2
+bibliography: references.bib
+header-includes:
+- \renewcommand{\abstractname}{Resumo}
+- \usepackage{booktabs}
+- \usepackage{longtable}
+- \usepackage{supertabular}
+- \usepackage{array}
+- \usepackage{multirow}
+- \usepackage[table]{xcolor}
+- \usepackage{wrapfig}
+- \usepackage{colortbl}
+- \usepackage{pdflscape}
+- \usepackage{tabu}
+- \usepackage{threeparttable}
+- \usepackage[normalem]{ulem}
+- \usepackage{caption}
+- \usepackage{floatrow}
+- \floatsetup[table]{capposition=top}
+- \floatsetup[figure]{capposition=top}
+- \captionsetup{options=chunk}
+- \DeclareNewFloatType{chunk}{placement=H, fileext=chk, name=}
+- \renewcommand{\thechunk}{\arabic{chunk}}
+- \usepackage{indentfirst}
+- \usepackage{sectsty} \sectionfont{\centering}
+---
+```{r setup, include=FALSE, cache=F}
+# Install libraries, if not already installed
+if(!require(tidyverse)) install.packages("tidyverse")
+if(!require(ggplot2)) install.packages("ggplot2")
+if(!require(caret)) install.packages("caret")
+if(!require(knitr)) install.packages("knitr")
+if(!require(kableExtra)) install.packages("kableExtra")
+if(!require(gdata)) install.packages("gdata")
+if(!require(dplyr)) install.packages("dplyr")
+if(!require(tidyr)) install.packages("tidyr")
+if(!require(cowplot)) install.packages("cowplot")
+if(!require(pastecs)) install.packages("pastecs")
+if(!require(factoextra)) install.packages("factoextra")
+if(!require(reshape2)) install.packages("reshape2")
+if(!require(purrr)) install.packages("purrr")
+if(!require(gridExtra)) install.packages("gridExtra")
+if(!require(questionr)) install.packages("questionr")
+# Load libraries
+library(tidyverse)
+library(caret)
+library(ggplot2)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+library(tidyr)
+library(gdata)
+library(reshape2)
+library(cowplot)
+library(pastecs)
+library(factoextra)
+library(purrr)
+library(gridExtra)
+library(questionr)
+# Set global options
+options(pillar.sigfig = 5)
+options(knitr.kable.NA = '')
+opts_knit$set(eval.after = "fig.cap")
+opts_chunk$set(echo = TRUE, fig.align = 'center', cache=T, prompt=F, highlight=T )
+oldSource <- knit_hooks$get("source")
+knit_hooks$set(source = function(x, options) {
+  x <- oldSource(x, options)
+  x <- ifelse(!is.null(options$ref), paste0("\\label{", options$ref,"}", x), x)
+  ifelse(!is.null(options$codecap), paste0("\\captionof{chunk}{", options$codecap,"}", x), x)
+})
+```
+\renewcommand{\figurename}{Figura}
+\renewcommand{\tablename}{Tabela}
+\renewcommand{\contentsname}{Sumário}
+\renewcommand{\chunkname}{Código}
+\renewcommand{\listfigurename}{Lista de figuras}
+\renewcommand{\listtablename}{Lista de tabelas}
+\newpage
+\tableofcontents
+\newpage
+\listoffigures
+\listoftables
+\newpage
+
+
+# Introdução
+A resistência à compressão é a principal característica do concreto, medida por testes de padrões internacionais que consistem na quebra de corpos de prova. A medição aos 28 dias é obrigatória e representa a classe do concreto. Saber com antecêdencia qual o resultado será obtido para uma determinada idade, a partir das proporções de seus ingredientes, é de grande interesse para os fabricantes de concreto, construtoras e engenheiros civis.
+
+&nbsp;
+ 
+Essa resistência à compressão é uma função não linear de seus ingredientes e idade, tornando difícil o estabelecimento de uma fórmula analítica, apesar de algumas fórmulas já haveram sido propostas. @Hasan2011 propós um modelo matemático para prever a partir dos resultados de testes de 7 e 14 dias, e @Kabir2012 a partir de 7 dias. Porém técnicas de machine learning podem ser utilizadas para modelar essa característica a partir de dados reais de amostras, utilizando apenas os ingredientes.
+
+&nbsp;
+ 
+Muitos estudos anteriores utilizam o mesmo conjunto de dados utilizado por @Yeh1998 para prever a resistência à compressão do concreto. @Alshamiri2020 obteve bons resultados com a técnica de regularized extreme learning machine (RELM), e @Hameed2020 obteve resultados ainda melhores com a técnica de Artificial Neural Networks e cross-validation. Esse conjunto de amostras é tão conhecido que há ainda páginas na internet de estudos não publicados que o utilizam e possuem bons resultados, como @Abban2016, @Raj2018, @Modukuru2020 e @Pierobon2018. Ao final do trabalho os resultados encontrados são comparados aos trabalhos citados aqui.
+
+&nbsp;
+
+Diferente dos estudos anteriores com esse conjunto de amostras, este trabalho faz a preparação dos dados de forma diferente. A idade do concreto é a variável mais singular que contribui para sua resistência à compressão, por esse motivo, a idade é tratada separadamente nos modelos de machine learning, criando modelos para cada faixa de idade.
+
+
+
+# Metodologia
+
+## Materiais utilizados
+A metodologia foi realizada utilizando o software RStudio [@RStudio], ambiente virtual integrado para desenvolvimento de código na linguagem *R* [@RCore]. Ao longo do processo, todo código executado foi documentado na mesma ordem de sua execução no [Apêndice 3](#appendix3), e foi sempre realizada referência aos códigos ao longo do texto. Todas as informações relevantes relacionados ao sistema operacional e pacotes instalados foram apresentados no [Apêndice 1](#appendix1). Além disso foi criado um repositorio online e de código aberto no *Github*, abrigando todo o código utilizado para gerar esse trabalho, o link foi diponibilizado no [Apêndice 2](#appendix2).
+
+
+
+
+## Reprodutibilidade
+Para garantir a reprodutibilidade, sempre que houve algum código que podesse utilizar operações probabilísticas, foi definido um *seed* antes da sua execução, garantindo que quando rodado em outra máquina, com a mesma versão de *R* e o mesmo *seed*, chegue ao mesmo resultado. Os *seeds* podem ser conferidos ao longo do [apêndice 3](#appendix) ou diretamente no *Github*.
+
+
+
+
+## Obtenção dos dados
+O download dos dados foi realizado no website da Universidade da California Irvine [@downloadData] (\ref{show-download-data}). No total são 1030 amostras com 9 colunas. As amostras foram renomeadas e foi adicionado uma coluna de id para facilitar na manipulação dos dados (\ref{show-rename-dat-cols}). As colunas foram reordenadas para colocar a nova coluna id em primeira posição (\ref{show-reorder-dat}). As primeiras amostras podem ser visualizadas na tabela \ref{tab:first-samples}.
+
+&nbsp;
+ 
+```{r download-data, echo=F, include=F}
+# Download dos dados
+url_base <- "https://archive.ics.uci.edu"
+url <-  "/ml/machine-learning-databases/concrete/compressive/Concrete_Data.xls"
+download.file(paste0(url_base, url), "data.xls")
+dat <- read.xls("data.xls")
+n_inicial_samples <- nrow(dat)
+colnames(dat)
+```
+```{r rename-dat-cols, echo=F}
+# Renomeando as colunas
+colnames(dat) <- c(
+  "cement",
+  "blast_furnace_slag",
+  "fly_ash",
+  "water",
+  "superplasticizers",
+  "coarse_aggregate",
+  "fine_aggregate",
+  "day",
+  "mpa"
+  )
+dat$id <- seq.int(nrow(dat))
+```
+```{r reorder-dat, echo=F}
+# Reordenando os dados
+col_order <- c(
+  "id",
+  "cement",
+  "blast_furnace_slag",
+  "fly_ash",
+  "water",
+  "superplasticizers",
+  "coarse_aggregate",
+  "fine_aggregate",
+  "day",
+  "mpa"
+)
+dat <- dat[, col_order]
+```
+```{r col-names-and-units, echo=F}
+# Definindo nomes e unidades das colunas
+colNames <- c("ID", "Cimento", "E.G.A.F", "C.Volante", "Água",
+             "Superp.", "A.Graúdo", "A.Miúdo", "Dia", "Comp.Str.")
+dfUnits <- c("", "$kg/m^3$", "$kg/m^3$","$kg/m^3$","$kg/m^3$",
+             "$kg/m^3$","$kg/m^3$","$kg/m^3$","","$MPa$")
+```
+```{r first-samples, echo=F}
+# Tabela Primeiras amostras
+caption <- "Primeiras 6 amostras"
+kable(
+    dat[1:6,],
+    col.names = dfUnits,
+    escape = F,
+    booktabs = T,
+    caption = caption,
+    linesep = "\\addlinespace",
+    align = "c"
+    ) %>%
+    add_header_above(header = colNames, line = F, align = "c") %>%
+    kable_styling(latex_options = c("HOLD_position", "scale_down"))
+```
+
+
+
+## Preparação dos dados
+A preparação dos dados consistiu em transformar o conjunto de amostra afim de manter apenas dados relevantes para os estudos subsequêntes. Foram retirandos dados considerados irrelevantes ou que com potencial de adicionar um ruído indesejavel nas análises. Além disso, os dados relevântes foram transformados para melhor se enquadrar para os estudos nas próximas etapas.
+
+### Limpeza inicial dos dados
+Inicialmente foram observadas a existência de 25 amostras duplicadas que foram retiradas, resultando em um novo total de 1005 amostras (\ref{show-removing-duplicated-samples}).
+
+&nbsp;
+ 
+```{r removing-duplicated-samples, echo=F}
+# Removendo amostras duplicadas
+n_distinct_samples <- dat %>% select(-c(id)) %>% n_distinct()
+n_duplicated_samples <- n_inicial_samples - n_distinct_samples
+dat <- dat[!duplicated(select(dat, -c(id))),]
+n_samples <- nrow(dat)
+```
+Os dados apresentam as variaveis nas colunas e amostras nas linhas. Porém foi verificado que algumas amostras são identicas em proporções de ingredientes, alterando apenas o valor da idade e resistência à compressão, por exemplo as amostras 653, 654, 678 e 681, mostradas na tabela \ref{tab:similar-samples}.
+
+&nbsp;
+ 
+```{r similar-samples, echo=FALSE}
+# Tabela - Amostras com a mesma composição
+same_samples <- dat %>%
+  filter(id %in% c(653, 678, 654, 681))
+caption <- "Amostras com a mesma composição"
+kable(
+  same_samples[order(same_samples$day),],
+  col.names = dfUnits,
+  escape = F,
+  booktabs = T,
+  caption = caption,
+  linesep = "\\addlinespace",
+  align = "c",
+  row.names = FALSE
+  ) %>%
+  add_header_above(header = colNames, line = F, align = "c") %>%
+  kable_styling(latex_options = c("HOLD_position", "scale_down"))
+```
+Além disso, também existem amostras com os mesmos valores e proporções de ingredientes, mas com resistência à compressão diferente, provavelmente devido a diferenças na execução. É o caso por exemplo das amostras 472, 473 e 474, mostradas na tabela \ref{tab:similar-samples-2}.
+
+&nbsp;
+ 
+```{r similar-samples-2, echo=FALSE}
+# Tabela - Amostras iguais com resultados diferentes
+same_samples_2 <- dat %>%
+  filter(id %in% c(472, 473, 474))
+caption <- "Amostras iguais com resultados diferentes"
+kable(
+  same_samples_2[order(same_samples_2$day),],
+  col.names = dfUnits,
+  escape = F,
+  booktabs = T,
+  caption = caption,
+  linesep = "\\addlinespace",
+  align = "c",
+  row.names = FALSE
+  ) %>%
+  add_header_above(header = colNames, line = F, align = "c") %>%
+  kable_styling(latex_options = c("scale_down"))
+```
+Para facilitar a analise das amostras, todas as amostras que são iguais em relação aos ingredientes, foram atribuidos o mesmo *id*. Além disso, como a resistência à compressão aos 28 dias é o parâmetro para determinar a classe do concreto, foi mantido apenas os elementos que contenham esse dia entre suas amostras. No caso das amostras iguais mas com resultado diferentes de resistência à compressão, foi calculado a média dos valores. Após todas essas alterações (\ref{show-initial-data-cleaning}), o novo total de amostras foi reduzido para 970, contendo 416 configurações diferentes das proporções de ingredientes (\ref{show-total-de-amostras-apos-processamento}).
+
+&nbsp;
+ 
+```{r initial-data-cleaning, echo=FALSE}
+# Limpeza inicial das amotras
+dat <- dat %>%
+  group_by(
+    cement,
+    blast_furnace_slag,
+    fly_ash,
+    water,
+    superplasticizers,
+    coarse_aggregate,
+    fine_aggregate,
+  ) %>%
+  filter("28" %in% day) %>%
+  mutate(id = id[which.min(id)]) %>%
+  ungroup() %>%
+  group_by(id, day) %>%
+  mutate(mpa = mean(mpa)) %>%
+  ungroup()
+dat <- dat[!duplicated(select(dat, -c(id))),]
+dat$id<-factor(dat$id)
+n_samples <- nrow(dat)
+n_distinct_samples <- n_distinct(dat$id)
+```
+O resultado pode ser conferido na tabela \ref{tab:similar-samples-same-id}. Todas as amostras com configurações iguais de ingredientes possuem o mesmo id, e quando possuiam resultados diferentes para os mesmos dias, foram transformadas em apenas uma amostra, com a média aritmética na resistência à compressão.
+
+&nbsp;
+ 
+```{r similar-samples-same-id, echo=FALSE, include=TRUE}
+# Tabela - Amostras anteriores após processamento
+same_samples <- dat %>%
+  filter(id == 653 | id == 472 & day == 28)
+caption <- "Amostras anteriores após processamento"
+kable(
+  same_samples[order(same_samples$id, same_samples$day),],
+  col.names = dfUnits,
+  escape = F,
+  booktabs = T,
+  caption = caption,
+  linesep = "\\addlinespace",
+  align = "c",
+  row.names = FALSE,
+  digits = 2
+  ) %>%
+  add_header_above(header = colNames, line = F, align = "c") %>%
+  kable_styling(latex_options = c("HOLD_position", "scale_down"))
+```
+
+### Seleção das idades
+Como descrito anteriormente, a principal idade para análise da resistência à compressão é aos 28 dias, mas as outras idades também podem ser utilizadas para construir modelos de previsão. Porém é necessário verificar o quanto relevante os dados dessas outras idades são. Iniciando pela distribuição das amostras em relação a cada idade (\ref{show-boxplot}) mostrado na figura \ref{fig:boxplot}.
+
+&nbsp;
+ 
+```{r boxplot, echo=F, fig.cap=cap, fig.height=3.5}
+# Figura - Resistência à compressão (MPa) vs idade (dias)
+cap <- "Boxplot - Resistência à compressão (MPa) vs idade (dias)"
+ylabel <- "Resistência à compressão (MPa)"
+xlabel <- "Idade (dias)"
+dat %>%
+  ggplot(aes(x=factor(day), y=mpa)) +
+  geom_boxplot() +
+  geom_jitter(alpha=0.2)  +
+  theme_bw() +
+  ylab(ylabel) +
+  xlab(xlabel)
+```
+Foi observado que as idades de 90, 91 e 100 dias provavelmente representam extremos entre si das configurações de ingredientes, uma vez que são idades relativamente próximas porém com valores muito diferentes, especialmente para 90 e 91.
+
+&nbsp;
+ 
+Essa hipótese foi verificada utilizando o método de análise de componente principal, aplicado às amostras dessas 3 idades (\ref{show-pca-90-91-100}). A fígura \ref{fig:pca-90-91-100} mostra como as amostras se relacionam umas com as outras (quais são parecidas ou diferentes) e revelou como cada variável contribui para a análise. As duas primeiras dimensões representam $37\%$ e $24\%$ respectivamente da variância.
+
+&nbsp;
+ 
+```{r pca-90-91-100, echo=F, include=T, fig.cap = cap, fig.height=3.5}
+# Figura - Análise componente principal - 90, 91 e 100 dias
+dat_90_91_100 <- dat %>%
+  ungroup() %>%
+  filter(day %in% c(90, 91, 100)) %>%
+  select(-c(id, mpa))
+cap <- "Análise componente principal - 90, 91 e 100 dias"
+colnames(dat_90_91_100) <- c(
+   "Cim.","E.G.A.F.","Ci.Vo.","Agu.","Sup.","Ag.G.","Ag.M.","dia"
+)
+pca <- prcomp(select(dat_90_91_100, -c(dia)), scale = TRUE)
+habillage <- dat_90_91_100$dia
+fviz_pca_biplot(
+  pca,
+  geom.ind = "point",
+  habillage=habillage,
+  addEllipses = TRUE,
+  ellipse.level=0.75) +
+  ggtitle("") +
+  theme_bw() +
+  coord_cartesian(xlim = c(-3, 3.5), ylim = c(3, -5))
+```
+Outro ponto importante considerado, da própria natureza do concreto, é o fato da taxa de crescimento de sua resistência à compressão diminuir com o tempo, chegando a um certo valor de establidade. A figura \ref{fig:mpa-on-time} mostra a resistência à compressão ao longo dos dias para amostras com mais de 5 dados, ou seja, dados disponiveis para no mínimo 6 idades distintas (\ref{show-mpa-on-time}). 
+
+&nbsp;
+ 
+```{r mpa-on-time, echo=F, include=T, fig.cap=cap, fig.height=3}
+# Figura - Resistência à compressão ao longo do tempo
+cap <- "Resistência à compressão ao longo do tempo"
+ylabel <- "MPa"
+xlabel <- "Idade (dias)"
+dat_duplicated_only <- dat %>%
+  group_by(id) %>%
+  filter(n()>5) %>%
+  select(id, mpa, day)
+dat_duplicated_only %>%
+  ggplot(aes(day, mpa, fill=id, alpha = 0.5)) +
+  geom_line() +
+  xlab(xlabel) +
+  ylab(ylabel) +
+  theme_bw() +
+  theme(legend.position = "none")
+```
+Pelos motivos apresentados nas figuras \ref{fig:boxplot}, \ref{fig:pca-90-91-100} e \ref{fig:mpa-on-time}, foi considerado que as idades de 90, 91 e 100 dias podem ser agrupadas para melhorar a leitura e diminuir o ruído das amostras. Elas foram convertidas para o mesmo valor, que no caso foi escolhido a idade de 100 dias (\ref{show-join-90-91-100}, pois como mostrado na figura \ref{fig:mpa-on-time}, a resistência apenas aumenta, logo aos 100 dias a resistência à compressão será maior ou igual ao valor de 90 ou 91 dias.
+
+&nbsp;
+ 
+```{r join-90-91-100, echo=F, eval=F}
+# Juntando amostras de 90, 91 e 100 dias
+ind_90 <- dat$id[which(dat$day == "90")]
+ind_91 <- dat$id[which(dat$day == "91")]
+ind_100 <- dat$id[which(dat$day == "100")]
+sum(duplicated(c(ind_90, ind_91, ind_100))) # 0
+dat <- dat %>%
+  ungroup() %>%
+  mutate(day = ifelse(day %in% c(91, 90), 100, day))
+```
+Mais um tópico analisado na seleção das idades foi a frequência observada de cada valor de idade após essa transformação dos 90, 91 em 100 dias, mostrada na figura \ref{fig:freq-ages}. Alguns valores de dias apresentam concentrações muito baixas de amostras, correndo o risco de prejudicar mais do que ajudar na criação dos modelos, logo elas foram removidas (\ref{show-remove-ages-lower-50}). O critério adotado foi manter apenas idades com frequência maior que 50, ou seja, apenas os valores de 3, 7, 14, 28, 56 e 100 dias.
+
+&nbsp;
+ 
+```{r freq-ages, echo=F, include=T, fig.cap=cap, fig.height=3}
+# Figura - Frequência das idades
+cap <- "Frequência das idades"
+ylabel <- "Frequência"
+xlabel <- "Idade (dias)"
+dat %>%
+  ggplot(aes(x = factor(day))) +
+  geom_bar() +
+  theme_bw() +
+  xlab(xlabel) +
+  ylab(ylabel)
+```
+```{r remove-ages-lower-50, echo=F}
+# Removendo idades com frequência menor que 50
+dat <- dat[dat$day %in% c(3, 7, 14, 28, 56, 100),]
+```
+
+### Reorganização dos dados
+As amostras foram agrupadas para manter apenas uma amostra distinta de cada conjunto de configuração das proporções dos ingredientes, adicionando novas variáveis/colunas para a resistência em cada idade (\ref{show-reorganizing-dat}). O resultado nas primeiras amostras após esse processamento é mostrado na tabela \ref{tab:new-features}.
+
+&nbsp;
+ 
+```{r reorganizing-dat, echo=F}
+# Reorganização das amotras
+dat <- dat %>%
+  group_by_at(vars(-mpa)) %>%
+  mutate(row_id = 1:n()) %>% ungroup() %>%
+  spread(day, mpa, sep = "_") %>%
+  select(-row_id)
+```
+```{r new-features, echo=F}
+caption <- "Primeiras 6 amostras reorganizadas"
+colNames2 = c("ID", "Cimento", "E.G.A.F.", "C.Volante", "Água",
+             "Superp.", "A.Graúdo", "A.Miúdo", "3 dias", "7 dias",
+             "14 dias", "28 dias", "56 dias", "100 dias")
+dfUnits2 <- c("", "$kg/m^3$", "$kg/m^3$","$kg/m^3$","$kg/m^3$",
+              "$kg/m^3$", "$kg/m^3$","$kg/m^3$","$MPa$","$MPa$",
+              "$MPa$","$MPa$","$MPa$","$MPa$")
+kable(
+    head(dat[order(dat$id),]),
+    col.names = dfUnits2,
+    escape = F,
+    booktabs = T,
+    caption = caption,
+    linesep = "\\addlinespace",
+    align = "c"
+    ) %>%
+    add_header_above(header = colNames2, line = F, align = "c") %>%
+    kable_styling(latex_options = c("HOLD_position", "scale_down"))
+```
+O número de amostras e amostras distintas após toda essa manipulação permaneceu o mesmo, um total de 416 (\ref{show-total-samples-2}).
+```{r total-samples-2, echo=F}
+
+### Adicionando novas variáveis
+Para finalizar a preparação dos dados, novas colunas foram adicionadas ao conjunto de amostras (\ref{show-new-features-2}). Iniciando pela classe do concreto, por exemplo se a resistência à compressão está entre 25 e 30, recebe a classe *C25*. A inclusão da classe foi importânte pois a resistência em $MPa$ é uma variável contínua, que será utilizada nos modelos de regressão, mas a classe como variável discreta pode fornecer outro ângulo de visualização dos dados. Também foi adicionado o traço aproximado do concreto, que representa as proporções de agregados (miúdo e graúdo) para o cimento. Outras proporções entre os principais ingredientes também foram adicionadas. As novas variáveis são apresentadas na tabela \ref{tab:new-features-table}.
+```{r new-features-2, echo=F}
+caption <- "Novas variáveis"
+colNames7 = c("ID", "Classe","Traço aproximado",
+             "Água / Cimento", "A.Miúdo / Cimento", 
+             "A.Graúdo / Cimento", "A.Miúdo / A.Graúdo",
+             "Água / A.Graúdo", "Água / A.Miúdo")
+kable(
+    head(dat[order(dat$id),][,c(1,15:22)]),
+    col.names = colNames7,
+    escape = F,
+    booktabs = T,
+    caption = caption,
+    linesep = "\\addlinespace",
+    align = "c",
+    digits = 4
+    ) %>%
+  kable_styling(latex_options = c("HOLD_position", "scale_down")) %>%
+  column_spec(2, width = "1.5cm") %>%
+  column_spec(3, width = "2cm") %>%
+  column_spec(4:9, width = "1.7cm")
+```
+
+
+
+
+## Visualização dos dados
+Para avaliar a necessidade de mais manipulações antes da construção dos modelos, nesta etapa as 416 amostras já processadas foram visualizadas e analisadas.
+
+### Estatistica descritiva
+A tabela \ref{tab:stat-summ} apresenta os dados estatísticos das variáveis contínuas (\ref{show-stat-summ}). A linha de *Null* representa o número de valores zerados para os ingredientes, e a linha *NA* representa o número de dados faltando. Como as amostras foram filtradas para manter apenas conjuntos de amostras com valores conhecidos da resistência à compressão aos 28 dias, o número de *NAs* é zero para essa idade. A figura \ref{fig:stat-summ-categorical} apresenta os dados estatísticos das variáveis discretas (\ref{show-stat-summ-categorical}).
+
+&nbsp;
+ 
+```{r stat-summ, echo=FALSE}
+caption <- "Estatística descritiva - variáveis contínuas"
+colnames(summ) <- c("Amostras", "Null", "NA", "Min", "Max", "Intervalo",
+              "Soma", "Mediana", "Média", "Erro padrão  da média", 
+              "Intervalo de confiânça da média",
+              "Variância", "Desvio Padrão", "Coeficiênte de variação")
+rownames(summ) = c("Cimento", "E.G.A.F.", "Cinza Volante", "Água",
+              "Superplast.", "A.Graúdo", "A.Miúdo", "3 dias", "7 dias",
+              "14 dias", "28 dias", "56 dias", "100 dias",
+              "Água/ Cimento", "A.Miúdo/ Cimento", 
+              "A.Graúdo/ Cimento", "A.Miúdo / A.Graúdo",
+              "Água / A.Graúdo", "Água / A.Miúdo")
+kable(
+  summ,
+  escape = F,
+  booktabs = T,
+  caption = caption,
+  linesep = "\\addlinespace",
+  align = "c",
+  digits = c(0,0,0,2,2,2,2,2,2,2,2,2,2,2)
+  ) %>%
+  kable_styling(latex_options = c("HOLD_position", "scale_down")) %>%
+  column_spec(c(1,10:15), width = "1.5cm")
+```
+```{r stat-summ-categorical, echo=FALSE, fig.height=4, fig.cap = cap}
+cap <- "Estatística descritiva - variáveis discretas"
+name1 <- "Porcentagem"
+name2 <- "Porcentagem acumulada"
+ylabel <- "Frequencia"
+xlabel1 <- "Classe"
+xlabel2 <- "Traço aproximado"
+format_percent = function(n){
+  paste(n, "%", sep = "")
+}
+format_class <- function(cls){
+  str_remove_all(cls, "C")
+}
+f_class <- freq(dat$class, cum = TRUE, sort = "dec", total = F) %>%
+  select(n, "%", "%cum") %>%
+  mutate(class = row.names(.)) %>%
+  mutate(class_n = as.numeric(format_class(class)))
+f_cls_labels = function(n) {
+  f_class$class[n]
+}
+f_cls_acc_labels = function(n){
+  paste(f_class$`%cum`[n], "%", sep = "")
+}
+p1 <- f_class %>%
+  ggplot(aes(x = as.integer(reorder(class_n, -n)), y = n)) +
+  geom_bar(stat = 'identity') +
+  scale_y_continuous(
+      sec.axis = sec_axis(~./length(dat$class) * 100,
+                          name = name1,
+                          labels = format_percent)) +
+  scale_x_continuous(labels = f_cls_labels, breaks = 1:16, limits = c(0.5,16.5),
+                     sec.axis = sec_axis(~., breaks = 1:16,
+                              name = name2,
+                              labels = f_cls_acc_labels)) +
+  theme_bw() +
+  theme(panel.grid.minor.y = element_blank()) +
+  xlab(xlabel1) +
+  ylab(ylabel) +
+  coord_flip()
+format_mix <- function(mix){
+  str_remove_all(mix, ":")
+}
+f_mix <- freq(dat$mix_app, cum = TRUE, sort = "dec", total = F) %>%
+  select(n, "%", "%cum") %>%
+  mutate(mix = row.names(.)) %>%
+  mutate(mix_n = as.numeric(format_mix(mix)))
+f_mix_labels = function(n) {
+  f_mix$mix[n]
+}
+f_mix_acc_labels = function(n){
+  paste(f_mix$`%cum`[n], "%", sep = "")
+}
+p2 <- f_mix %>%
+  ggplot(aes(x = as.integer(reorder(mix_n, -n)), y = n)) +
+  geom_bar(stat = 'identity') +
+  scale_y_continuous(
+      sec.axis = sec_axis(~./length(dat$mix_app) * 100,
+                          name = name1,
+                          labels = format_percent)) +
+  scale_x_continuous(labels = f_mix_labels, breaks = 1:24, limits = c(0.5,24.5),
+                     sec.axis = sec_axis(~., breaks = 1:24,
+                              name = name2,
+                              labels = f_mix_acc_labels)) +
+  theme_bw() +
+  theme(panel.grid.minor.y = element_blank()) +
+  xlab(xlabel2) +
+  ylab(ylabel) +
+  coord_flip()
+grid.arrange(p1, p2, ncol=2)
+```
+
+### Correlação dos ingredientes e resistência à compressão
+A figura \ref{fig:correlation} apresenta a correlação das variáveis para cada conjunto de idades (\ref{show-correlation}). A figura \ref{fig:correlation-mpa} apresenta os mesmos dados, mas em vez de correlacionar todos, correlaciona apenas com a resistência à compressão, mostrando os valores mais detalhadamente (\ref{show-correlation-mpa}).
+
+&nbsp;
+ 
+```{r correlation, echo=F, fig.height=4, fig.cap=cap}
+cap <- "Correlações em cada idade"
+f_lvl <- c("3 dias", "7 dias", "14 dias","28 dias", "56 dias", "100 dias")
+name <- "Correlação"
+colnames_dat <- c("Cimento", "E.G.A.F.", "C.Volante", "Água",
+                  "Superp.", "A.Graúdo", "A.Miúdo",
+                  "3","7","14","28","56","100",
+                  "class","mix_app" ,"Ág./Ci.",
+                  "A.M./Ci.", "A.G./Ci.", "A.M./A.G.",
+                  "Ág./A.G.", "Ág./A.M.")
+colnames(cor_dat) <- colnames_dat
+cor_dat <- cor_dat %>%
+  gather("day", "mpa", c("3", "7", "14", "28", "56", "100")) %>%
+  drop_na()
+cor_day <- function(d){
+  res <- cor_dat %>%
+    filter(day == d) %>%
+    select(-c(day, class, mix_app)) %>%
+    cor(.)
+  res[upper.tri(res)] <- NA
+  return(res)
+}
+cor_dats <- list(cor_day(3), cor_day(7), cor_day(14),
+               cor_day(28), cor_day(56), cor_day(100))
+melt_day <- function(df, d){
+  df %>%
+    melt() %>%
+    mutate(day = d)
+}
+melt_dats <- list(melt_day(cor_dats[1], 3), melt_day(cor_dats[2], 7),
+                  melt_day(cor_dats[3], 14), melt_day(cor_dats[4],28),
+                  melt_day(cor_dats[5], 56), melt_day(cor_dats[6],100))
+melt_dat_final <- melt_dats %>%
+  reduce(rbind) %>%
+  filter(value != 1)
+melt_dat_final$day <- factor(melt_dat_final$day)
+levels(melt_dat_final$day) <- f_lvl
+melt_dat_final %>%
+  ggplot(aes(x=reorder(Var1, desc(Var1)), y=Var2, fill=value)) + 
+  geom_tile(color = "white") +
+  facet_wrap(~day, ncol=3) +
+  scale_fill_gradient2(low = "red", high = "blue", mid = "white", 
+   midpoint = 0, limit = c(-1,1),name=name, na.value="white") +
+  xlab("") +
+  ylab("") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"))
+```
+```{r correlation-mpa, echo=F, fig.height=3, fig.cap=cap}
+cap <- "Correlação das variáveis com a resistência à compressão no tempo"
+name <- "Correlação"
+melt_dat_final %>%
+  filter(Var1 == "mpa" | Var2 == "mpa") %>%
+  ggplot(aes(x=reorder(Var1, desc(Var1)), y=Var2, fill=value)) +
+  geom_tile(color = "white") +
+  facet_wrap(~day, ncol=6) +
+  scale_fill_gradient2(low = "red", high = "blue", mid = "white",
+   midpoint = 0, limit = c(-1,1),name=name, na.value="white") +
+  xlab("") +
+  ylab("") +
+  geom_text(aes(label = round(value, 2)), size = 2.5) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(colour = "black"))
+```
+A interpretação da figura \ref{fig:correlation-mpa} sugere que a resistência do concreto está relacionada positivamente principalmente com os ingredientes cimento e superplastificante e negativamente com a água e agregado miúdo. Quanto menor a quantidade de cimento para os agregados e para água, mais negativamente estão correlacionados com a resistência à compressão.
+
+&nbsp;
+ 
+```{r mix-app-mpa, echo=F, fig.cap=cap,fig.height=3.5, warning=FALSE}
+cap <- "Relação entre o traço aproximado, água, resistência à compressão e idade"
+d <- " dias"
+xlabel <- "Traço aproximado" 
+ylabel <- "Resistência à compressão (MPa)"
+label <- "Água /\nCimento"
+mix_dat <- dat %>%
+  select(c(day_3,day_7,day_14,day_28,day_56,day_100,
+          mix_app, `water_/_cement`, 
+          `fine_aggregate_/_cement`, 
+          `coarse_aggregate_/_cement`))
+  
+labs <- paste(c("3","7","14","28","56","100"), d, sep="")
+mix_dat <- mix_dat %>%
+  gather("day", "mpa", -c(mix_app, `water_/_cement`,
+                          `fine_aggregate_/_cement`,
+                          `coarse_aggregate_/_cement`)) %>%
+  drop_na()
+mix_dat$day <- factor(mix_dat$day)
+levels(mix_dat$day) <- labs
+min_x <- min(mix_dat$`water_/_cement`)
+max_x <- max(mix_dat$`water_/_cement`)
+s_x <- max_x - min_x
+mix_dat %>%
+  ggplot(aes(x=mix_app, y=mpa, colour = `water_/_cement`)) +
+  geom_point()  +
+  facet_wrap(~ day, ncol=2) +
+  theme_bw() +
+  ylab(ylabel) +
+  xlab(xlabel) +
+  scale_shape_manual(values=c(16, 2, 8)) +
+  scale_colour_gradient2(low = "red", mid = "yellow", high = "blue",
+                         midpoint = s_x / 2 + min_x ,limits = c(min_x, max_x),
+                         breaks = c(round(min_x, 2),
+                                    round(s_x*0.25 + min_x,2), 
+                                    round(s_x*0.5 + min_x,2),
+                                    round(s_x * 0.75 + min_x,2),
+                                    round(max_x, 2))) +
+  labs(colour = label) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(panel.grid.minor = element_blank(),
+      axis.line = element_line(colour = "black"))
+```
+```{r mix-mpa, echo=F, fig.cap=cap, fig.height=3.5, warning=FALSE, message=F}
+cap <- "Relação das principais proporções do concreto"
+d <- " dias"
+xlabel <- "Água / Cimento"
+ylabel <- "Resistência à compressão (MPa)"
+colour <- "Ag. Miúdo /\nCimento"
+size <- "Ag. Graúdo /\nCimento"
+min_x_2 <- min(mix_dat$`fine_aggregate_/_cement`)
+max_x_2 <- max(mix_dat$`fine_aggregate_/_cement`)
+s_x_2 <- max_x_2 - min_x_2
+mix_dat %>%
+  ggplot(aes(x=`water_/_cement`, y=mpa,
+             colour = `fine_aggregate_/_cement`,
+             size = `coarse_aggregate_/_cement`)) +
+  geom_point(alpha = 0.5)  +
+  facet_wrap(~ day, ncol=2) +
+  theme_bw() +
+  ylab(ylabel) +
+  xlab(xlabel) +
+  scale_colour_gradient2(low = "red", mid = "yellow", high = "blue",
+                         midpoint = (s_x_2 / 2) + min_x_2, 
+                         limits = c(min_x_2, max_x_2),
+                         breaks = c(round(min_x_2, 2),
+                                    round(s_x_2*0.25 + min_x_2,2),
+                                    round(s_x_2*0.5 + min_x_2,2),
+                                    round(s_x_2 * 0.75 + min_x_2,2),
+                                    round(max_x_2 - 0.01, 2))
+                         ) +
+  labs(colour = colour, size = size) +
+  ylim(c(-5,85)) +
+  scale_radius() +
+  theme_minimal() +
+  theme(panel.grid.minor = element_blank(),
+      axis.line = element_line(colour = "black"))
+```
+As figuras \ref{fig:mix-app-mpa} e \ref{fig:mix-mpa} mostram a relação entre os principais ingredientes (conhecida como traço) em relação à resistência à compressão (\ref{show-mix-app-mpa} e \ref{show-mix-mpa}). A interpretação dessas figuras mostra que quanto maior a quantidade de cimento em relação aos outros ingredientes, maior será a resistência à compressão.
+
+### Distribuição das variáveis
+A figura \ref{fig:vars-distribution} mostra a distribuição das variáveis nas amostras (\ref{show-vars-distribution}). Foi calculado utilizando apenas os dados aos 28 dias. 
+
+&nbsp;
+ 
+```{r vars-distribution, echo=F, fig.height=10, fig.cap=cap, warning=FALSE, message = F}
+cap <- "Distribuição das variáveis"
+colnames_dat <- c("Cimento", "E.G.A.F.", "C.Volante", "Água",
+                 "Superplastificante", "A.Graúdo", "A.Miúdo", "MPa",
+                 "Água / Cimento", "A.Miúdo / Cimento", "A.Graúdo / Cimento",
+                 "A.Miúdo / A.Graúdo","Água / A.Graúdo", "Água / A.Miúdo")
+dist_dat <- dat %>%
+  select(-c(id, class, day_3, day_7, day_14, day_56, day_100, mix_app))
+  
+colnames(dist_dat) <- colnames_dat
+dist_dat <- dist_dat %>%
+  gather("Var", "value") %>%
+  mutate(value = as.numeric(value))
+dist_dat %>%
+  ggplot(aes(value)) +
+  geom_histogram(aes(y = ..density..), 
+                 colour = "black", 
+                 fill = "white") +
+  geom_density(alpha = .5, fill = "lightseagreen") +
+  facet_wrap(~ Var, ncol=3, scale = "free") +
+  theme_minimal() +
+  xlab("") +
+  ylab("") +
+  theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"))
+```
+De outra forma, a figura \ref{fig:vars-distribution-time} mostra a distribuição dos ingredientes e da resistência à compressão para cada conjunto de idades (\ref{show-vars-distribution-time}), ou seja, no caso dos 28 dias apresenta a mesma informação que a figura \ref{fig:vars-distribution}. Através dela é visualizado que como esperado, a resistência à compressão gradualmente aumenta ao longo do tempo. Além disso é visualizado que a concentração dos ingredientes podem variar muito quando estratíficado pelas idades.
+```{r vars-distribution-time, echo=F, fig.height=10, fig.cap=cap, warning=FALSE, message=F}
+cap <- "Distribuição das variáveis em relação a idade"
+colnames_dat <- c("Cimento", "E.G.A.F.", "C.Volante", "Água",
+                       "Superplastificante", "A.Graúdo", "A.Miúdo", 
+                       days_labs,
+                       "Água / Cimento", "A.Miúdo / Cimento", "A.Graúdo / Cimento",
+                       "A.Miúdo / A.Graúdo","Água / A.Graúdo", "Água / A.Miúdo")
+dist_dat_2 <- dat %>%
+  select(-c(id, class, mix_app))
+colnames(dist_dat_2) <- colnames_dat
+dist_dat_2 <- dist_dat_2 %>%
+  gather("day", "mpa", days_labs) %>%
+  drop_na() %>%
+  gather("Var", "value", -c("day")) %>%
+  mutate(day = factor(day, levels = days_labs))
+dist_dat_2 %>%
+  ggplot(aes(x = day, y = value)) +
+  geom_violin(color = NA,
+                fill = "lightseagreen",
+                alpha = .5,
+                na.rm = TRUE,
+                scale = "count") +
+  geom_boxplot(alpha = 0.2) +
+  facet_wrap(~ Var, ncol=3, scale = "free") +
+  theme_minimal() +
+  theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black")) +
+  xlab("") +
+  ylab("")
+```
+
+### Análise de componente principal
+Na figura \ref{fig:pca}, utilizando uma classificação alternativa, foi realizada a análise de componente principal nos ingredientes das amostras (\ref{show-pca}). A classificação separa o concreto em 4 grupos de resistência a compressão diferentes, baixo até *20 MPa*, normal até *40 MPa*, médio até *70 MPa* e alto acima disso. É possivel perceber que os grupos se sobrepõem, mas existem uma diferenciação entre o grupo alto e baixo.
+```{r pca, echo=F, fig.height=3, fig.cap=cap}
+cap <- "Análise componente principal nos ingredientes"
+colnames_dat <- c(
+  "Cim.", "E.G.A.F.", "Ci.Vo.", "Águ.", "Sup.", "Ag.G.",
+  "Ag.M.","AxC", "MxC","GxC","MxC","AxG","AxM"
+)
+class_list <- list(baixo="0", normal="20", médio="40", alto="70")
+dat_pca <- dat %>%
+  select(-c(id, class, mix_app,
+            "day_3", "day_7", "day_14", "day_28", "day_56", "day_100"))
+colnames(dat_pca) <- colnames_dat
+class_2 <- dat$day_28
+class_2[class_2 < 20] = "0"
+class_2[class_2 >= 20 & class_2 < 40] = "20"
+class_2[class_2 >= 40 & class_2 < 70] = "40"
+class_2[class_2 >= 70] = "70"
+class_2 <- factor(class_2)
+levels(class_2) <- class_list
+pca <- prcomp(dat_pca, scale = TRUE)
+fviz_pca_ind(
+  pca,
+  geom.ind = "point",
+  habillage=class_2,
+  addEllipses = T,
+  ellipse.level=0.95) +
+  ggtitle("") +
+  theme_bw()
+```
+
+
+
+
+## Modelos de machine learning
+O desenvolvimento dos modelos de machine learning foi realizado com o pacote *caret* [@caret] e baseado em @irizarry2019 e @Kuhn2008.
+
+### Pre processamento e separação dos dados
+Como existe a variável categórica para o traço aproximado do concreto, foi realizada a conversão dessa variável em variáveis fictiícias (*dummy vars*) (\ref{show-dummy-var}), passando de 22 colunas (id, classe, resistência à compressão e mais 19 *features*) para 45 colunas, uma adição de 23 variáveis, uma para cada traço aproximado. 
+
+&nbsp;
+
+```{r dummy-var, echo=F, message=F, warning=F}
+# Variáveis fictícias - dummy vars
+dummies <- dummyVars( ~ mix_app, data = dat)
+dummyDat <- data.frame(predict(dummies, newdata = dat))
+dummyDat$id <- dat$id
+dat <- dat %>%
+  select(-c(mix_app)) %>%
+  full_join(., dummyDat)
+```
+As amostras foram separadas baseado nas idades. Foram criados um conjunto de dados para cada valor de idade, totalizando 6 conjuntos diferentes (\ref{show-preparation}). Para fins ilustrativos, as primeiras 18 de 45 colunas das primeiras 6 amostras do conjunto de 28 dias são mostradas na tabela \ref{tab:table-preparated-samples}.
+
+&nbsp;
+ 
+```{r preparation, echo=F}
+# Preparação dos dados
+names(dat) <- gsub(x = names(dat), pattern = "/", replacement = ".")  
+dat_3 <- dat %>%
+  select(-c("day_7", "day_14", "day_28", "day_56", "day_100")) %>%
+  drop_na() %>%
+  rename_at("day_3",~"mpa")
+dat_7 <- dat %>%
+  select(-c("day_3", "day_14", "day_28", "day_56", "day_100")) %>%
+  drop_na() %>%
+  rename_at("day_7",~"mpa")
+dat_14 <- dat %>%
+  select(-c("day_3", "day_7", "day_28", "day_56", "day_100")) %>%
+  drop_na() %>%
+  rename_at("day_14",~"mpa")
+dat_28 <- dat %>%
+  select(-c("day_3", "day_7", "day_14", "day_56", "day_100")) %>%
+  drop_na() %>%
+  rename_at("day_28",~"mpa")
+dat_56 <- dat %>%
+  select(-c("day_3", "day_7", "day_14", "day_28", "day_100")) %>%
+  drop_na() %>%
+  rename_at("day_56",~"mpa")
+dat_100 <- dat %>%
+  select(-c("day_3", "day_7", "day_14", "day_28", "day_56")) %>%
+  drop_na() %>%
+  rename_at("day_100",~"mpa")
+```
+```{r table-preparated-samples, echo=F}
+# Tabela - Primeiras 18 colunas das primeiras 6 amostras de 28 dias
+colNames = c("ID", "Cimento", "E.G.A.F.", "C.Vol.", "Água",
+              "Superp.", "A.Graúdo", "A.Miúdo", "MPa", "Classe",
+              "Ág./", "A.M./", "A.G./",
+              "A.M./","Ág./", "Ág./", "Traço Apox." = 2)
+dfUnits <- c("", "$kg/m^3$", "$kg/m^3$","$kg/m^3$","$kg/m^3$",
+              "$kg/m^3$", "$kg/m^3$","$kg/m^3$","$MPa$","", "Ci.",
+              "Ci.", "Ci.", "A.G.", "A.G.", "Ag.M.", "1:1:2", "1:2:2")
+caption <- "Primeiras 18 colunas das primeiras 6 amostras de 28 dias"
+dat_tabela <- dat_28[1:18]
+kable(
+    head(dat_tabela[order(dat_tabela$id),]),
+    col.names = dfUnits,
+    escape = F,
+    booktabs = T,
+    caption = caption,
+    linesep = "\\addlinespace",
+    digits = 2,
+    align = "c"
+    ) %>%
+    add_header_above(header = colNames, line = F, align = "c") %>%
+    kable_styling(latex_options = c("HOLD_position", "scale_down"))
+```
+Para cada um dos 6 conjuntos foi verificado a existência ou não de variáveis com variância próxima a zero e sua subsequênte remoção (\ref{show-nzv}). Muitas das 23 variáveis adicionadas referentes ao traço aproximado do concreto foram removidas devido a esse fato. Além delas, no caso do conjunto de 7 dias, a variável cinza volante também foi removida. Depois foi verificado que não existem variáveis com alta correlação, acima de 0,999 em nenhum dos 6 conjuntos de dados (\ref{show-cors}). Após essas etapas, os conjuntos de amostras apresentaram 24, 21, 23, 23, 24 e 25 colunas respectivamente para as idades em sequência crescente.
+
+&nbsp;
+ 
+```{r nzv, echo=F}
+# Removendo colunas com variância próxima a zero
+nzv_3 <- nearZeroVar(dat_3)
+nzv_7 <- nearZeroVar(dat_7)
+nzv_14 <- nearZeroVar(dat_14)
+nzv_28 <- nearZeroVar(dat_28)
+nzv_56 <- nearZeroVar(dat_56)
+nzv_100 <- nearZeroVar(dat_100)
+dat_3 <- dat_3[,-nzv_3]
+dat_7 <- dat_7[,-nzv_7]
+dat_14 <- dat_14[,-nzv_14]
+dat_28 <- dat_28[,-nzv_28]
+dat_56 <- dat_56[,-nzv_56]
+dat_100 <- dat_100[,-nzv_100]
+```
+```{r cors, echo=F}
+# Verificação de variáveis com alta correlação
+descr_cor_3 <- cor(select(dat_3, -c(mpa, id, class)))
+descr_cor_7 <- cor(select(dat_7, -c(mpa, id, class)))
+descr_cor_14 <- cor(select(dat_14, -c(mpa, id, class)))
+descr_cor_28 <- cor(select(dat_28, -c(mpa, id, class)))
+descr_cor_56 <- cor(select(dat_56, -c(mpa, id, class)))
+descr_cor_100 <- cor(select(dat_100, -c(mpa, id, class)))
+high_cor_3 <- sum(abs(descr_cor_3[upper.tri(descr_cor_3)]) > .999)
+high_cor_7 <- sum(abs(descr_cor_7[upper.tri(descr_cor_7)]) > .999)
+high_cor_14 <- sum(abs(descr_cor_14[upper.tri(descr_cor_14)]) > .999)
+high_cor_28 <- sum(abs(descr_cor_28[upper.tri(descr_cor_28)]) > .999)
+high_cor_56 <- sum(abs(descr_cor_56[upper.tri(descr_cor_56)]) > .999)
+high_cor_100 <- sum(abs(descr_cor_100[upper.tri(descr_cor_100)]) > .999)
+```
+A etapa de centralização e normalização das variáveis foi realizada mais a frente, junto com a aplicação dos modelos, pois é mais simples fazer dessa forma com o pacote *caret*. Se fosse realizada nesse momento, seria nescessário manualmente desfazer essas transformações nas previsões. O *caret* permite transformar antes do treino dos modelos e já transforma de volta os resultados.
+
+&nbsp;
+ 
+Cada um dos conjuntos de dados foi separado em conjuntos de teste e treino, *20%* e *80%* respectivamente (\ref{show-split}). A figura \ref{fig:dist-split} mostra como ficou a distribuição dos dados entre os conjuntos em relação a resistência à compressão para cada modelo (\ref{show-dist-split}).
+```{r split, echo=F, message=F, warning=F}
+# Separação em conjunto de teste e treino
+reg <- list(
+  dat_3 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_3$MPa),
+  dat_7 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_7$MPa),
+  dat_14 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_14$MPa),
+  dat_28 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_28$MPa),
+  dat_56 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_56$MPa),
+  dat_100 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_100$MPa)
+)
+reg_seed <- c(
+  1111, # 3
+  1, # 7
+  22, # 14
+  11111, # 28
+  111, # 56
+  11 # 100
+  )
+split_reg <- function(n){
+  set.seed(reg_seed[[n]], sample.kind="Rounding")
+  createDataPartition(reg[[n]]$y, p = .8, list = F)
+}
+trainIndex_reg <- lapply(list(1,2,3,4,5,6), split_reg)
+gen_dat <- function(n){
+  regIndex <- trainIndex_reg[[n]]
+  list(train = reg[[n]][regIndex,], test = reg[[n]][-regIndex,])
+}
+dats_reg <- lapply(list(1,2,3,4,5,6), gen_dat)
+names(dats_reg) <- c("d3", "d7", "d14", "d28", "d56", "d100")
+```
+```{r dist-split, echo=F, message=F, warning=F, fig.height=3, fig.cap= cap}
+# Distribuição dos conjuntos de teste e treino
+cap <- "Distribuição dos conjuntos de teste e treino"
+d_lab <- " dias"
+ylabel <- "Densidade"
+g1 <- "Treino"
+g2 <- "Teste"
+dens <- function(d, n){
+  dens <- full_join(
+      d$train %>%
+        select(y) %>%
+        mutate(Grup = g1, day = str_sub(n, 2)),
+      d$test %>%
+        select(y) %>%
+        mutate(Grup = g2, day = str_sub(n, 2))
+    )
+  dens
+}
+densities <- imap(dats_reg, dens) %>%
+  reduce(rbind) %>%
+  mutate(day_f = factor(day, levels=c('3','7','14','28', '56', '100')))
+labs <- paste(c("3","7","14","28","56","100"), d_lab, sep="")
+levels(densities$day_f) <- labs
+densities %>%
+  ggplot(aes(y, fill = Grup)) +
+  geom_density(alpha = 0.5) +
+  facet_wrap(~dia_f, ncol=3) +
+  xlab("MPa") +
+  ylab(ylabel) +
+  theme_bw() +
+  theme_minimal() +
+  theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"))
+```
+
+### Medidas de performance
+A avaliação da performance dos modelos foi realizada pela Raiz do Erro Quadrático Médio (*RMSE*). O *RMSE* é a medida utilizada em todos os trabalhos citados na introdução e permitirá a comparação dos modelos na discussão.
+
+### Modelos ingênuos
+Antes de criar os modelos verdadeiros, para fins de comparação, foram criados modelos ingênuos. Eles simplesmente prevêem que a resistência à compressão do conjunto de teste, é a média da resistência à compressão do conjunto de treino (\ref{show-naive-model-reg}). Em outras palavras, os modelos ingênuos são simplesmente o melhor palpite possível. Os resultados podem ser conferidos na tabela \ref{tab:table-naive-model-reg}.
+```{r naive-model-reg, echo=F, message=F, warning=F}
+# Modelo ingênuo
+res <- function(d, n){
+  data.frame(
+    day = str_sub(n, 2),
+    mean_mpa = mean(d$train$y)   
+    )
+}
+ing_model <- imap(dats_reg, res)
+get_rmse <- function(d, n){
+   data.frame(
+    rmse_train = RMSE(d$train$y, ing_model[[n]]$mean_mpa),
+    rmse_test =  RMSE(d$test$y, ing_model[[n]]$mean_mpa),
+    day = str_sub(n, 2) 
+    )
+}
+rmses <- imap(dats_reg, get_rmse) %>%
+  reduce(rbind)
+ing_model_df <- ing_model %>% reduce(rbind)
+df_performance_reg <- full_join(ing_model_df, rmses)
+```
+```{r table-naive-model-reg, echo=F}
+# Tabela - Modelos ingênuo
+colNames = c("Idade", "Média $MPa$ (treino)", "RMSE (treino)", "RMSE (teste)")
+caption <- "Modelos ingênuos"
+kable(
+    df_performance_reg,
+    col.names = colNames6,
+    escape = F,
+    booktabs = T,
+    caption = caption,
+    linesep = "\\addlinespace",
+    align = "c"
+    )  %>%
+  kable_styling(latex_options = c("HOLD_position"))
+```
+
+### Escolha do algorítimo
+O pacote *caret* [@caret] expõe mais de 200 algorítimos diferentes para criar modelos de *machine learning*. A documentação do pacote apresenta um código inicial [@modelsClusters] como sugestão para selecionar um portifólio de algóritmos mais distintos possíveis em relação à algum algorítimo pré-selecionado, mas para agilidade e devido a limitações técnicas, foi escolhido utilizar um algorítimo com a maior probabilidade de atingir o melhor resultado possível. Segundo @Fernandez2014, que comparou 179 algorítimos em 121 banco de dados diferentes, o algorítimo mais provável de atingir os melhores resultados possíveis é o *Parallel Random Forest* (denominado *prRF* no *caret*).
+
+### Modelos de regressão
+Como ao longo do processamento foram adicionadas novas variáveis (as relações entre os ingredientes e mais algumas *dummy vars* para cada conjunto de idade), foram estudadas 5 possibilidades de configurações das *features* para os modelos:
+1. Todas as *features*;
+2. Sem as *dummy vars*;
+3. Apenas *features* originais;
+4. Apenas *features* adicionadas;
+5. Apenas *features* adicionadas, sem as *dummy vars*;
+Construindo um modelo para cada uma dessas configurações utilizando o conjunto de amostras aos 28 dias (\ref{show-test-models-reg}), mostrou que a melhor opção é a configuração 2, ou seja, as *dummy vars* foram completamente descartadas, porém foram mantidas as outras novas varáveis.
+Para fins ilustrativos, a tabela \ref{tab:table-done-samples-28} mostra as primeiras 6 amostras do conjunto de treino do modelo de 28 dias. As amostras dos outros modelos, dos conjuntos de teste e treino são similares, sendo a única diferença no modelo de 7 dias, que exlcui a cinza volante devido a variância próxima a zero, realizado anteriormente.
+```{r test-models-reg, echo=F, warning=F, message=F, include=F}
+# Escolha das caracterísitcas (features)
+data1 <- dats_reg$d28$train # full
+data2 <- dats_reg$d28$train[c(1:13, 21)] # no dummy vars
+data3 <- dats_reg$d28$train[c(1:7, 21)] # only original variables
+data4 <- dats_reg$d28$train[c(8:21)] # only new variables
+data5 <- dats_reg$d28$train[c(8:13, 21)] # only new varibels, no dummy vars
+test1 <- dats_reg$d28$test # full
+test2 <- dats_reg$d28$test[c(1:13, 21)] # no dummy vars
+test3 <- dats_reg$d28$test[c(1:7, 21)] # only original variables
+test4 <- dats_reg$d28$test[c(8:21)] # only new variables
+test5 <- dats_reg$d28$test[c(8:13, 21)] # only new varibels, no dummy vars
+# parRF
+modelLookup("parRF")
+control_parRF <- trainControl(method='repeatedcv',number=10,repeats=5,search='grid')
+fit_parRF<- function(data, n) {
+  set.seed(1, sample.kind = "Rounding")
+  tunegrid_parRF<- expand.grid(mtry = seq(1, length(data), n))
+  train(y ~ ., 
+    data = data,
+    preProcess = c("center","scale"),
+    method='parRF', 
+    tuneGrid=tunegrid_parRF,
+    trControl=control_parRF)
+}
+fit_parRF1 <- fit_parRF(data1, 3)
+ggplot(fit_parRF1)
+min(fit_parRF1$results$RMSE) # 6.26108
+p1_parRF1 <- predict(fit_parRF1, newdata = test1)
+RMSE(p1_parRF1, test1$y) # 4.887264
+fit_parRF2 <- fit_parRF(data2, 1)
+ggplot(fit_parRF2)
+min(fit_parRF2$results$RMSE) # 6.268789
+p_parRF2 <- predict(fit_parRF2, newdata = test2)
+RMSE(p_parRF2, test2$y) # 4.812994
+fit_parRF3 <- fit_parRF(data3, 1)
+ggplot(fit_parRF3)
+min(fit_parRF3$results$RMSE) # 6.361905
+p_parRF3 <- predict(fit_parRF3, newdata = test3)
+RMSE(p_parRF3, test3$y) # 5.083467
+fit_parRF4 <- fit_parRF(data4, 1)
+ggplot(fit_parRF4)
+min(fit_parRF4$results$RMSE) # 8.705984
+p_parRF4 <- predict(fit_parRF4, newdata = test4)
+RMSE(p_parRF4, test4$y) # 8.083962
+fit_parRF5 <- fit_parRF(data5, 1)
+ggplot(fit_parRF5)
+min(fit_parRF5$results$RMSE) # 8.691755
+p_parRF5 <- predict(fit_parRF5, newdata = test5)
+RMSE(p_parRF5, test5$y) # 7.991537
+```
+```{r table-done-samples-28, echo=F}
+# Tabela - Primeiras 6 amostras do conjunto de treino do modelo de 28 dias
+caption <- "Primeiras 6 amostras do conjunto de treino do modelo de 28 dias"
+colNames = c("Cimento", "E.G.A.F.", "C.Vol.", "Água",
+              "Superp.", "A.Graúdo", "A.Miúdo",
+              "Ág./", "A.M./", "A.G./",
+              "A.M./","Ág./", "Ág./", "y")
+dfUnits <- c("$kg/m^3$", "$kg/m^3$","$kg/m^3$","$kg/m^3$",
+              "$kg/m^3$", "$kg/m^3$","$kg/m^3$", "Ci.",
+              "Ci.", "Ci.", "A.G.", "A.G.", "Ag.M.", "$MPa$")
+colNames2 = c("Features"=13, "Outcome"=1)
+kable(
+    head(data2),
+    col.names = dfUnits,
+    escape = F,
+    booktabs = T,
+    caption = caption,
+    linesep = "\\addlinespace",
+    digits = 2,
+    align = "c"
+    ) %>%
+    add_header_above(header = colNames, line = F, align = "c") %>%
+    add_header_above(header = colNames2, line = T, align = "c") %>%
+    kable_styling(latex_options = c("HOLD_position", "scale_down"))
+```
+Para cada conjunto de idade foi criado um modelo utilizando o algorítimo *Parallel Random Forest*, definido anteriormente (\ref{show-reg-models}). Para cada um dos 6 modelos, o parâmetro *mtry* foi otimizado, e foi realizado *repeated cross-validation*, dividindo em 10 ou 30 partes e repetindo 10 vezes.
+```{r reg-models, echo=F, warning=F, message=F, include=F}
+# Modelos de regressão
+# no dummy vars:
+data3 <- dats_reg$d3$train[c(1:13, 22)]
+data7 <- dats_reg$d7$train[c(1:12, 19)]
+data14 <- dats_reg$d14$train[c(1:13, 21)]
+data28 <- dats_reg$d28$train[c(1:13, 21)]
+data56 <- dats_reg$d56$train[c(1:13, 22)]
+data100 <- dats_reg$d100$train[c(1:13, 23)]
+test3 <- dats_reg$d3$test[c(1:13, 22)]
+test7 <- dats_reg$d7$test[c(1:12, 19)]
+test14 <- dats_reg$d14$test[c(1:13, 21)]
+test28 <- dats_reg$d28$test[c(1:13, 21)]
+test56 <- dats_reg$d56$test[c(1:13, 22)]
+test100 <- dats_reg$d100$test[c(1:13, 23)]
+get_trControl <- function(n, r){
+  trainControl(method='repeatedcv',number=n,repeats=r,search='grid')
+}
+trControl3 <- get_trControl(30, 10)
+trControl7 <- get_trControl(10, 10)
+trControl14 <- get_trControl(30, 10)
+trControl28 <- get_trControl(30, 10)
+trControl56 <- get_trControl(30, 10)
+trControl100 <- get_trControl(10, 10)
+get_tuneGrid <- function(data){
+  expand.grid(mtry = seq(1, length(data), 1))
+}
+tuneGrid3 <- get_tuneGrid(data3)
+tuneGrid7 <- get_tuneGrid(data7)
+tuneGrid14 <- get_tuneGrid(data14)
+tuneGrid28 <- get_tuneGrid(data28)
+tuneGrid56 <- get_tuneGrid(data56)
+tuneGrid100 <- get_tuneGrid(data100)
+set.seed(1, sample.kind = "Rounding")
+fit_3 <- train(y ~ ., 
+            data = data3,
+            preProcess = c("center","scale"),
+            method='parRF', 
+            tuneGrid=tuneGrid3,
+            trControl=trControl3)
+p_3 <- predict(fit_3, newdata = test3)
+RMSE_test_3 <- RMSE(p_3, test3$y)
+RMSE_test_3 # 3.31037
+fit_3$bestTune # mtry = 6
+set.seed(1, sample.kind = "Rounding")
+fit_7 <- train(y ~ ., 
+            data = data7,
+            preProcess = c("center","scale"),
+            method='parRF', 
+            tuneGrid=tuneGrid7,
+            trControl=trControl7)
+p_7 <- predict(fit_7, newdata = test7)
+RMSE_test_7 <- RMSE(p_7, test7$y)
+RMSE_test_7 # 4.361987
+fit_7$bestTune # mtry = 2
+set.seed(1, sample.kind = "Rounding")
+fit_14 <- train(y ~ ., 
+            data = data14,
+            preProcess = c("center","scale"),
+            method='parRF', 
+            tuneGrid=tuneGrid14,
+            trControl=trControl14)
+p_14 <- predict(fit_14, newdata = test14)
+RMSE_test_14 <- RMSE(p_14, test14$y)
+RMSE_test_14 # 4.620515
+fit_14$bestTune # mtry = 13
+set.seed(1, sample.kind = "Rounding")
+fit_28 <- train(y ~ ., 
+            data = data28,
+            preProcess = c("center","scale"),
+            method='parRF', 
+            tuneGrid=tuneGrid28,
+            trControl=trControl28)
+p_28 <- predict(fit_28, newdata = test28)
+RMSE_test_28 <- RMSE(p_28, test28$y)
+RMSE_test_28 # 4.716698
+fit_28$bestTune # mtry = 11
+set.seed(1, sample.kind = "Rounding")
+fit_56 <- train(y ~ ., 
+            data = data56,
+            preProcess = c("center","scale"),
+            method='parRF', 
+            tuneGrid=tuneGrid56,
+            trControl=trControl56)
+p_56 <- predict(fit_56, newdata = test56)
+RMSE_test_56 <- RMSE(p_56, test56$y)
+RMSE_test_56 # 5.939163
+fit_56$bestTune # mtry = 8
+set.seed(1, sample.kind = "Rounding")
+fit_100 <- train(y ~ ., 
+            data = data100,
+            preProcess = c("center","scale"),
+            method='parRF', 
+            tuneGrid=tuneGrid100,
+            trControl=trControl100)
+p_100 <- predict(fit_100, newdata = test100)
+RMSE_test_100 <- RMSE(p_100, test100$y)
+RMSE_test_100 # 5.851088
+fit_100$bestTune # mtry = 8
+```
+
+
+
+# Results
+O *RMSE* de teste de cada modelo em ordem crescente de idade foi respectivamente `r round(RMSE_test_3,2)`, `r round(RMSE_test_7,2)`, `r round(RMSE_test_14,2)`, `r round(RMSE_test_28,2)`, `r round(RMSE_test_56,2)` e `r round(RMSE_test_100,2)`. A tabela \ref{tab:table-reg-models} apresenta os detalhes e resultados de cada modelo (\ref{show-table-reg-models}). A figura \ref{fig:results-comparison} compara os valores reais e previstos (\ref{show-results-comparison}), e as tabelas seguintes mostram os melhores e piores resultados de cada modelo (\ref{show-table-10}).
+```{r table-reg-models, echo=F}
+# Tabela - Detalhes dos modelso
+colNames <- c("Modelo", "mtry", "CV", "Repetições", 
+              "RMSE (treino)", "RMSE (teste)")
+caption <- "Resultados dos modelos de regressão"
+day <- c("3 dias", "7 dias", "14 dias", "28 dias", "56 dias", "100 dias")
+dat_reg_models <- data.frame(
+  dia = day,
+  mtry = c(fit_3$bestTune$mtry, fit_7$bestTune$mtry, fit_14$bestTune$mtry,
+           fit_28$bestTune$mtry, fit_56$bestTune$mtry, fit_100$bestTune$mtry),
+  number = c(trControl3$number, trControl7$number, trControl14$number,
+             trControl28$number,trControl56$number,trControl100$number),
+  repeats = c(trControl3$repeats, trControl7$repeats, trControl14$repeats,
+             trControl28$repeats,trControl56$repeats,trControl100$repeats),
+  RMSE_train = c(min(fit_3$results$RMSE), min(fit_7$results$RMSE),
+                  min(fit_14$results$RMSE), min(fit_28$results$RMSE),
+                  min(fit_56$results$RMSE), min(fit_100$results$RMSE)),
+  RMSE_test = c(RMSE_test_3, RMSE_test_7, RMSE_test_14,
+                RMSE_test_28, RMSE_test_56, RMSE_test_100)
+)
+kable(
+    dat_reg_models,
+    col.names = colNames,
+    escape = F,
+    booktabs = T,
+    caption = caption,
+    linesep = "\\addlinespace",
+    align = "c"
+    )  %>%
+  kable_styling(latex_options = c("HOLD_position"))
+```
+```{r results-comparison, echo=F, message=F, warning=F, fig.height=4, fig.cap=cap}
+# Figura - Comparação dos modelos
+cap <- "Comparação dos valores reais e previstos em cada modelo"
+models <- c("3 dias", "7 dias", "14 dias", "28 dias", "56 dias", "100 dias")
+xlabel <- "Real (MPa)"
+ylabel <- "Previsto (MPa)"
+preds <- list(p_3, p_7, p_14, p_28, p_56, p_100)
+actuals <- list(test3$y, test7$y, test14$y, test28$y, test56$y, test100$y)
+gen_res_df <- function(ind){
+  data.frame(actual = actuals[[ind]], pred = preds[[ind]], model = models[[ind]])
+}
+res_df <- lapply(1:6, gen_res_df)
+res_df <- bind_rows(res_df)
+res_df$model <- factor(res_df$modelo,levels=modelos)
+res_df %>%
+  ggplot(aes(actual, pred)) +
+  facet_wrap(~ modelo, ncol=3) +
+  geom_point(alpha=0.5) +
+  theme_bw() +
+  geom_abline(slope=1, intercept=0) +
+  xlab(xlabel) +
+  ylab(ylabel)
+```
+```{r table-10, echo=F}
+# Tabelas dos 10 melhores e piores resultados
+colNames1 = c("Real", "Previsto", "Erro", "","Real", "Previsto", "Erro") 
+colNames2 = c("10 melhores"=3,"", "10 piores"=3)
+caption_0 <- "Modelo de "
+get_X <- function(pred, actual, X=10){
+  diff <- abs(pred - actual)
+  diff_2 <- pred - actual
+  ind_min <- which(diff <= max(sort(diff, decreasing = F)[1:X]), arr.ind = T)
+  ind_max <- which(diff >= min(sort(diff, decreasing = T)[1:X]), arr.ind = T)
+  df_min <- data.frame(
+    actual_min=actual[ind_min],
+    pred_min=pred[ind_min],
+    diff_min=diff[ind_min],
+    diff_min_2=diff_2[ind_min]
+  )
+  df_max <- data.frame(
+    actual_max=actual[ind_max],
+    pred_max=pred[ind_max],
+    diff_max=diff[ind_max],
+    diff_max_2=diff_2[ind_max]
+  )
+  df_max <- df_max[order(-df_max$diff_max),]
+  df_min <- df_min[order(df_min$diff_min),]
+  df_null <- data.frame(null_col = rep(c(""), X))
+  res <- cbind(df_min,df_null, df_max)
+  res <- res %>% select(-c(diff_max, diff_min))
+  rownames(res) <- c()
+  res
+}
+gen_kable <- function(ind){
+  df <- get_X(preds[[ind]], actuals[[ind]])
+  caption <- paste0(caption_0,models[ind])
+  kable(
+    df,
+    col.names = colNames1,
+    escape = F,
+    booktabs = T,
+    caption = caption,
+    linesep = "\\addlinespace",
+    align = "c"
+    )  %>%
+  column_spec(4, width = "1cm",) %>%
+  add_header_above(header = colNames2, line = T, align = "c") %>%
+  kable_styling(latex_options = c("HOLD_position"))
+}
+gen_kable(1)
+gen_kable(2)
+gen_kable(3)
+gen_kable(4)
+gen_kable(5)
+gen_kable(6)
+```
+
+
+
+# Discussão
+Os modelos construidos apresentam resultados satisfatórios e provam que a resistência à compressão do concreto pode ser prevista de forma relativamente fácil. A alternativa adotada de criar um modelo para cada conjunto de idade se mostrou como uma alternativa válida, conseguindo estratificar para obter resultados específicos de cada conjunto. Os estudos citados na introdução utilizando o mesmo conjunto de dados possuem resultados similares, como esperado. A tabela \ref{tab:works-comparison} apresenta os resultados desses trabalhos (\ref{show-works-comparison}), e a tabela \ref{tab:results} apresenta os valores encontrados (\ref{show-results}) para fácil comparação.
+```{r works-comparison, echo=F}
+# Tabela - "Comparação dos estudos de outros autores"
+colNames = c("Autor","Ano" ,"Algorítimo", "RMSE") 
+caption <- "Comparação dos estudos de outros autores"
+works <- data.frame(
+  autor = c("Pierobon", "Hameed", "Raj","Modukuru" ,"Alshamiri", "Abban"),
+  ano = c("2018", "2020", "2018","2020" ,"2020", "2016"),
+  modelo = c("Ensemble com 5 algorítimos", "Artificial Neural Networks", 
+          "Gradient Boosting Regressor","Random Forest Regressor" ,
+          "Regularized Extreme Learning Machine",
+          "Support Vector Machines with Radial Basis Function Kernel"),
+  RMSE = c("4.150", "4.736", "4.957","5.080","5.508", "6.105")
+)
+kable(
+  works,
+  col.names = colNames,
+  escape = F,
+  booktabs = T,
+  caption = caption,
+  linesep = "\\addlinespace",
+  align = "l"
+  )  %>%
+    kable_styling(latex_options = c("HOLD_position"))
+```
+```{r results, echo=F}
+# Tabela - Resultados finais
+colNames <- c("Modelo", "RMSE")
+caption <- "Resultados finais"
+day <- c("3 dias", "7 dias", "14 dias", "28 dias", "56 dias", "100 dias")
+dat_reg_models <- data.frame(
+  dia = day,
+  RMSE_test = c(RMSE_test_3, RMSE_test_7, RMSE_test_14,
+                RMSE_test_28, RMSE_test_56, RMSE_test_100)
+)
+kable(
+    dat_reg_models,
+    col.names = colNames,
+    escape = F,
+    booktabs = T,
+    caption = caption,
+    linesep = "\\addlinespace",
+    align = "c"
+    )  %>%
+  kable_styling(latex_options = c("HOLD_position"))
+```
+Seguindo a linha de raciocínio desse trabalho, ele pode ser realizado com diferentes algorítimos, os resultados aqui encontrados utilizaram apenas um único (*Parallel Random Forest*), mesmo que tenha sido teoricamente o "melhor" encontrado, outros algorítmos podem apresentar resultados ainda melhores. Outra opção é criar um *ensemble* com diversos algorítimos, como realizado por @Pierobon2018, mas com a separação de conjuntos de idade aqui proposto. Além disso, pode ser realizado com um conjunto maior de dados, idealmente com o mesmo número de amostras em cada conjunto de idade, distribuição mais homgênia da resistência à compressão e menor variância entre as amostras.
+
+
+
+# Bibliografia
+<div id="refs"></div>
+\newpage
+
+
+# Appendix 1 - Ambiente virtual {#appendix1}
+
+## Sistema operacional
+```{r sistema, echo=FALSE}
+v <- as.matrix(R.Version())
+kable(v, booktabs = T) %>%
+    kable_styling(latex_options = c("HOLD_position"))
+```
+
+## Pacotes utilizados
+```{r pacotes, echo=FALSE}
+p <- matrix(
+      c(
+        "caret", as.character(packageVersion("caret")),
+        "cowplot",as.character(packageVersion("cowplot")),
+        "dplyr", as.character(packageVersion("dplyr")),
+        "factoextra", as.character(packageVersion("factoextra")),
+        "gdata", as.character(packageVersion("gdata")),
+        "ggplot2", as.character(packageVersion("ggplot2")),
+        "gridExtra",as.character(packageVersion("gridExtra")),
+        "kableExtra",as.character(packageVersion("kableExtra")),
+        "knitr",as.character(packageVersion("knitr")),
+        "pastecs",as.character(packageVersion("pastecs")),
+        "purrr", as.character(packageVersion("purrr")),
+        "questionr", as.character(packageVersion("questionr")),
+        "reshape2", as.character(packageVersion("reshape2")),
+        "tidyr", as.character(packageVersion("tidyr")),
+        "tidyverse", as.character(packageVersion("tidyverse"))
+      ),
+      ncol = 2,
+      byrow=TRUE
+    )
+kable(p, booktabs = T) %>%
+    kable_styling(latex_options = c("HOLD_position"))
+```
+\newpage
+
+
+# Appendix 2 - Repositório online {#appendix2}
+Todo o código utilizado para gerar esse trabalho está disponível no *GitHub* no link a seguir:
+- https://github.com/pedrobern/concrete-compressive-strength-prediction
+\newpage
+
+
+# Appendix 3 - Código {#appendix3}
+
+
+## Obtenção dos dados
+### Download dos dados
+
+```{r show-download-data, ref.label='download-data', ref='show-download-data', eval=FALSE}
+```
+
+### Renomeando as colunas
+
+```{r show-rename-dat-cols, ref.label='rename-dat-cols', ref='show-rename-dat-cols', eval=FALSE}
+```
+
+### Reordenando os dados
+
+```{r show-reorder-dat, ref.label='reorder-dat', ref='show-reorder-dat', eval=FALSE}
+```
+
+### Definindo nomes e unidades das colunas
+
+```{r show-col-names-and-units, ref.label='col-names-and-units', ref='show-col-names-and-units', eval=FALSE}
+```
+
+### Tabela Primeiras amostras
+
+```{r show-first-samples, ref.label='first-samples', ref='show-first-samples', eval=FALSE}
+```
+
+## Preparação dos dados
+### Removendo amostras duplicadas
+
+```{r show-removing-duplicated-samples, ref.label='removing-duplicated-samples', ref='show-removing-duplicated-samples', eval=FALSE}
+```
+
+### Tabela - Amostras com a mesma composição
+
+```{r show-similar-samples, ref.label='similar-samples', ref='show-similar-samples', eval=FALSE}
+```
+
+### Tabela - Amostras iguais com resultados diferentes
+
+```{r show-similar-samples-2, ref.label='similar-samples-2', ref='show-similar-samples-2', eval=FALSE}
+```
+
+### Limpeza inicial das amotras
+
+```{r show-initial-data-cleaning, ref.label='initial-data-cleaning', ref='show-initial-data-cleaning', eval=FALSE}
+```
+
+### Tabela - Amostras anteriores após processamento
+
+```{r show-similar-samples-same-id, ref.label='similar-samples-same-id', ref='show-similar-samples-same-id', eval=FALSE}
+```
+
+### Figura - Resistência à compressão (MPa) vs idade (dias)
+
+```{r show-boxplot, ref.label='boxplot', ref='show-boxplot', eval=FALSE}
+```
+
+### Figura - Análise componente principal - 90, 91 e 100 dias
+
+```{r show-pca-90-91-100, ref.label='pca-90-91-100', ref='show-pca-90-91-100', eval=FALSE}
+```
+
+### Figura - Resistência à compressão ao longo do tempo
+
+```{r show-mpa-on-time, ref.label='mpa-on-time', ref='show-mpa-on-time', eval=FALSE}
+```
+
+### Juntando amostras de 90, 91 e 100 dias
+
+```{r show-join-90-91-100, ref.label='join-90-91-100', ref='show-join-90-91-100', eval=FALSE}
+```
+
+### Figura - Frequência das idades
+
+```{r show-freq-ages, ref.label='freq-ages', ref='show-freq-ages', eval=FALSE}
+```
+
+### Removendo idades com frequência menor que 50
+
+```{r show-remove-ages-lower-50, ref.label='remove-ages-lower-50', ref='show-remove-ages-lower-50', eval=FALSE}
+```
+
+### Reorganização das amotras
+
+```{r show-reorganizing-dat, ref.label='reorganizing-dat', ref='show-reorganizing-dat', eval=FALSE}
+```
+
+### Tabela - Primeiras 6 amostras reorganizadas
+
+```{r show-new-features, ref.label='new-features', ref='show-new-features', eval=FALSE}
+```
+
+### Total de amostras
+
+```{r show-total-samples-2, ref.label='total-samples-2', ref='show-total-samples-2', eval=FALSE}
+```
+
+### Adicionando novas variáveis
+
+```{r show-new-features-2, ref.label='new-features-2', ref='show-new-features-2', eval=FALSE}
+```
+
+### Tabela - Novas variáveis
+
+```{r show-new-features-table, ref.label='new-features-table', ref='show-new-features-table', eval=FALSE}
+```
+
+## Visualização dos dados
+### Tabela - Estatística descritiva - variáveis contínuas
+
+```{r show-stat-summ, ref.label='stat-summ', ref='show-stat-summ', eval=FALSE}
+```
+
+### Figura - Estatística descritiva - variáveis discretas
+
+```{r show-stat-summ-categorical, ref.label='stat-summ-categorical', ref='show-stat-summ-categorical', eval=FALSE}
+```
+
+### Figura - Correlações em cada idade
+
+```{r show-correlation, ref.label='correlation', ref='show-correlation', eval=FALSE}
+```
+
+### Figura - Relação entre o traço aproximado, água, MPa e idade
+
+```{r show-correlation-mpa, ref.label='correlation-mpa', ref='show-correlation-mpa', eval=FALSE}
+```
+
+### Figura - Relação das principais características do concreto
+
+```{r show-mix-app-mpa, ref.label='mix-app-mpa', ref='show-mix-app-mpa', eval=FALSE}
+```
+
+### Figura - Distribuição das variáveis
+
+```{r show-mix-mpa, ref.label='mix-mpa', ref='show-mix-mpa', eval=FALSE}
+```
+
+### Figura - Distribuição das variáveis agrupadas por idade
+
+```{r show-vars-distribution, ref.label='vars-distribution', ref='show-vars-distribution', eval=FALSE}
+```
+
+### Figura - Análise componente principal nos ingredientes
+
+```{r show-vars-distribution-time, ref.label='vars-distribution-time', ref='show-vars-distribution-time', eval=FALSE}
+```
+
+## Modelos de machine learning
+### Variáveis fictícias - dummy vars
+
+```{r show-dummy-var, ref.label='dummy-var', ref='show-dummy-var', eval=FALSE}
+```
+
+### Preparação dos dados
+
+```{r show-preparation, ref.label='preparation', ref='show-preparation', eval=FALSE}
+```
+
+### Tabela - Primeiras 18 colunas das primeiras 6 amostras de 28 dias
+
+```{r show-table-preparated-samples, ref.label='table-preparated-samples', ref='show-table-preparated-samples', eval=FALSE}
+```
+
+### Removendo colunas com variância próxima a zero
+
+```{r show-nzv, ref.label='nzv', ref='show-nzv', eval=FALSE}
+```
+
+### Verificação de variáveis com alta correlação
+
+```{r show-cors, ref.label='cors', ref='show-cors', eval=FALSE}
+```
+
+### Separação em conjunto de teste e treino
+
+```{r show-split, ref.label='split', ref='show-split', eval=FALSE}
+```
+
+### Distribuição dos conjuntos de teste e treino
+
+```{r show-dist-split, ref.label='dist-split', ref='show-dist-split', eval=FALSE}
+```
+
+### Modelo ingênuo
+
+```{r show-naive-model-reg, ref.label='naive-model-reg', ref='show-naive-model-reg', eval=FALSE}
+```
+
+### Tabela - Modelos ingênuo
+
+```{r show-table-naive-model-reg, ref.label='table-naive-model-reg', ref='show-table-naive-model-reg', eval=FALSE}
+```
+
+### Escolha das caracterísitcas (features)
+
+```{r show-test-models-reg, ref.label='test-models-reg', ref='show-test-models-reg', eval=FALSE}
+```
+
+### Tabela - Primeiras 6 amostras do conjunto de treino do modelo de 28 dias
+
+```{r show-table-done-samples-28, ref.label='table-done-samples-28', ref='show-table-done-samples-28', eval=FALSE}
+```
+
+### Modelos de regressão
+
+```{r show-reg-models, ref.label='reg-models', ref='show-reg-models', eval=FALSE}
+```
+
+# Results
+### Tabela - Detalhes dos modelso
+
+```{r show-table-reg-models, ref.label='table-reg-models', ref='show-table-reg-models', eval=FALSE}
+```
+
+### Figura - Comparação dos modelos
+
+```{r show-results-comparison, ref.label='results-comparison', ref='show-results-comparison', eval=FALSE}
+```
+
+### Tabelas dos 10 melhores e piores resultados
+
+```{r show-table-10, ref.label='table-10', ref='show-table-10', eval=FALSE}
+```
+
+# Discussão
+### Tabela - "Comparação dos estudos de outros autores"
+
+```{r show-works-comparison, ref.label='works-comparison', ref='show-works-comparison', eval=FALSE}
+```
+
+### Tabela - Resultados finais
+
+```{r show-results, ref.label='results', ref='show-results', eval=FALSE}
+```
+
