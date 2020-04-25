@@ -1,0 +1,39 @@
+<EN>
+
+# Introduction
+
+Compressive strength is the main characteristic of concrete, measured by tests of international standards that consist of the breaking of specimens. Measurement at 28 days is mandatory and represents the grade of the concrete. Knowing in advance what the result will be obtained for a given age, based on the proportions of its ingredients, is of great interest to concrete manufacturers, construction companies, and civil engineers.
+
+&nbsp; 
+
+This compressive strength is a nonlinear function of its ingredients and age, making it difficult to establish an analytical formula, although some formulas have already been proposed. @Hasan2011 proposed a mathematical model to predict from the results of tests of 7 and 14 days, and @Kabir2012 from 7 days. However, machine learning techniques can be used to model this characteristic from real sample data, using only the ingredients.
+
+&nbsp; 
+
+Many previous studies use the same dataset used by @Yeh1998 to predict the compressive strength of concrete. @Alshamiri2020 got good results with the regularized extreme learning machine (RELM) technique, and @Hameed2020 got even better results with the Artificial Neural Networks and cross-validation technique. This set of samples is so well known that there are many pages on the internet of unpublished studies that use it and have good results, such as @Abban2016, @Raj2018, @Modukuru2020 and @Pierobon2018. At the end of the work, the results found are compared to the works cited here.
+
+&nbsp;
+
+Unlike previous studies with this dataset, this work does data preparation differently. The age of the concrete is the most unique feature that contributes to its compressive strength. For this reason, age is treated separately in the machine learning models, creating models for each age group.
+
+</EN>
+
+<PT>
+
+# Introdução
+
+A resistência à compressão é a principal característica do concreto, medida por testes de padrões internacionais que consistem na quebra de corpos de prova. A medição aos 28 dias é obrigatória e representa a classe do concreto. Saber com antecêdencia qual o resultado será obtido para uma determinada idade, a partir das proporções de seus ingredientes, é de grande interesse para os fabricantes de concreto, construtoras e engenheiros civis.
+
+&nbsp; 
+
+Essa resistência à compressão é uma função não linear de seus ingredientes e idade, tornando difícil o estabelecimento de uma fórmula analítica, apesar de algumas fórmulas já haveram sido propostas. @Hasan2011 propós um modelo matemático para prever a partir dos resultados de testes de 7 e 14 dias, e @Kabir2012 a partir de 7 dias. Porém técnicas de machine learning podem ser utilizadas para modelar essa característica a partir de dados reais de amostras, utilizando apenas os ingredientes.
+
+&nbsp; 
+
+Muitos estudos anteriores utilizam o mesmo conjunto de dados utilizado por @Yeh1998 para prever a resistência à compressão do concreto. @Alshamiri2020 obteve bons resultados com a técnica de regularized extreme learning machine (RELM), e @Hameed2020 obteve resultados ainda melhores com a técnica de Artificial Neural Networks e cross-validation. Esse conjunto de amostras é tão conhecido que há ainda páginas na internet de estudos não publicados que o utilizam e possuem bons resultados, como @Abban2016, @Raj2018, @Modukuru2020 e @Pierobon2018. Ao final do trabalho os resultados encontrados são comparados aos trabalhos citados aqui.
+
+&nbsp;
+
+Diferente dos estudos anteriores com esse conjunto de amostras, este trabalho faz a preparação dos dados de forma diferente. A idade do concreto é a variável mais singular que contribui para sua resistência à compressão, por esse motivo, a idade é tratada separadamente nos modelos de machine learning, criando modelos para cada faixa de idade.
+
+</PT>

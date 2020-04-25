@@ -1,0 +1,160 @@
+<EN>
+# Results
+
+The test *RMSE* for each model in ascending order of age was `r round(RMSE_test_3,2)`, `r round(RMSE_test_7,2)`, `r round(RMSE_test_14,2)`, `r round(RMSE_test_28,2)`, `r round(RMSE_test_56,2)` and `r round(RMSE_test_100,2)` respectively. The table \ref{tab:table-reg-models} presents the details and results of each model (\ref{show-table-reg-models}). The figure \ref{fig:results-comparison} compares the actual and predicted values (\ref{show-results-comparison}), and the following tables show the best and worst results for each model (\ref{show-table-10}).
+</EN>
+
+<PT>
+# Results
+
+O *RMSE* de teste de cada modelo em ordem crescente de idade foi respectivamente `r round(RMSE_test_3,2)`, `r round(RMSE_test_7,2)`, `r round(RMSE_test_14,2)`, `r round(RMSE_test_28,2)`, `r round(RMSE_test_56,2)` e `r round(RMSE_test_100,2)`. A tabela \ref{tab:table-reg-models} apresenta os detalhes e resultados de cada modelo (\ref{show-table-reg-models}). A figura \ref{fig:results-comparison} compara os valores reais e previstos (\ref{show-results-comparison}), e as tabelas seguintes mostram os melhores e piores resultados de cada modelo (\ref{show-table-10}).
+</PT>
+
+```{r table-reg-models, echo=F}
+#<EN># Table - Models details</EN>
+#<PT># Tabela - Detalhes dos modelso</PT>
+
+#<EN>
+colNames <- c("Model", "mtry", "CV", "Repetitions", 
+              "RMSE (train)", "RMSE (test)")
+caption <- "Regression models results"
+day <- c("3 days", "7 days", "14 days", "28 days", "56 days", "100 days")
+#</EN>
+#<PT>
+colNames <- c("Modelo", "mtry", "CV", "Repetições", 
+              "RMSE (treino)", "RMSE (teste)")
+caption <- "Resultados dos modelos de regressão"
+day <- c("3 dias", "7 dias", "14 dias", "28 dias", "56 dias", "100 dias")
+#</PT>
+
+dat_reg_models <- data.frame(
+  dia = day,
+  mtry = c(fit_3$bestTune$mtry, fit_7$bestTune$mtry, fit_14$bestTune$mtry,
+           fit_28$bestTune$mtry, fit_56$bestTune$mtry, fit_100$bestTune$mtry),
+  number = c(trControl3$number, trControl7$number, trControl14$number,
+             trControl28$number,trControl56$number,trControl100$number),
+  repeats = c(trControl3$repeats, trControl7$repeats, trControl14$repeats,
+             trControl28$repeats,trControl56$repeats,trControl100$repeats),
+  RMSE_train = c(min(fit_3$results$RMSE), min(fit_7$results$RMSE),
+                  min(fit_14$results$RMSE), min(fit_28$results$RMSE),
+                  min(fit_56$results$RMSE), min(fit_100$results$RMSE)),
+  RMSE_test = c(RMSE_test_3, RMSE_test_7, RMSE_test_14,
+                RMSE_test_28, RMSE_test_56, RMSE_test_100)
+)
+
+kable(
+    dat_reg_models,
+    col.names = colNames,
+    escape = F,
+    booktabs = T,
+    caption = caption,
+    linesep = "\\addlinespace",
+    align = "c"
+    )  %>%
+  kable_styling(latex_options = c("HOLD_position"))
+```
+
+
+```{r results-comparison, echo=F, message=F, warning=F, fig.height=4, fig.cap=cap}
+#<EN># Figure - Models comparison</EN>
+#<PT># Figura - Comparação dos modelos</PT>
+
+#<EN>
+cap <- "Actual vs Predicted values in each model"
+models <- c("3 days", "7 days", "14 days", "28 days", "56 days", "100 days")
+xlabel <- "Actual (MPa)"
+ylabel <- "Predicted (MPa)"
+#</EN>
+#<PT>
+cap <- "Comparação dos valores reais e previstos em cada modelo"
+models <- c("3 dias", "7 dias", "14 dias", "28 dias", "56 dias", "100 dias")
+xlabel <- "Real (MPa)"
+ylabel <- "Previsto (MPa)"
+#</PT>
+
+preds <- list(p_3, p_7, p_14, p_28, p_56, p_100)
+actuals <- list(test3$y, test7$y, test14$y, test28$y, test56$y, test100$y)
+
+gen_res_df <- function(ind){
+  data.frame(actual = actuals[[ind]], pred = preds[[ind]], model = models[[ind]])
+}
+
+res_df <- lapply(1:6, gen_res_df)
+res_df <- bind_rows(res_df)
+res_df$model <- factor(res_df$modelo,levels=modelos)
+
+res_df %>%
+  ggplot(aes(actual, pred)) +
+  facet_wrap(~ modelo, ncol=3) +
+  geom_point(alpha=0.5) +
+  theme_bw() +
+  geom_abline(slope=1, intercept=0) +
+  xlab(xlabel) +
+  ylab(ylabel)
+```
+
+```{r table-10, echo=F}
+#<EN># Results tables of 10 best and worst results</EN>
+#<PT># Tabelas dos 10 melhores e piores resultados</PT>
+
+#<EN>
+colNames1 = c("Actual", "Predicted", "Error", "","Actual", "Predicted", "Error") 
+colNames2 = c("Best 10"=3,"", "Worst 10"=3) 
+caption_0 <- "Model of "
+#</EN>
+#<PT>
+colNames1 = c("Real", "Previsto", "Erro", "","Real", "Previsto", "Erro") 
+colNames2 = c("10 melhores"=3,"", "10 piores"=3)
+caption_0 <- "Modelo de "
+#</PT>
+
+get_X <- function(pred, actual, X=10){
+  diff <- abs(pred - actual)
+  diff_2 <- pred - actual
+  ind_min <- which(diff <= max(sort(diff, decreasing = F)[1:X]), arr.ind = T)
+  ind_max <- which(diff >= min(sort(diff, decreasing = T)[1:X]), arr.ind = T)
+  df_min <- data.frame(
+    actual_min=actual[ind_min],
+    pred_min=pred[ind_min],
+    diff_min=diff[ind_min],
+    diff_min_2=diff_2[ind_min]
+  )
+  df_max <- data.frame(
+    actual_max=actual[ind_max],
+    pred_max=pred[ind_max],
+    diff_max=diff[ind_max],
+    diff_max_2=diff_2[ind_max]
+  )
+  df_max <- df_max[order(-df_max$diff_max),]
+  df_min <- df_min[order(df_min$diff_min),]
+  df_null <- data.frame(null_col = rep(c(""), X))
+  res <- cbind(df_min,df_null, df_max)
+  res <- res %>% select(-c(diff_max, diff_min))
+  rownames(res) <- c()
+  res
+}
+
+gen_kable <- function(ind){
+  df <- get_X(preds[[ind]], actuals[[ind]])
+  caption <- paste0(caption_0,models[ind])
+  kable(
+    df,
+    col.names = colNames1,
+    escape = F,
+    booktabs = T,
+    caption = caption,
+    linesep = "\\addlinespace",
+    align = "c"
+    )  %>%
+  column_spec(4, width = "1cm",) %>%
+  add_header_above(header = colNames2, line = T, align = "c") %>%
+  kable_styling(latex_options = c("HOLD_position"))
+}
+
+gen_kable(1)
+gen_kable(2)
+gen_kable(3)
+gen_kable(4)
+gen_kable(5)
+gen_kable(6)
+```

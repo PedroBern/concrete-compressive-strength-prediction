@@ -1,0 +1,103 @@
+<EN>
+## Obtaining the data
+
+The data was downloaded from the University of California Irvine website [@downloadData] (\ref{show-download-data}). In total there are 1030 samples with 9 columns. The samples were renamed and an id column was added to facilitate data manipulation (\ref{show-rename-dat-cols}). The columns were reordered to put the new id column in the first position (\ref{show-reorder-dat}). The first samples can be viewed in the table \ref{tab: first-samples}.
+</EN>
+
+<PT>
+## Obtenção dos dados
+
+O download dos dados foi realizado no website da Universidade da California Irvine [@downloadData] (\ref{show-download-data}). No total são 1030 amostras com 9 colunas. As amostras foram renomeadas e foi adicionado uma coluna de id para facilitar na manipulação dos dados (\ref{show-rename-dat-cols}). As colunas foram reordenadas para colocar a nova coluna id em primeira posição (\ref{show-reorder-dat}). As primeiras amostras podem ser visualizadas na tabela \ref{tab:first-samples}.
+</PT>
+
+&nbsp; 
+
+```{r download-data, echo=F, include=F}
+#<EN># Data download</EN>
+#<PT># Download dos dados</PT>
+url_base <- "https://archive.ics.uci.edu"
+url <-  "/ml/machine-learning-databases/concrete/compressive/Concrete_Data.xls"
+download.file(paste0(url_base, url), "data.xls")
+dat <- read.xls("data.xls")
+
+n_inicial_samples <- nrow(dat)
+colnames(dat)
+```
+
+```{r rename-dat-cols, echo=F}
+#<EN># Ranaming the columns</EN>
+#<PT># Renomeando as colunas</PT>
+colnames(dat) <- c(
+  "cement",
+  "blast_furnace_slag",
+  "fly_ash",
+  "water",
+  "superplasticizers",
+  "coarse_aggregate",
+  "fine_aggregate",
+  "day",
+  "mpa"
+  )
+
+dat$id <- seq.int(nrow(dat))
+```
+
+```{r reorder-dat, echo=F}
+#<EN># Reordering the data</EN>
+#<PT># Reordenando os dados</PT>
+col_order <- c(
+  "id",
+  "cement",
+  "blast_furnace_slag",
+  "fly_ash",
+  "water",
+  "superplasticizers",
+  "coarse_aggregate",
+  "fine_aggregate",
+  "day",
+  "mpa"
+)
+dat <- dat[, col_order]
+```
+
+```{r col-names-and-units, echo=F}
+#<EN># Defining column names and units</EN>
+#<PT># Definindo nomes e unidades das colunas</PT>
+
+#<EN>
+colNames <- c("ID", "Cement", "B.F.S.", "Fly ash", "Water",
+             "Superp.", "C.Aggregate", "F.Aggregate", "Day", "Comp.Str.")
+#</EN>
+
+#<PT>
+colNames <- c("ID", "Cimento", "E.G.A.F", "C.Volante", "Água",
+             "Superp.", "A.Graúdo", "A.Miúdo", "Dia", "Comp.Str.")
+#</PT>
+
+dfUnits <- c("", "$kg/m^3$", "$kg/m^3$","$kg/m^3$","$kg/m^3$",
+             "$kg/m^3$","$kg/m^3$","$kg/m^3$","","$MPa$")
+```
+
+```{r first-samples, echo=F}
+#<EN># Table First samples</EN>
+#<PT># Tabela Primeiras amostras</PT>
+
+#<EN>
+caption <- "First 6 samples"
+#</EN>
+#<PT>
+caption <- "Primeiras 6 amostras"
+#</PT>
+
+kable(
+    dat[1:6,],
+    col.names = dfUnits,
+    escape = F,
+    booktabs = T,
+    caption = caption,
+    linesep = "\\addlinespace",
+    align = "c"
+    ) %>%
+    add_header_above(header = colNames, line = F, align = "c") %>%
+    kable_styling(latex_options = c("HOLD_position", "scale_down"))
+```

@@ -1,0 +1,11 @@
+<EN>
+## Reproducibility
+
+In order to guarantee reproducibility, whenever there was some code that could use probabilistic operations, a *seed* was defined before its execution, ensuring that when run on another machine, with the same version of *R* and the same *seed*, get the same result. The *seeds* can be checked throughout [Appendix 3](#appendix3) or directly on *Github*.
+</EN>
+
+<PT>
+## Reprodutibilidade
+
+Para garantir a reprodutibilidade, sempre que houve algum código que podesse utilizar operações probabilísticas, foi definido um *seed* antes da sua execução, garantindo que quando rodado em outra máquina, com a mesma versão de *R* e o mesmo *seed*, chegue ao mesmo resultado. Os *seeds* podem ser conferidos ao longo do [apêndice 3](#appendix) ou diretamente no *Github*.
+</PT>

@@ -1,0 +1,89 @@
+<EN>
+# Discussion
+
+The models built present satisfactory results and prove that the compressive strength of concrete can be predicted relatively easily. The alternative adopted to create a model for each set of age proved to be a valid method, managing to stratify to obtain specific results for each set. The studies cited in the introduction using the same dataset have similar results, as expected. The \ref{tab:works-comparison} table presents the results of these works (\ref{show-works-comparison}), and the table \ref{tab:results} presents the values found for easy comparison (\ref{show-results}) .
+</EN>
+
+<PT>
+# Discussão
+
+Os modelos construidos apresentam resultados satisfatórios e provam que a resistência à compressão do concreto pode ser prevista de forma relativamente fácil. A alternativa adotada de criar um modelo para cada conjunto de idade se mostrou como uma alternativa válida, conseguindo estratificar para obter resultados específicos de cada conjunto. Os estudos citados na introdução utilizando o mesmo conjunto de dados possuem resultados similares, como esperado. A tabela \ref{tab:works-comparison} apresenta os resultados desses trabalhos (\ref{show-works-comparison}), e a tabela \ref{tab:results} apresenta os valores encontrados (\ref{show-results}) para fácil comparação.
+</PT>
+
+
+```{r works-comparison, echo=F}
+#<EN># Table - Comparison of other works</EN>
+#<PT># Tabela - "Comparação dos estudos de outros autores"</PT>
+
+#<EN>
+colNames = c("Author","Year" ,"Algorithm", "RMSE") 
+caption <- "Comparison of other works"
+#</EN>
+#<PT>
+colNames = c("Autor","Ano" ,"Algorítimo", "RMSE") 
+caption <- "Comparação dos estudos de outros autores"
+#</PT>
+
+works <- data.frame(
+  autor = c("Pierobon", "Hameed", "Raj","Modukuru" ,"Alshamiri", "Abban"),
+  ano = c("2018", "2020", "2018","2020" ,"2020", "2016"),
+  modelo = c("Ensemble com 5 algorítimos", "Artificial Neural Networks", 
+          "Gradient Boosting Regressor","Random Forest Regressor" ,
+          "Regularized Extreme Learning Machine",
+          "Support Vector Machines with Radial Basis Function Kernel"),
+  RMSE = c("4.150", "4.736", "4.957","5.080","5.508", "6.105")
+)
+
+kable(
+  works,
+  col.names = colNames,
+  escape = F,
+  booktabs = T,
+  caption = caption,
+  linesep = "\\addlinespace",
+  align = "l"
+  )  %>%
+    kable_styling(latex_options = c("HOLD_position"))
+
+```
+
+```{r results, echo=F}
+#<EN># Table - Final results</EN>
+#<PT># Tabela - Resultados finais</PT>
+
+#<EN>
+colNames <- c("Model", "RMSE")
+caption <- "Final result"
+day <- c("3 days", "7 days", "14 days", "28 days", "56 days", "100 days")
+#</EN>
+#<PT>
+colNames <- c("Modelo", "RMSE")
+caption <- "Resultados finais"
+day <- c("3 dias", "7 dias", "14 dias", "28 dias", "56 dias", "100 dias")
+#</PT>
+
+dat_reg_models <- data.frame(
+  dia = day,
+  RMSE_test = c(RMSE_test_3, RMSE_test_7, RMSE_test_14,
+                RMSE_test_28, RMSE_test_56, RMSE_test_100)
+)
+
+kable(
+    dat_reg_models,
+    col.names = colNames,
+    escape = F,
+    booktabs = T,
+    caption = caption,
+    linesep = "\\addlinespace",
+    align = "c"
+    )  %>%
+  kable_styling(latex_options = c("HOLD_position"))
+```
+
+<EN>
+Following the line of reasoning of this work, it can be performed with different algorithms, the results found here used only one (*Parallel Random Forest*), even though it was theoretically the "best" found, other algorithms can present even better results. Another option is to create an *ensemble* of various algorithms, just like @Pierobon2018, but with the separation of age sets proposed here. In addition, it can be performed with a larger dataset, ideally with the same number of samples in each age set, a more homogeneous distribution of compressive strength, and less variance between samples.
+</EN>
+
+<PT>
+Seguindo a linha de raciocínio desse trabalho, ele pode ser realizado com diferentes algorítimos, os resultados aqui encontrados utilizaram apenas um único (*Parallel Random Forest*), mesmo que tenha sido teoricamente o "melhor" encontrado, outros algorítmos podem apresentar resultados ainda melhores. Outra opção é criar um *ensemble* com diversos algorítimos, como realizado por @Pierobon2018, mas com a separação de conjuntos de idade aqui proposto. Além disso, pode ser realizado com um conjunto maior de dados, idealmente com o mesmo número de amostras em cada conjunto de idade, distribuição mais homgênia da resistência à compressão e menor variância entre as amostras.
+</PT>

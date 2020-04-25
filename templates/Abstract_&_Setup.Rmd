@@ -1,0 +1,112 @@
+---
+<EN>title:
+  Concrete compressive strength prediction with machine learning
+date: "April 22, 2020"</EN>
+<PT>title:
+  Prevendo a resisência à compressão do concreto com técnicas de machine learning
+date: "Abril 22, 2020"</PT>
+author: "Pedro Bernardino Alves Moreira"
+indent: true
+<EN>abstract:
+ Compressive strength is the main characteristic of concrete. This work used a set of samples widely used to build 6 forecast models of this characteristic, each one specifically for an age, 3, 7, 14, 28, 56 and 100 days from 7 ingredients (water, cement, fine aggregate, coarse aggregate, fly ash, blast furnace slag, and superplasticizers) and 6 relationships between the main ingredients (water/cement, coarse aggregate/cement, fine aggregate/cement, fine aggregate / coarse aggregate, water / coarse aggregate and water/fine aggregate) to make the predictions. The algorithm *Parallel Random Forest* was used (*parRF* of the *caret* package in *R*) . The results were satisfactory, being the best for the 3-day model (*RMSE* of 3.31) and the worst for the 100-day model (*RMSE* of 5.85). The 28-day model had *RMSE* of 4.72. The work indicated that the separation in a model for each age is promising and was able to generate compatible results or better than other studies, opening way for new models creation following this proposal, but using different algorithms or the combination of different algorithms.</EN>
+<PT>abstract:
+  A resistência à compressão é a principal característica do concreto. Esse trabalho utilizou um conjunto de amostras amplamente utilizado para construir 6 modelos de previsão dessa característica, cada um específicamente para uma idade, 3, 7, 14, 28, 56 e 100 dias a partir de 7 ingredientes (água, cimento, agregado miúdo, agregado graúdo, cinza volante, escória granulada de alto forno e superplastificantes) e 6 relações entre os principais ingredientes (água/cimento, agregado miúdo/cimento, agregado graúdo/cimento, agregado miúdo/agregado graúdo, água/agregado graúdo e água/agregado miúdo) para fazer a previsão. Foi utilizado o algorítimo *Parallel Random Forest* (*parRF* do pacote *caret* de linguagem *R*). Os resultados foram satisfatórios sendo o melhor para o modelo de 3 dias (*RMSE* de 3,31) e pior para o modelo de 100 dias (*RMSE* de 5,85). O modelo de 28 dias apresentou *RMSE* de 4,72. O trabalho indicou que a separação em um modelo para cada idade é promissora e foi capaz de gerar resultados compatíveis ou melhores que outros estudos, abrindo espaço para construção de novos modelos seguindo essa proposta, mas utilizando algorítimos diferentes ou a combinação de diversos algorítimos.</PT>
+output:
+  pdf_document:
+    keep_tex: yes
+    number_sections: yes
+    toc_depth: 2
+bibliography: references.bib
+header-includes:
+<PT>- \renewcommand{\abstractname}{Resumo}</PT>
+- \usepackage{booktabs}
+- \usepackage{longtable}
+- \usepackage{supertabular}
+- \usepackage{array}
+- \usepackage{multirow}
+- \usepackage[table]{xcolor}
+- \usepackage{wrapfig}
+- \usepackage{colortbl}
+- \usepackage{pdflscape}
+- \usepackage{tabu}
+- \usepackage{threeparttable}
+- \usepackage[normalem]{ulem}
+- \usepackage{caption}
+- \usepackage{floatrow}
+- \floatsetup[table]{capposition=top}
+- \floatsetup[figure]{capposition=top}
+- \captionsetup{options=chunk}
+- \DeclareNewFloatType{chunk}{placement=H, fileext=chk, name=}
+- \renewcommand{\thechunk}{\arabic{chunk}}
+- \usepackage{indentfirst}
+- \usepackage{sectsty} \sectionfont{\centering}
+---
+
+```{r setup, include=FALSE, cache=F}
+# Install libraries, if not already installed
+if(!require(tidyverse)) install.packages("tidyverse")
+if(!require(ggplot2)) install.packages("ggplot2")
+if(!require(caret)) install.packages("caret")
+if(!require(knitr)) install.packages("knitr")
+if(!require(kableExtra)) install.packages("kableExtra")
+if(!require(gdata)) install.packages("gdata")
+if(!require(dplyr)) install.packages("dplyr")
+if(!require(tidyr)) install.packages("tidyr")
+if(!require(cowplot)) install.packages("cowplot")
+if(!require(pastecs)) install.packages("pastecs")
+if(!require(factoextra)) install.packages("factoextra")
+if(!require(reshape2)) install.packages("reshape2")
+if(!require(purrr)) install.packages("purrr")
+if(!require(gridExtra)) install.packages("gridExtra")
+if(!require(questionr)) install.packages("questionr")
+
+# Load libraries
+library(tidyverse)
+library(caret)
+library(ggplot2)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+library(tidyr)
+library(gdata)
+library(reshape2)
+library(cowplot)
+library(pastecs)
+library(factoextra)
+library(purrr)
+library(gridExtra)
+library(questionr)
+
+# Set global options
+options(pillar.sigfig = 5)
+options(knitr.kable.NA = '')
+opts_knit$set(eval.after = "fig.cap")
+opts_chunk$set(echo = TRUE, fig.align = 'center', cache=T, prompt=F, highlight=T )
+oldSource <- knit_hooks$get("source")
+knit_hooks$set(source = function(x, options) {
+  x <- oldSource(x, options)
+  x <- ifelse(!is.null(options$ref), paste0("\\label{", options$ref,"}", x), x)
+  ifelse(!is.null(options$codecap), paste0("\\captionof{chunk}{", options$codecap,"}", x), x)
+})
+```
+
+<PT>
+\renewcommand{\figurename}{Figura}
+\renewcommand{\tablename}{Tabela}
+\renewcommand{\contentsname}{Sumário}
+\renewcommand{\chunkname}{Código}
+\renewcommand{\listfigurename}{Lista de figuras}
+\renewcommand{\listtablename}{Lista de tabelas}
+</PT>
+
+\newpage
+
+\tableofcontents
+
+\newpage
+
+\listoffigures
+
+\listoftables
+
+\newpage

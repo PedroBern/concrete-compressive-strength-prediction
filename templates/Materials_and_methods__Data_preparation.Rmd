@@ -1,0 +1,552 @@
+<EN>
+## Data preparation
+
+The preparation of the data consisted of transforming the sample set in order to maintain only relevant data for the subsequent studies. Data that were considered irrelevant or that had the potential to add undesirable noise to the analysis were removed. In addition, the relevant data has been transformed to better fit the studies in the next steps.
+</EN>
+
+<PT>
+## Preparação dos dados
+
+A preparação dos dados consistiu em transformar o conjunto de amostra afim de manter apenas dados relevantes para os estudos subsequêntes. Foram retirandos dados considerados irrelevantes ou que com potencial de adicionar um ruído indesejavel nas análises. Além disso, os dados relevântes foram transformados para melhor se enquadrar para os estudos nas próximas etapas.
+</PT>
+
+<EN>
+### Initial data cleaning
+
+Initially, there were 25 duplicate samples that were removed, resulting in a new total of 1005 samples (\ref{show-removing-duplicated-samples}).
+</EN>
+
+<PT>
+### Limpeza inicial dos dados
+
+Inicialmente foram observadas a existência de 25 amostras duplicadas que foram retiradas, resultando em um novo total de 1005 amostras (\ref{show-removing-duplicated-samples}).
+</PT>
+
+&nbsp; 
+
+```{r removing-duplicated-samples, echo=F}
+#<EN># Removing duplicated samples</EN>
+#<PT># Removendo amostras duplicadas</PT>
+
+n_distinct_samples <- dat %>% select(-c(id)) %>% n_distinct()
+n_duplicated_samples <- n_inicial_samples - n_distinct_samples
+dat <- dat[!duplicated(select(dat, -c(id))),]
+n_samples <- nrow(dat)
+```
+
+<EN>
+The data show the variables in the columns and samples in the rows. However it was found that some samples are identical in proportions of ingredients, changing only the value of age and compressive strngth, for example, samples 653, 654, 678 and 681, shown in the table \ref{tab:similar-samples}.
+</EN>
+
+<PT>
+Os dados apresentam as variaveis nas colunas e amostras nas linhas. Porém foi verificado que algumas amostras são identicas em proporções de ingredientes, alterando apenas o valor da idade e resistência à compressão, por exemplo as amostras 653, 654, 678 e 681, mostradas na tabela \ref{tab:similar-samples}.
+</PT>
+
+&nbsp; 
+
+```{r similar-samples, echo=FALSE}
+#<EN># Tabela - Samples with same composition</EN>
+#<PT># Tabela - Amostras com a mesma composição</PT>
+
+same_samples <- dat %>%
+  filter(id %in% c(653, 678, 654, 681))
+
+#<EN>
+caption <- "Samples with same composition"
+#</EN>
+#<PT>
+caption <- "Amostras com a mesma composição"
+#</PT>
+
+kable(
+  same_samples[order(same_samples$day),],
+  col.names = dfUnits,
+  escape = F,
+  booktabs = T,
+  caption = caption,
+  linesep = "\\addlinespace",
+  align = "c",
+  row.names = FALSE
+  ) %>%
+  add_header_above(header = colNames, line = F, align = "c") %>%
+  kable_styling(latex_options = c("HOLD_position", "scale_down"))
+```
+
+<EN>
+In addition, there are also samples with the same values and proportions of ingredients, but with different compressive strength, probably due to differences in the building process. This is the case, for example, of samples 472, 473 and 474, shown in the table  \ref{tab:similar-samples-2}.
+</EN>
+
+<PT>
+Além disso, também existem amostras com os mesmos valores e proporções de ingredientes, mas com resistência à compressão diferente, provavelmente devido a diferenças na execução. É o caso por exemplo das amostras 472, 473 e 474, mostradas na tabela \ref{tab:similar-samples-2}.
+</PT>
+
+&nbsp; 
+
+```{r similar-samples-2, echo=FALSE}
+#<EN># Tabela - Same samples with different results</EN>
+#<PT># Tabela - Amostras iguais com resultados diferentes</PT>
+
+same_samples_2 <- dat %>%
+  filter(id %in% c(472, 473, 474))
+
+#<EN>
+caption <- "Same samples with different results"
+#</EN>
+#<PT>
+caption <- "Amostras iguais com resultados diferentes"
+#</PT>
+
+kable(
+  same_samples_2[order(same_samples_2$day),],
+  col.names = dfUnits,
+  escape = F,
+  booktabs = T,
+  caption = caption,
+  linesep = "\\addlinespace",
+  align = "c",
+  row.names = FALSE
+  ) %>%
+  add_header_above(header = colNames, line = F, align = "c") %>%
+  kable_styling(latex_options = c("scale_down"))
+```
+
+<EN>
+To facilitate the analysis of the samples, all samples that are the same in relation to the ingredients, have been assigned the same *id*. In addition, as the compressive strength at 28 days is the parameter to determine the grade of the concrete, only the elements containing that day among its samples were maintained. In the case of the same samples but with different results of compressive strength, the values were averaged. After all these changes (\ref{show-initial-data-cleaning}), the new total of samples was reduced to 970, containing 416 different settings for the proportions of ingredients (\ref{show-total-de-amostras-apos-processamento}).
+</EN>
+
+<PT>
+Para facilitar a analise das amostras, todas as amostras que são iguais em relação aos ingredientes, foram atribuidos o mesmo *id*. Além disso, como a resistência à compressão aos 28 dias é o parâmetro para determinar a classe do concreto, foi mantido apenas os elementos que contenham esse dia entre suas amostras. No caso das amostras iguais mas com resultado diferentes de resistência à compressão, foi calculado a média dos valores. Após todas essas alterações (\ref{show-initial-data-cleaning}), o novo total de amostras foi reduzido para 970, contendo 416 configurações diferentes das proporções de ingredientes (\ref{show-total-de-amostras-apos-processamento}).
+</PT>
+
+&nbsp; 
+
+```{r initial-data-cleaning, echo=FALSE}
+#<EN># Data cleaning</EN>
+#<PT># Limpeza inicial das amotras</PT>
+
+dat <- dat %>%
+  group_by(
+    cement,
+    blast_furnace_slag,
+    fly_ash,
+    water,
+    superplasticizers,
+    coarse_aggregate,
+    fine_aggregate,
+  ) %>%
+  filter("28" %in% day) %>%
+  mutate(id = id[which.min(id)]) %>%
+  ungroup() %>%
+  group_by(id, day) %>%
+  mutate(mpa = mean(mpa)) %>%
+  ungroup()
+
+dat <- dat[!duplicated(select(dat, -c(id))),]
+
+dat$id<-factor(dat$id)
+
+n_samples <- nrow(dat)
+n_distinct_samples <- n_distinct(dat$id)
+```
+
+<EN>
+The result can be seen in the table \ref{tab:similar-samples-same-id}. All samples with equal ingredient settings have the same id, and when they had different results for the same days, they were transformed into just one sample, with the arithmetic mean in the compressive strength.
+</EN>
+
+<PT>
+O resultado pode ser conferido na tabela \ref{tab:similar-samples-same-id}. Todas as amostras com configurações iguais de ingredientes possuem o mesmo id, e quando possuiam resultados diferentes para os mesmos dias, foram transformadas em apenas uma amostra, com a média aritmética na resistência à compressão.
+</PT>
+
+&nbsp; 
+
+```{r similar-samples-same-id, echo=FALSE, include=TRUE}
+#<EN># Tabela - Previous samples after processing</EN>
+#<PT># Tabela - Amostras anteriores após processamento</PT>
+
+same_samples <- dat %>%
+  filter(id == 653 | id == 472 & day == 28)
+
+#<EN>
+caption <- "Previous samples after processing"
+#</EN>
+#<PT>
+caption <- "Amostras anteriores após processamento"
+#</PT>
+
+kable(
+  same_samples[order(same_samples$id, same_samples$day),],
+  col.names = dfUnits,
+  escape = F,
+  booktabs = T,
+  caption = caption,
+  linesep = "\\addlinespace",
+  align = "c",
+  row.names = FALSE,
+  digits = 2
+  ) %>%
+  add_header_above(header = colNames, line = F, align = "c") %>%
+  kable_styling(latex_options = c("HOLD_position", "scale_down"))
+
+```
+
+<EN>
+### Age selection
+
+As previously described, the main age for analysis of compressive strength is 28 days, but other ages can also be used to build forecasting models. However, it is necessary to verify how relevant the data of these other ages are. Starting with the distribution of the samples in relation to each age  (\ref{show-boxplot}) shown in the figure \ref{fig:boxplot}.
+</EN>
+
+<PT>
+### Seleção das idades
+
+Como descrito anteriormente, a principal idade para análise da resistência à compressão é aos 28 dias, mas as outras idades também podem ser utilizadas para construir modelos de previsão. Porém é necessário verificar o quanto relevante os dados dessas outras idades são. Iniciando pela distribuição das amostras em relação a cada idade (\ref{show-boxplot}) mostrado na figura \ref{fig:boxplot}.
+</PT>
+
+&nbsp; 
+
+```{r boxplot, echo=F, fig.cap=cap, fig.height=3.5}
+#<EN># Figure - Compressive strength (MPa) vs age (days)</EN>
+#<PT># Figura - Resistência à compressão (MPa) vs idade (dias)</PT>
+
+#<EN>
+cap <- "Boxplot - Compressive strength (MPa) vs age (days)"
+ylabel <- "Compressive strength (MPa)"
+xlabel <- "Age (days)"
+#</EN>
+#<PT>
+cap <- "Boxplot - Resistência à compressão (MPa) vs idade (dias)"
+ylabel <- "Resistência à compressão (MPa)"
+xlabel <- "Idade (dias)"
+#</PT>
+
+dat %>%
+  ggplot(aes(x=factor(day), y=mpa)) +
+  geom_boxplot() +
+  geom_jitter(alpha=0.2)  +
+  theme_bw() +
+  ylab(ylabel) +
+  xlab(xlabel)
+```
+
+<EN>
+It was observed that the ages of 90, 91 and 100 days probably represent extremes to each other in the ingredient configurations, since they are relatively close ages but with very different values, especially for 90 and 91.
+
+&nbsp; 
+
+This hypothesis was verified using the principal component analysis method, applied to samples of these 3 ages (\ref{show-pca-90-91-100}). The figure \ref{fig:pca-90-91-100} shows how the samples relate to each other (which are similar or different) and revealed how each variable contributes to the analysis. The first two dimensions represent $ 37 \% $ and $ 24 \% $ respectively of the variance.
+</EN>
+
+<PT>
+Foi observado que as idades de 90, 91 e 100 dias provavelmente representam extremos entre si das configurações de ingredientes, uma vez que são idades relativamente próximas porém com valores muito diferentes, especialmente para 90 e 91.
+
+&nbsp; 
+
+Essa hipótese foi verificada utilizando o método de análise de componente principal, aplicado às amostras dessas 3 idades (\ref{show-pca-90-91-100}). A fígura \ref{fig:pca-90-91-100} mostra como as amostras se relacionam umas com as outras (quais são parecidas ou diferentes) e revelou como cada variável contribui para a análise. As duas primeiras dimensões representam $37\%$ e $24\%$ respectivamente da variância.
+</PT>
+
+&nbsp; 
+
+```{r pca-90-91-100, echo=F, include=T, fig.cap = cap, fig.height=3.5}
+#<EN># Figure - Principal component analysis - 90, 91 e 100 days</EN>
+#<PT># Figura - Análise componente principal - 90, 91 e 100 dias</PT>
+
+dat_90_91_100 <- dat %>%
+  ungroup() %>%
+  filter(day %in% c(90, 91, 100)) %>%
+  select(-c(id, mpa))
+
+#<EN>
+cap <- "Principal component analysis - 90, 91 e 100 days"
+colnames(dat_90_91_100) <- c(
+   "Cem.", "B.F.S.", "Fly.A.","Water","Sup.","C.Ag.","F.Ag.","day")
+pca <- prcomp(select(dat_90_91_100, -c(day)), scale = TRUE)
+habillage <- dat_90_91_100$day
+#</EN>
+#<PT>
+cap <- "Análise componente principal - 90, 91 e 100 dias"
+colnames(dat_90_91_100) <- c(
+   "Cim.","E.G.A.F.","Ci.Vo.","Agu.","Sup.","Ag.G.","Ag.M.","dia"
+)
+pca <- prcomp(select(dat_90_91_100, -c(dia)), scale = TRUE)
+habillage <- dat_90_91_100$dia
+#</PT>
+
+fviz_pca_biplot(
+  pca,
+  geom.ind = "point",
+  habillage=habillage,
+  addEllipses = TRUE,
+  ellipse.level=0.75) +
+  ggtitle("") +
+  theme_bw() +
+  coord_cartesian(xlim = c(-3, 3.5), ylim = c(3, -5))
+```
+
+<EN>
+Another important point considered, of the concrete nature itself, is the fact that the growth rate of its compressive strength decreases with time, reaching a certain stability value. The figure \ref{fig:mpa-on-time} shows the compressive strength over the days for samples with more than 5 data, that is, data available for at least 6 different ages (\ref{show-mpa-on-team}).
+</EN>
+
+<PT>
+Outro ponto importante considerado, da própria natureza do concreto, é o fato da taxa de crescimento de sua resistência à compressão diminuir com o tempo, chegando a um certo valor de establidade. A figura \ref{fig:mpa-on-time} mostra a resistência à compressão ao longo dos dias para amostras com mais de 5 dados, ou seja, dados disponiveis para no mínimo 6 idades distintas (\ref{show-mpa-on-time}). 
+</PT>
+
+&nbsp; 
+
+```{r mpa-on-time, echo=F, include=T, fig.cap=cap, fig.height=3}
+#<EN># Figure - Compressive strength through time</EN>
+#<PT># Figura - Resistência à compressão ao longo do tempo</PT>
+
+#<EN>
+cap <- "Compressive strength through time"
+ylabel <- "MPa"
+xlabel <- "Age (days)"
+#</EN>
+#<PT>
+cap <- "Resistência à compressão ao longo do tempo"
+ylabel <- "MPa"
+xlabel <- "Idade (dias)"
+#</PT>
+
+dat_duplicated_only <- dat %>%
+  group_by(id) %>%
+  filter(n()>5) %>%
+  select(id, mpa, day)
+
+dat_duplicated_only %>%
+  ggplot(aes(day, mpa, fill=id, alpha = 0.5)) +
+  geom_line() +
+  xlab(xlabel) +
+  ylab(ylabel) +
+  theme_bw() +
+  theme(legend.position = "none")
+```
+
+<EN>
+For the reasons presented in the figures \ref{fig:boxplot}, \ref{fig:pca-90-91-100} and \ref{fig:mpa-on-time}, it was considered that the ages of 90, 91 and 100 days can be grouped to improve reading and decrease sample noise. They were converted to the same value, the age of 100 days was chosen (\ref{show-join-90-91-100}. As shown in the figure \ref{fig:mpa-on-time}, the resistance only increases, after 100 days the resistance to compression will be greater than or equal to the value of 90 or 91 days.
+</EN>
+
+<PT>
+Pelos motivos apresentados nas figuras \ref{fig:boxplot}, \ref{fig:pca-90-91-100} e \ref{fig:mpa-on-time}, foi considerado que as idades de 90, 91 e 100 dias podem ser agrupadas para melhorar a leitura e diminuir o ruído das amostras. Elas foram convertidas para o mesmo valor, que no caso foi escolhido a idade de 100 dias (\ref{show-join-90-91-100}, pois como mostrado na figura \ref{fig:mpa-on-time}, a resistência apenas aumenta, logo aos 100 dias a resistência à compressão será maior ou igual ao valor de 90 ou 91 dias.
+</PT>
+
+&nbsp; 
+
+```{r join-90-91-100, echo=F, eval=F}
+#<EN># Joining 90, 91 and 100 days data</EN>
+#<PT># Juntando amostras de 90, 91 e 100 dias</PT>
+
+ind_90 <- dat$id[which(dat$day == "90")]
+ind_91 <- dat$id[which(dat$day == "91")]
+ind_100 <- dat$id[which(dat$day == "100")]
+
+sum(duplicated(c(ind_90, ind_91, ind_100))) # 0
+
+dat <- dat %>%
+  ungroup() %>%
+  mutate(day = ifelse(day %in% c(91, 90), 100, day))
+```
+
+<EN>
+Another topic analyzed in the selection of ages was the observed frequency of each age value after this transformation from 90, 91 in 100 days, shown in the figure \ref{fig:freq-ages}. Some values of days have very low concentrations of samples, at the risk of damaging more than helping to create the models, so they were removed (\ref{show-remove-ages-lower-50}). The criterion adopted was to maintain only ages with a frequency greater than 50, only the values of 3, 7, 14, 28, 56 and 100 days.
+</EN>
+
+<PT>
+Mais um tópico analisado na seleção das idades foi a frequência observada de cada valor de idade após essa transformação dos 90, 91 em 100 dias, mostrada na figura \ref{fig:freq-ages}. Alguns valores de dias apresentam concentrações muito baixas de amostras, correndo o risco de prejudicar mais do que ajudar na criação dos modelos, logo elas foram removidas (\ref{show-remove-ages-lower-50}). O critério adotado foi manter apenas idades com frequência maior que 50, ou seja, apenas os valores de 3, 7, 14, 28, 56 e 100 dias.
+</PT>
+
+&nbsp; 
+
+```{r freq-ages, echo=F, include=T, fig.cap=cap, fig.height=3}
+#<EN># Figure - Ages frequency</EN>
+#<PT># Figura - Frequência das idades</PT>
+
+#<EN>
+cap <- "Ages frequency"
+ylabel <- "Frequency"
+xlabel <- "Age (days)"
+#</EN>
+#<PT>
+cap <- "Frequência das idades"
+ylabel <- "Frequência"
+xlabel <- "Idade (dias)"
+#</PT>
+
+dat %>%
+  ggplot(aes(x = factor(day))) +
+  geom_bar() +
+  theme_bw() +
+  xlab(xlabel) +
+  ylab(ylabel)
+```
+
+
+```{r remove-ages-lower-50, echo=F}
+#<EN># Removing ages with frequency lower than 50</EN>
+#<PT># Removendo idades com frequência menor que 50</PT>
+
+dat <- dat[dat$day %in% c(3, 7, 14, 28, 56, 100),]
+```
+
+<EN>
+### Data reorganization
+
+The samples were grouped to maintain only a separate sample from each set of configuration of the proportions of the ingredients, adding new variables/columns for resistance at each age (\ref{show-reorganizing-dat}). The result in the first samples after this processing is shown in the table \ref{tab:new-features}.
+</EN>
+
+<PT>
+### Reorganização dos dados
+
+As amostras foram agrupadas para manter apenas uma amostra distinta de cada conjunto de configuração das proporções dos ingredientes, adicionando novas variáveis/colunas para a resistência em cada idade (\ref{show-reorganizing-dat}). O resultado nas primeiras amostras após esse processamento é mostrado na tabela \ref{tab:new-features}.
+</PT>
+
+&nbsp; 
+
+```{r reorganizing-dat, echo=F}
+#<EN># Data reorganization</EN>
+#<PT># Reorganização das amotras</PT>
+
+dat <- dat %>%
+  group_by_at(vars(-mpa)) %>%
+  mutate(row_id = 1:n()) %>% ungroup() %>%
+  spread(day, mpa, sep = "_") %>%
+  select(-row_id)
+```
+
+```{r new-features, echo=F}
+#<EN># Table - First 6 samples after reorganization/EN>
+#<PT># Tabela - Primeiras 6 amostras reorganizadas</PT>
+
+#<EN>
+caption <- "First 6 samples after reorganization"
+colNames2 = c("ID", "Cement", "B.F.S", "Fly ash", "Water",
+             "Superp.", "Coarse Ag.", "Fine Ag.", "3 days", "7 days",
+             "14 days", "28 days", "56 days", "100 days")
+#</EN>
+#<PT>
+caption <- "Primeiras 6 amostras reorganizadas"
+colNames2 = c("ID", "Cimento", "E.G.A.F.", "C.Volante", "Água",
+             "Superp.", "A.Graúdo", "A.Miúdo", "3 dias", "7 dias",
+             "14 dias", "28 dias", "56 dias", "100 dias")
+#</PT>
+
+dfUnits2 <- c("", "$kg/m^3$", "$kg/m^3$","$kg/m^3$","$kg/m^3$",
+              "$kg/m^3$", "$kg/m^3$","$kg/m^3$","$MPa$","$MPa$",
+              "$MPa$","$MPa$","$MPa$","$MPa$")
+
+kable(
+    head(dat[order(dat$id),]),
+    col.names = dfUnits2,
+    escape = F,
+    booktabs = T,
+    caption = caption,
+    linesep = "\\addlinespace",
+    align = "c"
+    ) %>%
+    add_header_above(header = colNames2, line = F, align = "c") %>%
+    kable_styling(latex_options = c("HOLD_position", "scale_down"))
+```
+
+<EN>
+The number of samples and distinct samples after all this manipulation remained the same, a total of 416 (\ref{show-total-samples-2}).
+</EN>
+
+<PT>
+O número de amostras e amostras distintas após toda essa manipulação permaneceu o mesmo, um total de 416 (\ref{show-total-samples-2}).
+</PT>
+
+```{r total-samples-2, echo=F}
+#<EN># Total samples/EN>
+#<PT># Total de amostras</PT>
+
+n_samples <- nrow(dat) # 416
+n_distinct_samples <- n_distinct(dat$id) # 416
+```
+
+<EN>
+### Adding new variables
+
+To finish the data preparation, new columns were added to the dataset (\ref{show-new-features-2}). Starting with the concrete class, for example if the compressive strength is between 25 and 30, it receives the class *C25*. The inclusion of the class was important because the compressive strength in *MPa* is a continuous variable, which will be used in the regression models, but the class as a discrete variable can provide another visualization of the data. The approximate mix of concrete was also added, which represents the proportions of aggregates (fine and coarse) for cement. Other proportions between the main ingredients were also added. The new variables are presented in the table ref{tab:new-features-table}.
+</EN>
+
+<PT>
+### Adicionando novas variáveis
+
+Para finalizar a preparação dos dados, novas colunas foram adicionadas ao conjunto de amostras (\ref{show-new-features-2}). Iniciando pela classe do concreto, por exemplo se a resistência à compressão está entre 25 e 30, recebe a classe *C25*. A inclusão da classe foi importânte pois a resistência em $MPa$ é uma variável contínua, que será utilizada nos modelos de regressão, mas a classe como variável discreta pode fornecer outro ângulo de visualização dos dados. Também foi adicionado o traço aproximado do concreto, que representa as proporções de agregados (miúdo e graúdo) para o cimento. Outras proporções entre os principais ingredientes também foram adicionadas. As novas variáveis são apresentadas na tabela \ref{tab:new-features-table}.
+</PT>
+
+```{r new-features-2, echo=F}
+#<EN># Adding New features/EN>
+#<PT># Adicionando novas variáveis</PT>
+
+concrete_class <- function(mpa){
+  if (mpa >= 10) {
+    s <- as.character(mpa)
+    first <- substr(s, start = 1, stop = 1)
+    second <- ifelse(substr(s, start = 2, stop = 2) >= 5, 5, 0)
+  }
+  else {
+    first <- ""
+    second <- "5"
+  }
+  paste("C", first, second, sep = "")
+}
+
+mix <- function(c, f_ag, c_ag){
+  paste(
+    1,
+    round(f_ag/c, 0),
+    round(c_ag/c, 0),
+    sep = ":")
+}
+
+dat <- dat %>%
+  mutate(class = sapply(day_28, concrete_class)) %>%
+  mutate(class = as.factor(class)) %>%
+  mutate(mix_app = factor(
+    mix(cement, fine_aggregate, coarse_aggregate))) %>%
+  mutate(`water_/_cement` = water / cement) %>%
+  mutate(`fine_aggregate_/_cement` = fine_aggregate/cement) %>%
+  mutate(`coarse_aggregate_/_cement` = coarse_aggregate/cement) %>%
+  mutate(`fine_aggregate_/_coarse_aggregate` = fine_aggregate/coarse_aggregate) %>%
+  mutate(`water_/_coarse_aggregate` = water/coarse_aggregate) %>%
+  mutate(`water_/_fine_aggregate` = water/fine_aggregate)
+
+lvl <- levels(dat$class)
+dat$class <- factor(
+  dat$class, 
+  levels=c( "C5", sort(lvl[lvl!="C5"], decreasing=F)))
+```
+
+```{r new-features-table, echo=F}
+#<EN># Table - New features/EN>
+#<PT># Tabela - Novas variáveis</PT>
+
+#<EN>
+caption <- "New features"
+colNames7 = c("ID", "Class","Approximated Mix",
+             "Water / Cement", "Fine Ag. / Cement", 
+             "Coarse Ag. / Cement", "Fine Ag. / Coarse Ag.",
+             "Water / Coarse Ag.", "Water / Fine Ag.")
+#</EN>
+#<PT>
+caption <- "Novas variáveis"
+colNames7 = c("ID", "Classe","Traço aproximado",
+             "Água / Cimento", "A.Miúdo / Cimento", 
+             "A.Graúdo / Cimento", "A.Miúdo / A.Graúdo",
+             "Água / A.Graúdo", "Água / A.Miúdo")
+#</PT>
+
+kable(
+    head(dat[order(dat$id),][,c(1,15:22)]),
+    col.names = colNames7,
+    escape = F,
+    booktabs = T,
+    caption = caption,
+    linesep = "\\addlinespace",
+    align = "c",
+    digits = 4
+    ) %>%
+  kable_styling(latex_options = c("HOLD_position", "scale_down")) %>%
+  column_spec(2, width = "1.5cm") %>%
+  column_spec(3, width = "2cm") %>%
+  column_spec(4:9, width = "1.7cm")
+```

@@ -1,0 +1,599 @@
+<EN>
+## Data visualization
+
+In order to assess the need for further manipulation before building the models, in this step the 416 samples already processed were visualized and analyzed.
+
+### Descriptive statistics
+
+The table \ref{tab:stat-summ} presents the statistical data of the continuous variables (\ ref {show-stat-summ}). The *Null* line represents the number of zeroed values for the ingredients, and the *NA* line represents the number of missing data. As the samples were filtered to maintain only sets of samples with known values of compressive strength at 28 days, the number of *NAs* is zero for that age. The figure \ref{fig:stat-summ-categorical} presents the statistical data of the discrete variables (\ref{show-stat-summ-categorical}).
+</EN>
+
+<PT>
+## Visualização dos dados
+
+Para avaliar a necessidade de mais manipulações antes da construção dos modelos, nesta etapa as 416 amostras já processadas foram visualizadas e analisadas.
+
+### Estatistica descritiva
+
+A tabela \ref{tab:stat-summ} apresenta os dados estatísticos das variáveis contínuas (\ref{show-stat-summ}). A linha de *Null* representa o número de valores zerados para os ingredientes, e a linha *NA* representa o número de dados faltando. Como as amostras foram filtradas para manter apenas conjuntos de amostras com valores conhecidos da resistência à compressão aos 28 dias, o número de *NAs* é zero para essa idade. A figura \ref{fig:stat-summ-categorical} apresenta os dados estatísticos das variáveis discretas (\ref{show-stat-summ-categorical}).
+
+</PT>
+
+&nbsp; 
+
+```{r stat-summ, echo=FALSE}
+#<EN># Table - Descriptive statistics - continuous variables/EN>
+#<PT># Tabela - Estatística descritiva - variáveis contínuas</PT>
+
+summ <- t(
+  stat.desc(select(dat, -c(id, class, mix_app))))
+
+#<EN>
+caption <- "Descriptive statistics - continuous variables"
+colnames(summ) <- c("Samples", "Null", "NA", "Min", "Max", "Range",
+              "Sum", "Median", "Mean", "SE mean", 
+              "CI mean","Variance", "Std.Dev.", "Coef.Var")
+rownames(summ) = c("Cement", "B.F.S.", "Fly ash", "Water",
+              "Superplast.", "Coarse agg.", "Fine agg.", "3 days", "7 days",
+              "14 days", "28 days", "56 days", "100 days",
+              "Water / Cement", "Fine agg. / Cement", 
+              "Coarse agg. / Cement", "Fine agg. / Coarse agg.",
+              "Water / Coarse agg.", "Water / Fine agg.")
+#</EN>
+#<PT>
+caption <- "Estatística descritiva - variáveis contínuas"
+colnames(summ) <- c("Amostras", "Null", "NA", "Min", "Max", "Intervalo",
+              "Soma", "Mediana", "Média", "Erro padrão  da média", 
+              "Intervalo de confiânça da média",
+              "Variância", "Desvio Padrão", "Coeficiênte de variação")
+rownames(summ) = c("Cimento", "E.G.A.F.", "Cinza Volante", "Água",
+              "Superplast.", "A.Graúdo", "A.Miúdo", "3 dias", "7 dias",
+              "14 dias", "28 dias", "56 dias", "100 dias",
+              "Água/ Cimento", "A.Miúdo/ Cimento", 
+              "A.Graúdo/ Cimento", "A.Miúdo / A.Graúdo",
+              "Água / A.Graúdo", "Água / A.Miúdo")
+#</PT>
+
+kable(
+  summ,
+  escape = F,
+  booktabs = T,
+  caption = caption,
+  linesep = "\\addlinespace",
+  align = "c",
+  digits = c(0,0,0,2,2,2,2,2,2,2,2,2,2,2)
+  ) %>%
+  kable_styling(latex_options = c("HOLD_position", "scale_down")) %>%
+  column_spec(c(1,10:15), width = "1.5cm")
+```
+
+
+```{r stat-summ-categorical, echo=FALSE, fig.height=4, fig.cap = cap}
+#<EN># Figure - Descriptive statistics - categorical variables/EN>
+#<PT># Figura - Estatística descritiva - variáveis discretas</PT>
+
+#<EN>
+cap <- "Descriptive statistics - categorical variables"
+name1 <- "Percentage"
+name2 <- "Accumulated percentage"
+ylabel <- "Frequency"
+xlabel1 <- "Class"
+xlabel2 <- "Approximate Mix"
+#</EN>
+#<PT>
+cap <- "Estatística descritiva - variáveis discretas"
+name1 <- "Porcentagem"
+name2 <- "Porcentagem acumulada"
+ylabel <- "Frequencia"
+xlabel1 <- "Classe"
+xlabel2 <- "Traço aproximado"
+#</PT>
+
+format_percent = function(n){
+  paste(n, "%", sep = "")
+}
+
+format_class <- function(cls){
+  str_remove_all(cls, "C")
+}
+
+f_class <- freq(dat$class, cum = TRUE, sort = "dec", total = F) %>%
+  select(n, "%", "%cum") %>%
+  mutate(class = row.names(.)) %>%
+  mutate(class_n = as.numeric(format_class(class)))
+
+f_cls_labels = function(n) {
+  f_class$class[n]
+}
+
+f_cls_acc_labels = function(n){
+  paste(f_class$`%cum`[n], "%", sep = "")
+}
+
+p1 <- f_class %>%
+  ggplot(aes(x = as.integer(reorder(class_n, -n)), y = n)) +
+  geom_bar(stat = 'identity') +
+  scale_y_continuous(
+      sec.axis = sec_axis(~./length(dat$class) * 100,
+                          name = name1,
+                          labels = format_percent)) +
+  scale_x_continuous(labels = f_cls_labels, breaks = 1:16, limits = c(0.5,16.5),
+                     sec.axis = sec_axis(~., breaks = 1:16,
+                              name = name2,
+                              labels = f_cls_acc_labels)) +
+  theme_bw() +
+  theme(panel.grid.minor.y = element_blank()) +
+  xlab(xlabel1) +
+  ylab(ylabel) +
+  coord_flip()
+
+format_mix <- function(mix){
+  str_remove_all(mix, ":")
+}
+
+f_mix <- freq(dat$mix_app, cum = TRUE, sort = "dec", total = F) %>%
+  select(n, "%", "%cum") %>%
+  mutate(mix = row.names(.)) %>%
+  mutate(mix_n = as.numeric(format_mix(mix)))
+
+f_mix_labels = function(n) {
+  f_mix$mix[n]
+}
+
+f_mix_acc_labels = function(n){
+  paste(f_mix$`%cum`[n], "%", sep = "")
+}
+
+p2 <- f_mix %>%
+  ggplot(aes(x = as.integer(reorder(mix_n, -n)), y = n)) +
+  geom_bar(stat = 'identity') +
+  scale_y_continuous(
+      sec.axis = sec_axis(~./length(dat$mix_app) * 100,
+                          name = name1,
+                          labels = format_percent)) +
+  scale_x_continuous(labels = f_mix_labels, breaks = 1:24, limits = c(0.5,24.5),
+                     sec.axis = sec_axis(~., breaks = 1:24,
+                              name = name2,
+                              labels = f_mix_acc_labels)) +
+  theme_bw() +
+  theme(panel.grid.minor.y = element_blank()) +
+  xlab(xlabel2) +
+  ylab(ylabel) +
+  coord_flip()
+
+grid.arrange(p1, p2, ncol=2)
+```
+
+<EN>
+### Correlation between ingredients and compressive strength
+
+The figure \ref{fig:correlation} shows the correlation of variables for each set of ages (\ref{show-correlation}). The figure \ref{fig:correlation-mpa} presents the same data, but instead of correlating them all, it only correlates with the compressive strength, showing the values in more detail (\ref{show-correlation-mpa}).
+</EN>
+
+<PT>
+### Correlação dos ingredientes e resistência à compressão
+
+A figura \ref{fig:correlation} apresenta a correlação das variáveis para cada conjunto de idades (\ref{show-correlation}). A figura \ref{fig:correlation-mpa} apresenta os mesmos dados, mas em vez de correlacionar todos, correlaciona apenas com a resistência à compressão, mostrando os valores mais detalhadamente (\ref{show-correlation-mpa}).
+</PT>
+
+&nbsp; 
+
+```{r correlation, echo=F, fig.height=4, fig.cap=cap}
+#<EN># Figure - Correlation grouped by age/EN>
+#<PT># Figura - Correlações em cada idade</PT>
+
+cor_dat <- dat %>% select(-c(id))
+
+#<EN>
+cap <- "Correlations at each age"
+f_lvl <- c("3 days", "7 days", "14 days","28 days", "56 days", "100 days")
+name <- "Correlation"
+colnames_dat <- c("Cement", "B.F.S.", "Fly ash", "Water",
+                "Superplast.", "Coarse agg.", "Fine agg.", "3", "7",
+                "14", "28", "56", "100",
+                "W./C.", "F.A./C.", 
+                "C.A./C.", "F.A./C.A.",
+                "W./C.A.", "W./F.A.")
+#</EN>
+#<PT>
+cap <- "Correlações em cada idade"
+f_lvl <- c("3 dias", "7 dias", "14 dias","28 dias", "56 dias", "100 dias")
+name <- "Correlação"
+colnames_dat <- c("Cimento", "E.G.A.F.", "C.Volante", "Água",
+                  "Superp.", "A.Graúdo", "A.Miúdo",
+                  "3","7","14","28","56","100",
+                  "class","mix_app" ,"Ág./Ci.",
+                  "A.M./Ci.", "A.G./Ci.", "A.M./A.G.",
+                  "Ág./A.G.", "Ág./A.M.")
+#</PT>
+
+colnames(cor_dat) <- colnames_dat
+
+cor_dat <- cor_dat %>%
+  gather("day", "mpa", c("3", "7", "14", "28", "56", "100")) %>%
+  drop_na()
+
+cor_day <- function(d){
+  res <- cor_dat %>%
+    filter(day == d) %>%
+    select(-c(day, class, mix_app)) %>%
+    cor(.)
+  res[upper.tri(res)] <- NA
+  return(res)
+}
+
+cor_dats <- list(cor_day(3), cor_day(7), cor_day(14),
+               cor_day(28), cor_day(56), cor_day(100))
+
+melt_day <- function(df, d){
+  df %>%
+    melt() %>%
+    mutate(day = d)
+}
+
+melt_dats <- list(melt_day(cor_dats[1], 3), melt_day(cor_dats[2], 7),
+                  melt_day(cor_dats[3], 14), melt_day(cor_dats[4],28),
+                  melt_day(cor_dats[5], 56), melt_day(cor_dats[6],100))
+
+melt_dat_final <- melt_dats %>%
+  reduce(rbind) %>%
+  filter(value != 1)
+
+melt_dat_final$day <- factor(melt_dat_final$day)
+levels(melt_dat_final$day) <- f_lvl
+
+melt_dat_final %>%
+  ggplot(aes(x=reorder(Var1, desc(Var1)), y=Var2, fill=value)) + 
+  geom_tile(color = "white") +
+  facet_wrap(~day, ncol=3) +
+  scale_fill_gradient2(low = "red", high = "blue", mid = "white", 
+   midpoint = 0, limit = c(-1,1),name=name, na.value="white") +
+  xlab("") +
+  ylab("") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"))
+```
+
+```{r correlation-mpa, echo=F, fig.height=3, fig.cap=cap}
+
+#<EN>
+cap <- "Correlation of variables with compressive strength over time"
+name <- "Correlation"
+#</EN>
+#<PT>
+cap <- "Correlação das variáveis com a resistência à compressão no tempo"
+name <- "Correlação"
+#</PT>
+
+melt_dat_final %>%
+  filter(Var1 == "mpa" | Var2 == "mpa") %>%
+  ggplot(aes(x=reorder(Var1, desc(Var1)), y=Var2, fill=value)) +
+  geom_tile(color = "white") +
+  facet_wrap(~day, ncol=6) +
+  scale_fill_gradient2(low = "red", high = "blue", mid = "white",
+   midpoint = 0, limit = c(-1,1),name=name, na.value="white") +
+  xlab("") +
+  ylab("") +
+  geom_text(aes(label = round(value, 2)), size = 2.5) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(colour = "black"))
+
+```
+
+<EN>
+The interpretation of the figure \ref{fig:correlation-mpa} suggests that the strength of the concrete is positively related mainly to the cement and superplasticizer ingredients and negatively to the water and fine aggregate. The smaller the amount of cement for aggregates and water, the more negatively they are correlated with compressive strength.
+</EN>
+
+<PT>
+A interpretação da figura \ref{fig:correlation-mpa} sugere que a resistência do concreto está relacionada positivamente principalmente com os ingredientes cimento e superplastificante e negativamente com a água e agregado miúdo. Quanto menor a quantidade de cimento para os agregados e para água, mais negativamente estão correlacionados com a resistência à compressão.
+</PT>
+
+&nbsp; 
+
+```{r mix-app-mpa, echo=F, fig.cap=cap,fig.height=3.5, warning=FALSE}
+#<EN># Figure - Relationship between approximated mix, water, MPa and age/EN>
+#<PT># Figura - Relação entre o traço aproximado, água, MPa e idade</PT>
+
+#<EN>
+cap <- "Relationship between approximated mix, water, MPa and age"
+d <- " days"
+xlabel <- "Approximated mix" 
+ylabel <- "Compressive strength (MPa)"
+label <- "Water /\nCement"
+#</EN>
+#<PT>
+cap <- "Relação entre o traço aproximado, água, resistência à compressão e idade"
+d <- " dias"
+xlabel <- "Traço aproximado" 
+ylabel <- "Resistência à compressão (MPa)"
+label <- "Água /\nCimento"
+#</PT>
+
+mix_dat <- dat %>%
+  select(c(day_3,day_7,day_14,day_28,day_56,day_100,
+          mix_app, `water_/_cement`, 
+          `fine_aggregate_/_cement`, 
+          `coarse_aggregate_/_cement`))
+  
+labs <- paste(c("3","7","14","28","56","100"), d, sep="")
+
+mix_dat <- mix_dat %>%
+  gather("day", "mpa", -c(mix_app, `water_/_cement`,
+                          `fine_aggregate_/_cement`,
+                          `coarse_aggregate_/_cement`)) %>%
+  drop_na()
+
+mix_dat$day <- factor(mix_dat$day)
+levels(mix_dat$day) <- labs
+
+min_x <- min(mix_dat$`water_/_cement`)
+max_x <- max(mix_dat$`water_/_cement`)
+s_x <- max_x - min_x
+
+mix_dat %>%
+  ggplot(aes(x=mix_app, y=mpa, colour = `water_/_cement`)) +
+  geom_point()  +
+  facet_wrap(~ day, ncol=2) +
+  theme_bw() +
+  ylab(ylabel) +
+  xlab(xlabel) +
+  scale_shape_manual(values=c(16, 2, 8)) +
+  scale_colour_gradient2(low = "red", mid = "yellow", high = "blue",
+                         midpoint = s_x / 2 + min_x ,limits = c(min_x, max_x),
+                         breaks = c(round(min_x, 2),
+                                    round(s_x*0.25 + min_x,2), 
+                                    round(s_x*0.5 + min_x,2),
+                                    round(s_x * 0.75 + min_x,2),
+                                    round(max_x, 2))) +
+  labs(colour = label) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(panel.grid.minor = element_blank(),
+      axis.line = element_line(colour = "black"))
+```
+
+```{r mix-mpa, echo=F, fig.cap=cap, fig.height=3.5, warning=FALSE, message=F}
+#<EN># Figure - Relationship between concrete main features/EN>
+#<PT># Figura - Relação das principais características do concreto</PT>
+
+#<EN>
+cap <- "Relationship between concrete main features"
+d <- " days"
+xlabel <- "Water / Cement"
+ylabel <- "Compressive strength (MPa)"
+colour <- "Fine Agg. /\nCement"
+size <- "Coarse Agg. /\nCement"
+#</EN>
+#<PT>
+cap <- "Relação das principais proporções do concreto"
+d <- " dias"
+xlabel <- "Água / Cimento"
+ylabel <- "Resistência à compressão (MPa)"
+colour <- "Ag. Miúdo /\nCimento"
+size <- "Ag. Graúdo /\nCimento"
+#</PT>
+
+min_x_2 <- min(mix_dat$`fine_aggregate_/_cement`)
+max_x_2 <- max(mix_dat$`fine_aggregate_/_cement`)
+s_x_2 <- max_x_2 - min_x_2
+
+mix_dat %>%
+  ggplot(aes(x=`water_/_cement`, y=mpa,
+             colour = `fine_aggregate_/_cement`,
+             size = `coarse_aggregate_/_cement`)) +
+  geom_point(alpha = 0.5)  +
+  facet_wrap(~ day, ncol=2) +
+  theme_bw() +
+  ylab(ylabel) +
+  xlab(xlabel) +
+  scale_colour_gradient2(low = "red", mid = "yellow", high = "blue",
+                         midpoint = (s_x_2 / 2) + min_x_2, 
+                         limits = c(min_x_2, max_x_2),
+                         breaks = c(round(min_x_2, 2),
+                                    round(s_x_2*0.25 + min_x_2,2),
+                                    round(s_x_2*0.5 + min_x_2,2),
+                                    round(s_x_2 * 0.75 + min_x_2,2),
+                                    round(max_x_2 - 0.01, 2))
+                         ) +
+  labs(colour = colour, size = size) +
+  ylim(c(-5,85)) +
+  scale_radius() +
+  theme_minimal() +
+  theme(panel.grid.minor = element_blank(),
+      axis.line = element_line(colour = "black"))
+```
+
+<EN>
+The figures \ref{fig:mix-app-mpa} and \ref{fig:mix-mpa} show the relationship between the main ingredients (known as mix) in relation to the compressive strength (\ref{show-mix-app-mpa} and \ref{show-mix-mpa}). The interpretation of these figures shows that the greater the amount of cement in relation to the other ingredients, the greater the resistance to compression.
+
+### Variables distribution
+
+A figura \ref{fig:vars-distribution} mostra a distribuição das variáveis nas amostras (\ref{show-vars-distribution}). Foi calculado utilizando apenas os dados aos 28 dias. 
+
+The figure\ref{fig:vars-distribution} shows the distribution of variables in the samples (\ref{show-vars-distribution}). It was calculated using data only at 28 days.
+</EN>
+
+<PT>
+As figuras \ref{fig:mix-app-mpa} e \ref{fig:mix-mpa} mostram a relação entre os principais ingredientes (conhecida como traço) em relação à resistência à compressão (\ref{show-mix-app-mpa} e \ref{show-mix-mpa}). A interpretação dessas figuras mostra que quanto maior a quantidade de cimento em relação aos outros ingredientes, maior será a resistência à compressão.
+
+### Distribuição das variáveis
+
+A figura \ref{fig:vars-distribution} mostra a distribuição das variáveis nas amostras (\ref{show-vars-distribution}). Foi calculado utilizando apenas os dados aos 28 dias. 
+</PT>
+
+&nbsp; 
+
+```{r vars-distribution, echo=F, fig.height=10, fig.cap=cap, warning=FALSE, message = F}
+#<EN># Figure - Variables distribution/EN>
+#<PT># Figura - Distribuição das variáveis</PT>  
+
+#<EN>
+cap <- "Variables distribution"
+colnames_dat <- c("Cement", "B.F.S.", "Fly ash", "Water",
+                  "Superplast.", "Coarse agg.", "Fine agg.",
+                  "Water / Cement", "Fine agg. / Cement", 
+                  "Coarse agg. / Cement", "Fine agg. / Coarse agg.",
+                  "Water / Coarse agg.", "Water / Fine agg.")
+#</EN>
+#<PT>
+cap <- "Distribuição das variáveis"
+colnames_dat <- c("Cimento", "E.G.A.F.", "C.Volante", "Água",
+                 "Superplastificante", "A.Graúdo", "A.Miúdo", "MPa",
+                 "Água / Cimento", "A.Miúdo / Cimento", "A.Graúdo / Cimento",
+                 "A.Miúdo / A.Graúdo","Água / A.Graúdo", "Água / A.Miúdo")
+#</PT>
+
+dist_dat <- dat %>%
+  select(-c(id, class, day_3, day_7, day_14, day_56, day_100, mix_app))
+  
+colnames(dist_dat) <- colnames_dat
+
+dist_dat <- dist_dat %>%
+  gather("Var", "value") %>%
+  mutate(value = as.numeric(value))
+
+dist_dat %>%
+  ggplot(aes(value)) +
+  geom_histogram(aes(y = ..density..), 
+                 colour = "black", 
+                 fill = "white") +
+  geom_density(alpha = .5, fill = "lightseagreen") +
+  facet_wrap(~ Var, ncol=3, scale = "free") +
+  theme_minimal() +
+  xlab("") +
+  ylab("") +
+  theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"))
+```
+
+<EN>
+The figure \ref{fig:vars-distribution-time} shows the distribution of ingredients and compressive strength for each set of ages (\ref{show-vars-distribution-time}), in case of the 28 days it presents the same information as the figure \ref{fig:vars-distribution}. It shows that the resistance to compression gradually increases over time, as expected. Furthermore it is seen that the concentration of the ingredients can vary a lot when stratified by ages.
+</EN>
+
+<PT>
+De outra forma, a figura \ref{fig:vars-distribution-time} mostra a distribuição dos ingredientes e da resistência à compressão para cada conjunto de idades (\ref{show-vars-distribution-time}), ou seja, no caso dos 28 dias apresenta a mesma informação que a figura \ref{fig:vars-distribution}. Através dela é visualizado que como esperado, a resistência à compressão gradualmente aumenta ao longo do tempo. Além disso é visualizado que a concentração dos ingredientes podem variar muito quando estratíficado pelas idades.
+</PT>
+
+```{r vars-distribution-time, echo=F, fig.height=10, fig.cap=cap, warning=FALSE, message=F}
+#<EN># Figure - Variables distribution grouped by age/EN>
+#<PT># Figura - Distribuição das variáveis agrupadas por idade</PT>  
+
+days_labs <- c("3","7","14","28","56","100")
+
+#<EN>
+cap <- "Variables distribution grouped by age"
+colnames_dat <- c("Cement", "B.F.S.", "Fly ash", "Water",
+                  "Superplast.", "Coarse agg.", "Fine agg.",
+                  days_labs,
+                  "Water / Cement", "Fine agg. / Cement", 
+                  "Coarse agg. / Cement", "Fine agg. / Coarse agg.",
+                  "Water / Coarse agg.", "Water / Fine agg.")
+#</EN>
+#<PT>
+cap <- "Distribuição das variáveis em relação a idade"
+colnames_dat <- c("Cimento", "E.G.A.F.", "C.Volante", "Água",
+                       "Superplastificante", "A.Graúdo", "A.Miúdo", 
+                       days_labs,
+                       "Água / Cimento", "A.Miúdo / Cimento", "A.Graúdo / Cimento",
+                       "A.Miúdo / A.Graúdo","Água / A.Graúdo", "Água / A.Miúdo")
+#</PT>
+
+dist_dat_2 <- dat %>%
+  select(-c(id, class, mix_app))
+
+colnames(dist_dat_2) <- colnames_dat
+
+dist_dat_2 <- dist_dat_2 %>%
+  gather("day", "mpa", days_labs) %>%
+  drop_na() %>%
+  gather("Var", "value", -c("day")) %>%
+  mutate(day = factor(day, levels = days_labs))
+
+dist_dat_2 %>%
+  ggplot(aes(x = day, y = value)) +
+  geom_violin(color = NA,
+                fill = "lightseagreen",
+                alpha = .5,
+                na.rm = TRUE,
+                scale = "count") +
+  geom_boxplot(alpha = 0.2) +
+  facet_wrap(~ Var, ncol=3, scale = "free") +
+  theme_minimal() +
+  theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black")) +
+  xlab("") +
+  ylab("")
+
+```
+
+<EN>
+### Principal component analysis
+
+Na figura \ref{fig:pca}, utilizando uma classificação alternativa, foi realizada a análise de componente principal nos ingredientes das amostras (\ref{show-pca}). A classificação separa o concreto em 4 grupos de resistência a compressão diferentes, baixo até $20 MPa$, normal até $40 MPa$, médio até $70 MPa$ e alto acima disso. É possivel perceber que os grupos se sobrepõem, mas existem uma diferenciação entre o grupo alto e baixo.
+
+In the figure v, using an alternative classification, the principal component analysis was performed on the ingredients (\ref{show-pca}). The classification separates concrete into 4 different compressive strength groups, low up to *20 MPa*, normal up to *40 MPa*, medium up to *70 MPa* and high above that. It is possible to notice that the groups overlap, but there is a differentiation between the high and low group.
+</EN>
+
+<PT>
+### Análise de componente principal
+
+Na figura \ref{fig:pca}, utilizando uma classificação alternativa, foi realizada a análise de componente principal nos ingredientes das amostras (\ref{show-pca}). A classificação separa o concreto em 4 grupos de resistência a compressão diferentes, baixo até *20 MPa*, normal até *40 MPa*, médio até *70 MPa* e alto acima disso. É possivel perceber que os grupos se sobrepõem, mas existem uma diferenciação entre o grupo alto e baixo.
+</PT>
+
+```{r pca, echo=F, fig.height=3, fig.cap=cap}
+#<EN># Figure - Principal component analysis on ingredients/EN>
+#<PT># Figura - Análise componente principal nos ingredientes</PT>  
+
+#<EN>
+cap <- "Principal component analysis on ingredients"
+colnames_dat <- c(
+  "Cem.", "B.F.S.", "F.A.", "Wat.", "Sup.", "C.Agg.",
+  "F.Agg.","WxC", "F.Agg.xC","C.Agg.xC","F.Agg.xC",
+  "WxC.Agg.","WxF.Agg."
+)
+class_list <- list(low="0", normal="20", medium="40", high="70")
+#</EN>
+#<PT>
+cap <- "Análise componente principal nos ingredientes"
+colnames_dat <- c(
+  "Cim.", "E.G.A.F.", "Ci.Vo.", "Águ.", "Sup.", "Ag.G.",
+  "Ag.M.","AxC", "MxC","GxC","MxC","AxG","AxM"
+)
+class_list <- list(baixo="0", normal="20", médio="40", alto="70")
+#</PT>
+
+dat_pca <- dat %>%
+  select(-c(id, class, mix_app,
+            "day_3", "day_7", "day_14", "day_28", "day_56", "day_100"))
+
+colnames(dat_pca) <- colnames_dat
+
+class_2 <- dat$day_28
+
+class_2[class_2 < 20] = "0"
+class_2[class_2 >= 20 & class_2 < 40] = "20"
+class_2[class_2 >= 40 & class_2 < 70] = "40"
+class_2[class_2 >= 70] = "70"
+
+class_2 <- factor(class_2)
+levels(class_2) <- class_list
+
+pca <- prcomp(dat_pca, scale = TRUE)
+
+fviz_pca_ind(
+  pca,
+  geom.ind = "point",
+  habillage=class_2,
+  addEllipses = T,
+  ellipse.level=0.95) +
+  ggtitle("") +
+  theme_bw()
+```

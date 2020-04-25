@@ -1,0 +1,15 @@
+<EN>
+# Materials and Methods
+
+## Materials
+
+The methodology was carried out using RStudio software [@RStudio], an integrated virtual environment for code development in *R* [@RCore]. Throughout the process, all code executed was documented in the same order as its execution in [Appendix 3](#appendix3), and reference was always made to codes throughout the text. All relevant information related to the operating system and installed packages has been presented in [Appendix 1](#appendix1). In addition, an online and open-source repository was created in *Github*, housing all the code used to generate this work, the link was made available in [Appendix 2](#appendix2).
+</EN>
+
+<PT>
+# Metodologia
+
+## Materiais utilizados
+
+A metodologia foi realizada utilizando o software RStudio [@RStudio], ambiente virtual integrado para desenvolvimento de código na linguagem *R* [@RCore]. Ao longo do processo, todo código executado foi documentado na mesma ordem de sua execução no [Apêndice 3](#appendix3), e foi sempre realizada referência aos códigos ao longo do texto. Todas as informações relevantes relacionados ao sistema operacional e pacotes instalados foram apresentados no [Apêndice 1](#appendix1). Além disso foi criado um repositorio online e de código aberto no *Github*, abrigando todo o código utilizado para gerar esse trabalho, o link foi diponibilizado no [Apêndice 2](#appendix2).
+</PT>

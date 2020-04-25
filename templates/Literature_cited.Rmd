@@ -1,0 +1,17 @@
+<EN>
+
+# Literature cited
+
+<div id="refs"></div>
+
+</EN>
+
+<PT>
+
+# Bibliografia
+
+<div id="refs"></div>
+
+</PT>
+
+\newpage

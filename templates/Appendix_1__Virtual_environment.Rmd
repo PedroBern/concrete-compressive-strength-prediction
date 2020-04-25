@@ -1,0 +1,53 @@
+<EN>
+# Appendix 1 - Virtual environment {#appendix1}
+
+## Operational system
+</EN>
+
+<PT>
+# Appendix 1 - Ambiente virtual {#appendix1}
+
+## Sistema operacional
+</PT>
+
+```{r sistema, echo=FALSE}
+v <- as.matrix(R.Version())
+kable(v, booktabs = T) %>%
+    kable_styling(latex_options = c("HOLD_position"))
+```
+
+<EN>
+## Packages
+</EN>
+
+<PT>
+## Pacotes utilizados
+</PT>
+
+```{r pacotes, echo=FALSE}
+p <- matrix(
+      c(
+        "caret", as.character(packageVersion("caret")),
+        "cowplot",as.character(packageVersion("cowplot")),
+        "dplyr", as.character(packageVersion("dplyr")),
+        "factoextra", as.character(packageVersion("factoextra")),
+        "gdata", as.character(packageVersion("gdata")),
+        "ggplot2", as.character(packageVersion("ggplot2")),
+        "gridExtra",as.character(packageVersion("gridExtra")),
+        "kableExtra",as.character(packageVersion("kableExtra")),
+        "knitr",as.character(packageVersion("knitr")),
+        "pastecs",as.character(packageVersion("pastecs")),
+        "purrr", as.character(packageVersion("purrr")),
+        "questionr", as.character(packageVersion("questionr")),
+        "reshape2", as.character(packageVersion("reshape2")),
+        "tidyr", as.character(packageVersion("tidyr")),
+        "tidyverse", as.character(packageVersion("tidyverse"))
+      ),
+      ncol = 2,
+      byrow=TRUE
+    )
+kable(p, booktabs = T) %>%
+    kable_styling(latex_options = c("HOLD_position"))
+```
+
+\newpage

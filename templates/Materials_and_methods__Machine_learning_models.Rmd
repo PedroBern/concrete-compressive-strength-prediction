@@ -1,0 +1,617 @@
+<EN>
+## Machine learning models
+
+The development of machine learning models was carried out with the *caret* package [@caret] and based on @irizarry2019 e @Kuhn2008.
+
+### Pre-processing and data separation
+
+Como existe a variável categórica para o traço aproximado do concreto, foi realizada a conversão dessa variável em variáveis fictiícias (*dummy vars*) (\ref{show-dummy-var}), passando de 22 colunas (id, classe, resistência à compressão e mais 19 *features*) para 45 colunas, uma adição de 23 variáveis, uma para cada traço aproximado. 
+
+As the approximate mix is a categorical variable, it was converted into dummy variables (\ref{show-dummy-var}), going from 22 columns (id, class, compressive strength and 19 more *features*) to 45 columns, an addition of 23 variables, one for each approximate mix.
+</EN>
+
+<PT>
+## Modelos de machine learning
+
+O desenvolvimento dos modelos de machine learning foi realizado com o pacote *caret* [@caret] e baseado em @irizarry2019 e @Kuhn2008.
+
+### Pre processamento e separação dos dados
+
+Como existe a variável categórica para o traço aproximado do concreto, foi realizada a conversão dessa variável em variáveis fictiícias (*dummy vars*) (\ref{show-dummy-var}), passando de 22 colunas (id, classe, resistência à compressão e mais 19 *features*) para 45 colunas, uma adição de 23 variáveis, uma para cada traço aproximado. 
+</PT>
+
+&nbsp;
+
+```{r dummy-var, echo=F, message=F, warning=F}
+#<EN># Dummy variables</EN>
+#<PT># Variáveis fictícias - dummy vars</PT>
+
+dummies <- dummyVars( ~ mix_app, data = dat)
+dummyDat <- data.frame(predict(dummies, newdata = dat))
+
+dummyDat$id <- dat$id
+
+dat <- dat %>%
+  select(-c(mix_app)) %>%
+  full_join(., dummyDat)
+```
+
+<EN>
+The samples were separated based on age. One dataset was created for each age value, totaling 6 different sets (\ref{show-preparation}). For illustrative purposes, the first 18 of 45 columns of the first 6 samples from the 28-day set are shown in the table \ref{tab:table-prepared-samples}.
+</EN>
+
+<PT>
+As amostras foram separadas baseado nas idades. Foram criados um conjunto de dados para cada valor de idade, totalizando 6 conjuntos diferentes (\ref{show-preparation}). Para fins ilustrativos, as primeiras 18 de 45 colunas das primeiras 6 amostras do conjunto de 28 dias são mostradas na tabela \ref{tab:table-preparated-samples}.
+</PT>
+
+&nbsp; 
+
+```{r preparation, echo=F}
+#<EN># Data preparation</EN>
+#<PT># Preparação dos dados</PT>
+
+names(dat) <- gsub(x = names(dat), pattern = "/", replacement = ".")  
+
+dat_3 <- dat %>%
+  select(-c("day_7", "day_14", "day_28", "day_56", "day_100")) %>%
+  drop_na() %>%
+  rename_at("day_3",~"mpa")
+dat_7 <- dat %>%
+  select(-c("day_3", "day_14", "day_28", "day_56", "day_100")) %>%
+  drop_na() %>%
+  rename_at("day_7",~"mpa")
+dat_14 <- dat %>%
+  select(-c("day_3", "day_7", "day_28", "day_56", "day_100")) %>%
+  drop_na() %>%
+  rename_at("day_14",~"mpa")
+dat_28 <- dat %>%
+  select(-c("day_3", "day_7", "day_14", "day_56", "day_100")) %>%
+  drop_na() %>%
+  rename_at("day_28",~"mpa")
+dat_56 <- dat %>%
+  select(-c("day_3", "day_7", "day_14", "day_28", "day_100")) %>%
+  drop_na() %>%
+  rename_at("day_56",~"mpa")
+dat_100 <- dat %>%
+  select(-c("day_3", "day_7", "day_14", "day_28", "day_56")) %>%
+  drop_na() %>%
+  rename_at("day_100",~"mpa")
+```
+
+```{r table-preparated-samples, echo=F}
+#<EN># Table - First 18 columns of the 6 first samples of 28 days</EN>
+#<PT># Tabela - Primeiras 18 colunas das primeiras 6 amostras de 28 dias</PT>
+
+#<EN>
+colNames = c("ID", "Cement", "B.F.S.", "Fly ash", "water",
+              "Superp.", "Coarse Agg.", "Fine Agg.", "MPa", "Class",
+              "Wat./", "F.Agg./", "C.Agg./",
+              "F.Agg./","Wat./", "Wat./", "App Mix" = 2)
+dfUnits <- c("", "$kg/m^3$", "$kg/m^3$","$kg/m^3$","$kg/m^3$",
+              "$kg/m^3$", "$kg/m^3$","$kg/m^3$","$MPa$","", "Ci.",
+              "Ce.", "Ce.", "C.Agg.", "C.Agg.", "F.Agg.", "1:1:2", "1:2:2")
+caption <- "First 18 columns of the 6 first samples of 28 days"
+#</EN>
+#<PT>
+colNames = c("ID", "Cimento", "E.G.A.F.", "C.Vol.", "Água",
+              "Superp.", "A.Graúdo", "A.Miúdo", "MPa", "Classe",
+              "Ág./", "A.M./", "A.G./",
+              "A.M./","Ág./", "Ág./", "Traço Apox." = 2)
+dfUnits <- c("", "$kg/m^3$", "$kg/m^3$","$kg/m^3$","$kg/m^3$",
+              "$kg/m^3$", "$kg/m^3$","$kg/m^3$","$MPa$","", "Ci.",
+              "Ci.", "Ci.", "A.G.", "A.G.", "Ag.M.", "1:1:2", "1:2:2")
+caption <- "Primeiras 18 colunas das primeiras 6 amostras de 28 dias"
+#</PT>
+
+
+dat_tabela <- dat_28[1:18]
+
+kable(
+    head(dat_tabela[order(dat_tabela$id),]),
+    col.names = dfUnits,
+    escape = F,
+    booktabs = T,
+    caption = caption,
+    linesep = "\\addlinespace",
+    digits = 2,
+    align = "c"
+    ) %>%
+    add_header_above(header = colNames, line = F, align = "c") %>%
+    kable_styling(latex_options = c("HOLD_position", "scale_down"))
+```
+
+<EN>
+For each of the 6 sets, the existence or not of variables with variance close to zero and their subsequent removal was verified (\ref{show-nzv}). Many of the 23 variables added referring to the approximate concrete mix were removed due to this fact. In addition to them, in the case of the 7-day set, the fly ash variable was also removed. Then it was verified that there are no variables with high correlation, above 0.999, in any of the 6 data sets (\ref{show-cors}). After these steps, the sample sets presented 24, 21, 23, 23, 24 and 25 columns respectively for ages in increasing sequence.
+</EN>
+
+<PT>
+Para cada um dos 6 conjuntos foi verificado a existência ou não de variáveis com variância próxima a zero e sua subsequênte remoção (\ref{show-nzv}). Muitas das 23 variáveis adicionadas referentes ao traço aproximado do concreto foram removidas devido a esse fato. Além delas, no caso do conjunto de 7 dias, a variável cinza volante também foi removida. Depois foi verificado que não existem variáveis com alta correlação, acima de 0,999 em nenhum dos 6 conjuntos de dados (\ref{show-cors}). Após essas etapas, os conjuntos de amostras apresentaram 24, 21, 23, 23, 24 e 25 colunas respectivamente para as idades em sequência crescente.
+</PT>
+
+&nbsp; 
+
+```{r nzv, echo=F}
+#<EN># Removing near zero variance columns</EN>
+#<PT># Removendo colunas com variância próxima a zero</PT>
+
+nzv_3 <- nearZeroVar(dat_3)
+nzv_7 <- nearZeroVar(dat_7)
+nzv_14 <- nearZeroVar(dat_14)
+nzv_28 <- nearZeroVar(dat_28)
+nzv_56 <- nearZeroVar(dat_56)
+nzv_100 <- nearZeroVar(dat_100)
+
+dat_3 <- dat_3[,-nzv_3]
+dat_7 <- dat_7[,-nzv_7]
+dat_14 <- dat_14[,-nzv_14]
+dat_28 <- dat_28[,-nzv_28]
+dat_56 <- dat_56[,-nzv_56]
+dat_100 <- dat_100[,-nzv_100]
+```
+
+```{r cors, echo=F}
+#<EN># High correlation variables verification</EN>
+#<PT># Verificação de variáveis com alta correlação</PT>
+
+descr_cor_3 <- cor(select(dat_3, -c(mpa, id, class)))
+descr_cor_7 <- cor(select(dat_7, -c(mpa, id, class)))
+descr_cor_14 <- cor(select(dat_14, -c(mpa, id, class)))
+descr_cor_28 <- cor(select(dat_28, -c(mpa, id, class)))
+descr_cor_56 <- cor(select(dat_56, -c(mpa, id, class)))
+descr_cor_100 <- cor(select(dat_100, -c(mpa, id, class)))
+
+high_cor_3 <- sum(abs(descr_cor_3[upper.tri(descr_cor_3)]) > .999)
+high_cor_7 <- sum(abs(descr_cor_7[upper.tri(descr_cor_7)]) > .999)
+high_cor_14 <- sum(abs(descr_cor_14[upper.tri(descr_cor_14)]) > .999)
+high_cor_28 <- sum(abs(descr_cor_28[upper.tri(descr_cor_28)]) > .999)
+high_cor_56 <- sum(abs(descr_cor_56[upper.tri(descr_cor_56)]) > .999)
+high_cor_100 <- sum(abs(descr_cor_100[upper.tri(descr_cor_100)]) > .999)
+```
+
+<EN>
+The stage of centralization and normalization of the variables was carried out later, together with the application of the models, as it is simpler to do this with the *caret* package. If performed at this time, it would be necessary to manually undo these transformations in the predictions. The *caret* allows you to transform before training the models and already transforms the results back.
+
+&nbsp; 
+
+Each data set was separated into test and training sets, *20%* and *80%* respectively (\ref{show-split}). The figure \ref{fig:dist-split} shows the distribution of data between the sets in relation to the compressive strength for each model (\ref{show-dist-split}).
+</EN>
+
+<PT>
+A etapa de centralização e normalização das variáveis foi realizada mais a frente, junto com a aplicação dos modelos, pois é mais simples fazer dessa forma com o pacote *caret*. Se fosse realizada nesse momento, seria nescessário manualmente desfazer essas transformações nas previsões. O *caret* permite transformar antes do treino dos modelos e já transforma de volta os resultados.
+
+&nbsp; 
+
+Cada um dos conjuntos de dados foi separado em conjuntos de teste e treino, *20%* e *80%* respectivamente (\ref{show-split}). A figura \ref{fig:dist-split} mostra como ficou a distribuição dos dados entre os conjuntos em relação a resistência à compressão para cada modelo (\ref{show-dist-split}).
+</PT>
+
+```{r split, echo=F, message=F, warning=F}
+#<EN># Test and train data split</EN>
+#<PT># Separação em conjunto de teste e treino</PT>
+
+reg <- list(
+  dat_3 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_3$MPa),
+  dat_7 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_7$MPa),
+  dat_14 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_14$MPa),
+  dat_28 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_28$MPa),
+  dat_56 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_56$MPa),
+  dat_100 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_100$MPa)
+)
+
+reg_seed <- c(
+  1111, # 3
+  1, # 7
+  22, # 14
+  11111, # 28
+  111, # 56
+  11 # 100
+  )
+
+split_reg <- function(n){
+  set.seed(reg_seed[[n]], sample.kind="Rounding")
+  createDataPartition(reg[[n]]$y, p = .8, list = F)
+}
+
+trainIndex_reg <- lapply(list(1,2,3,4,5,6), split_reg)
+
+gen_dat <- function(n){
+  regIndex <- trainIndex_reg[[n]]
+  list(train = reg[[n]][regIndex,], test = reg[[n]][-regIndex,])
+}
+
+dats_reg <- lapply(list(1,2,3,4,5,6), gen_dat)
+names(dats_reg) <- c("d3", "d7", "d14", "d28", "d56", "d100")
+```
+
+
+```{r dist-split, echo=F, message=F, warning=F, fig.height=3, fig.cap= cap}
+#<EN># Distribution of test and train data</EN>
+#<PT># Distribuição dos conjuntos de teste e treino</PT>
+
+#<EN>
+cap <- "Distribution of test and train data"
+d_lab <- " days"
+ylabel <- "Density"
+g1 <- "Train"
+g2 <- "Test"
+#</EN>
+#<PT>
+cap <- "Distribuição dos conjuntos de teste e treino"
+d_lab <- " dias"
+ylabel <- "Densidade"
+g1 <- "Treino"
+g2 <- "Teste"
+#</PT>
+
+dens <- function(d, n){
+  dens <- full_join(
+      d$train %>%
+        select(y) %>%
+        mutate(Grup = g1, day = str_sub(n, 2)),
+      d$test %>%
+        select(y) %>%
+        mutate(Grup = g2, day = str_sub(n, 2))
+    )
+  dens
+}
+
+densities <- imap(dats_reg, dens) %>%
+  reduce(rbind) %>%
+  mutate(day_f = factor(day, levels=c('3','7','14','28', '56', '100')))
+
+labs <- paste(c("3","7","14","28","56","100"), d_lab, sep="")
+levels(densities$day_f) <- labs
+
+densities %>%
+  ggplot(aes(y, fill = Grup)) +
+  geom_density(alpha = 0.5) +
+  facet_wrap(~dia_f, ncol=3) +
+  xlab("MPa") +
+  ylab(ylabel) +
+  theme_bw() +
+  theme_minimal() +
+  theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"))
+```
+
+<EN>
+### Performance measures
+
+The performance evaluation of the models was performed by the Root Mean Square Error (*RMSE*). The *RMSE* is the measure used in all the works mentioned in the introduction and will allow the comparison of the models in the discussion.
+
+### Naive models
+
+Before creating the real models, for comparison purposes, naive models were created. They simply predict that the compressive strength of the test set is the average compressive strength of the training set (\ref{show-naive-model-reg}). In other words, naive models are simply the best guess possible. The results can be checked in the table \ref{tab:table-naive-model-reg}.
+</EN>
+
+<PT>
+### Medidas de performance
+
+A avaliação da performance dos modelos foi realizada pela Raiz do Erro Quadrático Médio (*RMSE*). O *RMSE* é a medida utilizada em todos os trabalhos citados na introdução e permitirá a comparação dos modelos na discussão.
+
+### Modelos ingênuos
+
+Antes de criar os modelos verdadeiros, para fins de comparação, foram criados modelos ingênuos. Eles simplesmente prevêem que a resistência à compressão do conjunto de teste, é a média da resistência à compressão do conjunto de treino (\ref{show-naive-model-reg}). Em outras palavras, os modelos ingênuos são simplesmente o melhor palpite possível. Os resultados podem ser conferidos na tabela \ref{tab:table-naive-model-reg}.
+</PT>
+
+```{r naive-model-reg, echo=F, message=F, warning=F}
+#<EN># Naive model</EN>
+#<PT># Modelo ingênuo</PT>
+
+res <- function(d, n){
+  data.frame(
+    day = str_sub(n, 2),
+    mean_mpa = mean(d$train$y)   
+    )
+}
+
+ing_model <- imap(dats_reg, res)
+
+get_rmse <- function(d, n){
+   data.frame(
+    rmse_train = RMSE(d$train$y, ing_model[[n]]$mean_mpa),
+    rmse_test =  RMSE(d$test$y, ing_model[[n]]$mean_mpa),
+    day = str_sub(n, 2) 
+    )
+}
+
+rmses <- imap(dats_reg, get_rmse) %>%
+  reduce(rbind)
+
+ing_model_df <- ing_model %>% reduce(rbind)
+
+df_performance_reg <- full_join(ing_model_df, rmses)
+
+```
+
+```{r table-naive-model-reg, echo=F}
+#<EN># Table - Naive models</EN>
+#<PT># Tabela - Modelos ingênuo</PT>
+
+#<EN>
+colNames = c("Age", "Mean $MPa$ (train)", "RMSE (train)", "RMSE (test)")
+caption <- "Naive models"
+#</EN>
+#<PT>
+colNames = c("Idade", "Média $MPa$ (treino)", "RMSE (treino)", "RMSE (teste)")
+caption <- "Modelos ingênuos"
+#</PT>
+
+kable(
+    df_performance_reg,
+    col.names = colNames6,
+    escape = F,
+    booktabs = T,
+    caption = caption,
+    linesep = "\\addlinespace",
+    align = "c"
+    )  %>%
+  kable_styling(latex_options = c("HOLD_position"))
+```
+
+<EN>
+### Choice of algorithms
+
+The *caret* [@caret] package exposes more than 200 different algorithms for building *machine learning* models. The package documentation presents an initial code [@modelsClusters] as a suggestion to select a portfolio of the most distinct algorithms possible in relation to some pre-selected algorithm, but for agility and due to technical limitations, it was chosen to use an algorithm with the highest probability to achieve the best possible result. According to @Fernandez2014, who compared 179 algorithms in 121 different databases, the algorithm most likely to achieve the best possible results is the *Parallel Random Forest* (called *prRF * in *caret*).
+
+### Regression models
+
+As new variables were added throughout the processing (the relationships between the ingredients and a few more *dummy vars* for each age set), 5 possibilities for configuring the *features* for the models were studied:
+
+1. All *features*;
+2. All *features* without the *dummy vars*;
+3. Only the original *features*;
+4. Only new *features*;
+5. Only new *features*, without *dummy vars*;
+
+Building a model for each of these configurations using the set at 28 days (\ref{show-test-models-reg}), showed that the best option is configuration 2, the *dummy vars* were completely discarded, but the other new variables were kept.
+
+For illustrative purposes, the \ref{tab:table-done-samples-28} table shows the first 6 samples from the 28-day model training set. The samples of the other models, of the test and training sets are similar, the only difference being in the 7-day model, which excludes fly ash due to the variance close to zero, performed previously.
+</EN>
+
+<PT>
+### Escolha do algorítimo
+
+O pacote *caret* [@caret] expõe mais de 200 algorítimos diferentes para criar modelos de *machine learning*. A documentação do pacote apresenta um código inicial [@modelsClusters] como sugestão para selecionar um portifólio de algóritmos mais distintos possíveis em relação à algum algorítimo pré-selecionado, mas para agilidade e devido a limitações técnicas, foi escolhido utilizar um algorítimo com a maior probabilidade de atingir o melhor resultado possível. Segundo @Fernandez2014, que comparou 179 algorítimos em 121 banco de dados diferentes, o algorítimo mais provável de atingir os melhores resultados possíveis é o *Parallel Random Forest* (denominado *prRF* no *caret*).
+
+### Modelos de regressão
+
+Como ao longo do processamento foram adicionadas novas variáveis (as relações entre os ingredientes e mais algumas *dummy vars* para cada conjunto de idade), foram estudadas 5 possibilidades de configurações das *features* para os modelos:
+
+1. Todas as *features*;
+2. Sem as *dummy vars*;
+3. Apenas *features* originais;
+4. Apenas *features* adicionadas;
+5. Apenas *features* adicionadas, sem as *dummy vars*;
+
+Construindo um modelo para cada uma dessas configurações utilizando o conjunto de amostras aos 28 dias (\ref{show-test-models-reg}), mostrou que a melhor opção é a configuração 2, ou seja, as *dummy vars* foram completamente descartadas, porém foram mantidas as outras novas varáveis.
+
+Para fins ilustrativos, a tabela \ref{tab:table-done-samples-28} mostra as primeiras 6 amostras do conjunto de treino do modelo de 28 dias. As amostras dos outros modelos, dos conjuntos de teste e treino são similares, sendo a única diferença no modelo de 7 dias, que exlcui a cinza volante devido a variância próxima a zero, realizado anteriormente.
+</PT>
+
+```{r test-models-reg, echo=F, warning=F, message=F, include=F}
+#<EN># Features selection</EN>
+#<PT># Escolha das caracterísitcas (features)</PT>
+
+data1 <- dats_reg$d28$train # full
+data2 <- dats_reg$d28$train[c(1:13, 21)] # no dummy vars
+data3 <- dats_reg$d28$train[c(1:7, 21)] # only original variables
+data4 <- dats_reg$d28$train[c(8:21)] # only new variables
+data5 <- dats_reg$d28$train[c(8:13, 21)] # only new varibels, no dummy vars
+
+test1 <- dats_reg$d28$test # full
+test2 <- dats_reg$d28$test[c(1:13, 21)] # no dummy vars
+test3 <- dats_reg$d28$test[c(1:7, 21)] # only original variables
+test4 <- dats_reg$d28$test[c(8:21)] # only new variables
+test5 <- dats_reg$d28$test[c(8:13, 21)] # only new varibels, no dummy vars
+
+# parRF
+modelLookup("parRF")
+control_parRF <- trainControl(method='repeatedcv',number=10,repeats=5,search='grid')
+
+fit_parRF<- function(data, n) {
+  set.seed(1, sample.kind = "Rounding")
+  tunegrid_parRF<- expand.grid(mtry = seq(1, length(data), n))
+  train(y ~ ., 
+    data = data,
+    preProcess = c("center","scale"),
+    method='parRF', 
+    tuneGrid=tunegrid_parRF,
+    trControl=control_parRF)
+}
+
+fit_parRF1 <- fit_parRF(data1, 3)
+ggplot(fit_parRF1)
+min(fit_parRF1$results$RMSE) # 6.26108
+p1_parRF1 <- predict(fit_parRF1, newdata = test1)
+RMSE(p1_parRF1, test1$y) # 4.887264
+
+fit_parRF2 <- fit_parRF(data2, 1)
+ggplot(fit_parRF2)
+min(fit_parRF2$results$RMSE) # 6.268789
+p_parRF2 <- predict(fit_parRF2, newdata = test2)
+RMSE(p_parRF2, test2$y) # 4.812994
+
+fit_parRF3 <- fit_parRF(data3, 1)
+ggplot(fit_parRF3)
+min(fit_parRF3$results$RMSE) # 6.361905
+p_parRF3 <- predict(fit_parRF3, newdata = test3)
+RMSE(p_parRF3, test3$y) # 5.083467
+
+fit_parRF4 <- fit_parRF(data4, 1)
+ggplot(fit_parRF4)
+min(fit_parRF4$results$RMSE) # 8.705984
+p_parRF4 <- predict(fit_parRF4, newdata = test4)
+RMSE(p_parRF4, test4$y) # 8.083962
+
+fit_parRF5 <- fit_parRF(data5, 1)
+ggplot(fit_parRF5)
+min(fit_parRF5$results$RMSE) # 8.691755
+p_parRF5 <- predict(fit_parRF5, newdata = test5)
+RMSE(p_parRF5, test5$y) # 7.991537
+```
+
+```{r table-done-samples-28, echo=F}
+#<EN># Table - First 6 samples of train data of the 28 days model</EN>
+#<PT># Tabela - Primeiras 6 amostras do conjunto de treino do modelo de 28 dias</PT>
+
+#<EN>
+caption <- "First 6 samples of train data of the 28 days model"
+colNames = c("Cement", "B.F.S.", "Fly ash", "water",
+              "Superp.", "Coarse Agg.", "Fine Agg.",
+              "Wat./", "F.Agg./", "C.Agg./",
+              "F.Agg./","Wat./", "Wat./", "y")
+dfUnits <- c("$kg/m^3$", "$kg/m^3$","$kg/m^3$","$kg/m^3$",
+              "$kg/m^3$", "$kg/m^3$","$kg/m^3$","Ce.",
+              "Ce.", "Ce.", "C.Agg.", "C.Agg.", "F.Agg.", "MPa")
+#</EN>
+#<PT>
+caption <- "Primeiras 6 amostras do conjunto de treino do modelo de 28 dias"
+colNames = c("Cimento", "E.G.A.F.", "C.Vol.", "Água",
+              "Superp.", "A.Graúdo", "A.Miúdo",
+              "Ág./", "A.M./", "A.G./",
+              "A.M./","Ág./", "Ág./", "y")
+dfUnits <- c("$kg/m^3$", "$kg/m^3$","$kg/m^3$","$kg/m^3$",
+              "$kg/m^3$", "$kg/m^3$","$kg/m^3$", "Ci.",
+              "Ci.", "Ci.", "A.G.", "A.G.", "Ag.M.", "$MPa$")
+#</PT>
+
+colNames2 = c("Features"=13, "Outcome"=1)
+
+kable(
+    head(data2),
+    col.names = dfUnits,
+    escape = F,
+    booktabs = T,
+    caption = caption,
+    linesep = "\\addlinespace",
+    digits = 2,
+    align = "c"
+    ) %>%
+    add_header_above(header = colNames, line = F, align = "c") %>%
+    add_header_above(header = colNames2, line = T, align = "c") %>%
+    kable_styling(latex_options = c("HOLD_position", "scale_down"))
+```
+
+<EN>
+For each age set, a model was created using the *Parallel Random Forest* algorithm, previously defined (\ref{show-reg-models}). For each of the 6 models, the parameter *mtry* was optimized, and *repeated cross-validation * was performed, dividing into 10 or 30 parts and repeating 10 times.
+</EN>
+
+<PT>
+Para cada conjunto de idade foi criado um modelo utilizando o algorítimo *Parallel Random Forest*, definido anteriormente (\ref{show-reg-models}). Para cada um dos 6 modelos, o parâmetro *mtry* foi otimizado, e foi realizado *repeated cross-validation*, dividindo em 10 ou 30 partes e repetindo 10 vezes.
+</PT>
+
+```{r reg-models, echo=F, warning=F, message=F, include=F}
+#<EN># Regression models</EN>
+#<PT># Modelos de regressão</PT>
+
+# no dummy vars:
+data3 <- dats_reg$d3$train[c(1:13, 22)]
+data7 <- dats_reg$d7$train[c(1:12, 19)]
+data14 <- dats_reg$d14$train[c(1:13, 21)]
+data28 <- dats_reg$d28$train[c(1:13, 21)]
+data56 <- dats_reg$d56$train[c(1:13, 22)]
+data100 <- dats_reg$d100$train[c(1:13, 23)]
+
+test3 <- dats_reg$d3$test[c(1:13, 22)]
+test7 <- dats_reg$d7$test[c(1:12, 19)]
+test14 <- dats_reg$d14$test[c(1:13, 21)]
+test28 <- dats_reg$d28$test[c(1:13, 21)]
+test56 <- dats_reg$d56$test[c(1:13, 22)]
+test100 <- dats_reg$d100$test[c(1:13, 23)]
+
+get_trControl <- function(n, r){
+  trainControl(method='repeatedcv',number=n,repeats=r,search='grid')
+}
+
+trControl3 <- get_trControl(30, 10)
+trControl7 <- get_trControl(10, 10)
+trControl14 <- get_trControl(30, 10)
+trControl28 <- get_trControl(30, 10)
+trControl56 <- get_trControl(30, 10)
+trControl100 <- get_trControl(10, 10)
+
+get_tuneGrid <- function(data){
+  expand.grid(mtry = seq(1, length(data), 1))
+}
+
+tuneGrid3 <- get_tuneGrid(data3)
+tuneGrid7 <- get_tuneGrid(data7)
+tuneGrid14 <- get_tuneGrid(data14)
+tuneGrid28 <- get_tuneGrid(data28)
+tuneGrid56 <- get_tuneGrid(data56)
+tuneGrid100 <- get_tuneGrid(data100)
+
+set.seed(1, sample.kind = "Rounding")
+fit_3 <- train(y ~ ., 
+            data = data3,
+            preProcess = c("center","scale"),
+            method='parRF', 
+            tuneGrid=tuneGrid3,
+            trControl=trControl3)
+p_3 <- predict(fit_3, newdata = test3)
+RMSE_test_3 <- RMSE(p_3, test3$y)
+RMSE_test_3 # 3.31037
+fit_3$bestTune # mtry = 6
+
+set.seed(1, sample.kind = "Rounding")
+fit_7 <- train(y ~ ., 
+            data = data7,
+            preProcess = c("center","scale"),
+            method='parRF', 
+            tuneGrid=tuneGrid7,
+            trControl=trControl7)
+p_7 <- predict(fit_7, newdata = test7)
+RMSE_test_7 <- RMSE(p_7, test7$y)
+RMSE_test_7 # 4.361987
+fit_7$bestTune # mtry = 2
+
+set.seed(1, sample.kind = "Rounding")
+fit_14 <- train(y ~ ., 
+            data = data14,
+            preProcess = c("center","scale"),
+            method='parRF', 
+            tuneGrid=tuneGrid14,
+            trControl=trControl14)
+p_14 <- predict(fit_14, newdata = test14)
+RMSE_test_14 <- RMSE(p_14, test14$y)
+RMSE_test_14 # 4.620515
+fit_14$bestTune # mtry = 13
+
+set.seed(1, sample.kind = "Rounding")
+fit_28 <- train(y ~ ., 
+            data = data28,
+            preProcess = c("center","scale"),
+            method='parRF', 
+            tuneGrid=tuneGrid28,
+            trControl=trControl28)
+p_28 <- predict(fit_28, newdata = test28)
+RMSE_test_28 <- RMSE(p_28, test28$y)
+RMSE_test_28 # 4.716698
+fit_28$bestTune # mtry = 11
+
+set.seed(1, sample.kind = "Rounding")
+fit_56 <- train(y ~ ., 
+            data = data56,
+            preProcess = c("center","scale"),
+            method='parRF', 
+            tuneGrid=tuneGrid56,
+            trControl=trControl56)
+p_56 <- predict(fit_56, newdata = test56)
+RMSE_test_56 <- RMSE(p_56, test56$y)
+RMSE_test_56 # 5.939163
+fit_56$bestTune # mtry = 8
+
+set.seed(1, sample.kind = "Rounding")
+fit_100 <- train(y ~ ., 
+            data = data100,
+            preProcess = c("center","scale"),
+            method='parRF', 
+            tuneGrid=tuneGrid100,
+            trControl=trControl100)
+p_100 <- predict(fit_100, newdata = test100)
+RMSE_test_100 <- RMSE(p_100, test100$y)
+RMSE_test_100 # 5.851088
+fit_100$bestTune # mtry = 8
+
+```
