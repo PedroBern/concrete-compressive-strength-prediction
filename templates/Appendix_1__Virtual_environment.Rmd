@@ -10,7 +10,7 @@
 ## Sistema operacional
 </PT>
 
-```{r sistema, echo=FALSE}
+```{r system, echo=FALSE}
 v <- as.matrix(R.Version())
 kable(v, booktabs = T) %>%
     kable_styling(latex_options = c("HOLD_position"))
@@ -24,7 +24,7 @@ kable(v, booktabs = T) %>%
 ## Pacotes utilizados
 </PT>
 
-```{r pacotes, echo=FALSE}
+```{r packages, echo=FALSE}
 p <- matrix(
       c(
         "caret", as.character(packageVersion("caret")),

@@ -1475,14 +1475,14 @@ Following the line of reasoning of this work, it can be performed with different
 # Appendix 1 - Virtual environment {#appendix1}
 
 ## Operational system
-```{r sistema, echo=FALSE}
+```{r system, echo=FALSE}
 v <- as.matrix(R.Version())
 kable(v, booktabs = T) %>%
     kable_styling(latex_options = c("HOLD_position"))
 ```
 
 ## Packages
-```{r pacotes, echo=FALSE}
+```{r packages, echo=FALSE}
 p <- matrix(
       c(
         "caret", as.character(packageVersion("caret")),

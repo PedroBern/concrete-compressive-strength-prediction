@@ -1475,14 +1475,14 @@ Seguindo a linha de raciocínio desse trabalho, ele pode ser realizado com difer
 # Appendix 1 - Ambiente virtual {#appendix1}
 
 ## Sistema operacional
-```{r sistema, echo=FALSE}
+```{r system, echo=FALSE}
 v <- as.matrix(R.Version())
 kable(v, booktabs = T) %>%
     kable_styling(latex_options = c("HOLD_position"))
 ```
 
 ## Pacotes utilizados
-```{r pacotes, echo=FALSE}
+```{r packages, echo=FALSE}
 p <- matrix(
       c(
         "caret", as.character(packageVersion("caret")),
