@@ -189,12 +189,12 @@ Cada um dos conjuntos de dados foi separado em conjuntos de teste e treino, *20%
 #<PT># Separação em conjunto de teste e treino</PT>
 
 reg <- list(
-  dat_3 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_3$MPa),
-  dat_7 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_7$MPa),
-  dat_14 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_14$MPa),
-  dat_28 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_28$MPa),
-  dat_56 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_56$MPa),
-  dat_100 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_100$MPa)
+  dat_3 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_3$mpa),
+  dat_7 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_7$mpa),
+  dat_14 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_14$mpa),
+  dat_28 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_28$mpa),
+  dat_56 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_56$mpa),
+  dat_100 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_100$mpa)
 )
 
 reg_seed <- c(
@@ -246,10 +246,10 @@ dens <- function(d, n){
   dens <- full_join(
       d$train %>%
         select(y) %>%
-        mutate(Grup = g1, day = str_sub(n, 2)),
+        mutate(Group = g1, day = str_sub(n, 2)),
       d$test %>%
         select(y) %>%
-        mutate(Grup = g2, day = str_sub(n, 2))
+        mutate(Group = g2, day = str_sub(n, 2))
     )
   dens
 }
@@ -262,9 +262,9 @@ labs <- paste(c("3","7","14","28","56","100"), d_lab, sep="")
 levels(densities$day_f) <- labs
 
 densities %>%
-  ggplot(aes(y, fill = Grup)) +
+  ggplot(aes(y, fill = Group)) +
   geom_density(alpha = 0.5) +
-  facet_wrap(~dia_f, ncol=3) +
+  facet_wrap(~day_f, ncol=3) +
   xlab("MPa") +
   ylab(ylabel) +
   theme_bw() +
@@ -339,7 +339,7 @@ caption <- "Modelos ingênuos"
 
 kable(
     df_performance_reg,
-    col.names = colNames6,
+    col.names = colNames,
     escape = F,
     booktabs = T,
     caption = caption,
