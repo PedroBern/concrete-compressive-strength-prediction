@@ -3,7 +3,7 @@
   Concrete compressive strength prediction with machine learning
 date: "April 22, 2020"</EN>
 <PT>title:
-  Prevendo a resisência à compressão do concreto com técnicas de machine learning
+  Prevendo a resistência à compressão do concreto com técnicas de machine learning
 date: "Abril 22, 2020"</PT>
 author: "Pedro Bernardino Alves Moreira"
 indent: true
