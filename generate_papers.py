@@ -38,7 +38,10 @@ def generate_appendix_3_subsection(file, L="EN", hastags=2):
         file_title = re.findall("<"+L+">\s*(#{"+str(hastags)+"}.*)\s", f)[0]
         titles = re.findall("^#<"+L+".*?>(#.+?)</"+L+">", f, flags=re.MULTILINE)
         chunk_names = re.findall("```{r\s([\w|-]*),", f, flags=re.DOTALL)
-        s = file_title + "\n"
+        s = ""
+        if hastags == 1:
+            s = "#"	
+        s += file_title + "\n"
         for i in range(len(titles)):
             s += generate_appendix_code_chunk(titles[i], chunk_names[i])
         return(s)
