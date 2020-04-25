@@ -5,14 +5,14 @@ The test *RMSE* for each model in ascending order of age was `r round(RMSE_test_
 </EN>
 
 <PT>
-# Results
+# Resultados
 
 O *RMSE* de teste de cada modelo em ordem crescente de idade foi respectivamente `r round(RMSE_test_3,2)`, `r round(RMSE_test_7,2)`, `r round(RMSE_test_14,2)`, `r round(RMSE_test_28,2)`, `r round(RMSE_test_56,2)` e `r round(RMSE_test_100,2)`. A tabela \ref{tab:table-reg-models} apresenta os detalhes e resultados de cada modelo (\ref{show-table-reg-models}). A figura \ref{fig:results-comparison} compara os valores reais e previstos (\ref{show-results-comparison}), e as tabelas seguintes mostram os melhores e piores resultados de cada modelo (\ref{show-table-10}).
 </PT>
 
 ```{r table-reg-models, echo=F}
 #<EN># Table - Models details</EN>
-#<PT># Tabela - Detalhes dos modelso</PT>
+#<PT># Tabela - Detalhes dos modelos</PT>
 
 #<EN>
 colNames <- c("Model", "mtry", "CV", "Repetitions", 
@@ -81,11 +81,11 @@ gen_res_df <- function(ind){
 
 res_df <- lapply(1:6, gen_res_df)
 res_df <- bind_rows(res_df)
-res_df$model <- factor(res_df$modelo,levels=modelos)
+res_df$model <- factor(res_df$model,levels=models)
 
 res_df %>%
   ggplot(aes(actual, pred)) +
-  facet_wrap(~ modelo, ncol=3) +
+  facet_wrap(~ model, ncol=3) +
   geom_point(alpha=0.5) +
   theme_bw() +
   geom_abline(slope=1, intercept=0) +
