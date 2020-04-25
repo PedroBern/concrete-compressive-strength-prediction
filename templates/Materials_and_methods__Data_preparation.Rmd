@@ -111,11 +111,11 @@ kable(
 ```
 
 <EN>
-To facilitate the analysis of the samples, all samples that are the same in relation to the ingredients, have been assigned the same *id*. In addition, as the compressive strength at 28 days is the parameter to determine the grade of the concrete, only the elements containing that day among its samples were maintained. In the case of the same samples but with different results of compressive strength, the values were averaged. After all these changes (\ref{show-initial-data-cleaning}), the new total of samples was reduced to 970, containing 416 different settings for the proportions of ingredients (\ref{show-total-de-amostras-apos-processamento}).
+To facilitate the analysis of the samples, all samples that are the same in relation to the ingredients, have been assigned the same *id*. In addition, as the compressive strength at 28 days is the parameter to determine the grade of the concrete, only the elements containing that day among its samples were maintained. In the case of the same samples but with different results of compressive strength, the values were averaged. After all these changes (\ref{show-initial-data-cleaning}), the new total of samples was reduced to 970, containing 416 different settings for the proportions of ingredients.
 </EN>
 
 <PT>
-Para facilitar a analise das amostras, todas as amostras que são iguais em relação aos ingredientes, foram atribuidos o mesmo *id*. Além disso, como a resistência à compressão aos 28 dias é o parâmetro para determinar a classe do concreto, foi mantido apenas os elementos que contenham esse dia entre suas amostras. No caso das amostras iguais mas com resultado diferentes de resistência à compressão, foi calculado a média dos valores. Após todas essas alterações (\ref{show-initial-data-cleaning}), o novo total de amostras foi reduzido para 970, contendo 416 configurações diferentes das proporções de ingredientes (\ref{show-total-de-amostras-apos-processamento}).
+Para facilitar a analise das amostras, todas as amostras que são iguais em relação aos ingredientes, foram atribuidos o mesmo *id*. Além disso, como a resistência à compressão aos 28 dias é o parâmetro para determinar a classe do concreto, foi mantido apenas os elementos que contenham esse dia entre suas amostras. No caso das amostras iguais mas com resultado diferentes de resistência à compressão, foi calculado a média dos valores. Após todas essas alterações (\ref{show-initial-data-cleaning}), o novo total de amostras foi reduzido para 970, contendo 416 configurações diferentes das proporções de ingredientes.
 </PT>
 
 &nbsp; 
@@ -330,7 +330,7 @@ Pelos motivos apresentados nas figuras \ref{fig:boxplot}, \ref{fig:pca-90-91-100
 
 &nbsp; 
 
-```{r join-90-91-100, echo=F, eval=F}
+```{r join-90-91-100, echo=F}
 #<EN># Joining 90, 91 and 100 days data</EN>
 #<PT># Juntando amostras de 90, 91 e 100 dias</PT>
 
@@ -412,7 +412,7 @@ dat <- dat %>%
 ```
 
 ```{r new-features, echo=F}
-#<EN># Table - First 6 samples after reorganization/EN>
+#<EN># Table - First 6 samples after reorganization</EN>
 #<PT># Tabela - Primeiras 6 amostras reorganizadas</PT>
 
 #<EN>
@@ -454,7 +454,7 @@ O número de amostras e amostras distintas após toda essa manipulação permane
 </PT>
 
 ```{r total-samples-2, echo=F}
-#<EN># Total samples/EN>
+#<EN># Total samples</EN>
 #<PT># Total de amostras</PT>
 
 n_samples <- nrow(dat) # 416
@@ -474,7 +474,7 @@ Para finalizar a preparação dos dados, novas colunas foram adicionadas ao conj
 </PT>
 
 ```{r new-features-2, echo=F}
-#<EN># Adding New features/EN>
+#<EN># Adding New features</EN>
 #<PT># Adicionando novas variáveis</PT>
 
 concrete_class <- function(mpa){
@@ -517,7 +517,7 @@ dat$class <- factor(
 ```
 
 ```{r new-features-table, echo=F}
-#<EN># Table - New features/EN>
+#<EN># Table - New features</EN>
 #<PT># Tabela - Novas variáveis</PT>
 
 #<EN>
