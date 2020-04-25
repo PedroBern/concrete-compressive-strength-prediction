@@ -1,6 +1,6 @@
 ---
 title:
-  Prevendo a resisência à compressão do concreto com técnicas de machine learning
+  Prevendo a resistência à compressão do concreto com técnicas de machine learning
 date: "Abril 22, 2020"
 author: "Pedro Bernardino Alves Moreira"
 indent: true
@@ -255,7 +255,7 @@ kable(
   add_header_above(header = colNames, line = F, align = "c") %>%
   kable_styling(latex_options = c("scale_down"))
 ```
-Para facilitar a analise das amostras, todas as amostras que são iguais em relação aos ingredientes, foram atribuidos o mesmo *id*. Além disso, como a resistência à compressão aos 28 dias é o parâmetro para determinar a classe do concreto, foi mantido apenas os elementos que contenham esse dia entre suas amostras. No caso das amostras iguais mas com resultado diferentes de resistência à compressão, foi calculado a média dos valores. Após todas essas alterações (\ref{show-initial-data-cleaning}), o novo total de amostras foi reduzido para 970, contendo 416 configurações diferentes das proporções de ingredientes (\ref{show-total-de-amostras-apos-processamento}).
+Para facilitar a analise das amostras, todas as amostras que são iguais em relação aos ingredientes, foram atribuidos o mesmo *id*. Além disso, como a resistência à compressão aos 28 dias é o parâmetro para determinar a classe do concreto, foi mantido apenas os elementos que contenham esse dia entre suas amostras. No caso das amostras iguais mas com resultado diferentes de resistência à compressão, foi calculado a média dos valores. Após todas essas alterações (\ref{show-initial-data-cleaning}), o novo total de amostras foi reduzido para 970, contendo 416 configurações diferentes das proporções de ingredientes.
 
 &nbsp;
  
@@ -379,7 +379,7 @@ Pelos motivos apresentados nas figuras \ref{fig:boxplot}, \ref{fig:pca-90-91-100
 
 &nbsp;
  
-```{r join-90-91-100, echo=F, eval=F}
+```{r join-90-91-100, echo=F}
 # Juntando amostras de 90, 91 e 100 dias
 ind_90 <- dat$id[which(dat$day == "90")]
 ind_91 <- dat$id[which(dat$day == "91")]
@@ -424,6 +424,7 @@ dat <- dat %>%
   select(-row_id)
 ```
 ```{r new-features, echo=F}
+# Tabela - Primeiras 6 amostras reorganizadas
 caption <- "Primeiras 6 amostras reorganizadas"
 colNames2 = c("ID", "Cimento", "E.G.A.F.", "C.Volante", "Água",
              "Superp.", "A.Graúdo", "A.Miúdo", "3 dias", "7 dias",
@@ -445,10 +446,52 @@ kable(
 ```
 O número de amostras e amostras distintas após toda essa manipulação permaneceu o mesmo, um total de 416 (\ref{show-total-samples-2}).
 ```{r total-samples-2, echo=F}
+# Total de amostras
+n_samples <- nrow(dat) # 416
+n_distinct_samples <- n_distinct(dat$id) # 416
+```
 
 ### Adicionando novas variáveis
 Para finalizar a preparação dos dados, novas colunas foram adicionadas ao conjunto de amostras (\ref{show-new-features-2}). Iniciando pela classe do concreto, por exemplo se a resistência à compressão está entre 25 e 30, recebe a classe *C25*. A inclusão da classe foi importânte pois a resistência em $MPa$ é uma variável contínua, que será utilizada nos modelos de regressão, mas a classe como variável discreta pode fornecer outro ângulo de visualização dos dados. Também foi adicionado o traço aproximado do concreto, que representa as proporções de agregados (miúdo e graúdo) para o cimento. Outras proporções entre os principais ingredientes também foram adicionadas. As novas variáveis são apresentadas na tabela \ref{tab:new-features-table}.
 ```{r new-features-2, echo=F}
+# Adicionando novas variáveis
+concrete_class <- function(mpa){
+  if (mpa >= 10) {
+    s <- as.character(mpa)
+    first <- substr(s, start = 1, stop = 1)
+    second <- ifelse(substr(s, start = 2, stop = 2) >= 5, 5, 0)
+  }
+  else {
+    first <- ""
+    second <- "5"
+  }
+  paste("C", first, second, sep = "")
+}
+mix <- function(c, f_ag, c_ag){
+  paste(
+    1,
+    round(f_ag/c, 0),
+    round(c_ag/c, 0),
+    sep = ":")
+}
+dat <- dat %>%
+  mutate(class = sapply(day_28, concrete_class)) %>%
+  mutate(class = as.factor(class)) %>%
+  mutate(mix_app = factor(
+    mix(cement, fine_aggregate, coarse_aggregate))) %>%
+  mutate(`water_/_cement` = water / cement) %>%
+  mutate(`fine_aggregate_/_cement` = fine_aggregate/cement) %>%
+  mutate(`coarse_aggregate_/_cement` = coarse_aggregate/cement) %>%
+  mutate(`fine_aggregate_/_coarse_aggregate` = fine_aggregate/coarse_aggregate) %>%
+  mutate(`water_/_coarse_aggregate` = water/coarse_aggregate) %>%
+  mutate(`water_/_fine_aggregate` = water/fine_aggregate)
+lvl <- levels(dat$class)
+dat$class <- factor(
+  dat$class, 
+  levels=c( "C5", sort(lvl[lvl!="C5"], decreasing=F)))
+```
+```{r new-features-table, echo=F}
+# Tabela - Novas variáveis
 caption <- "Novas variáveis"
 colNames7 = c("ID", "Classe","Traço aproximado",
              "Água / Cimento", "A.Miúdo / Cimento", 
@@ -482,6 +525,9 @@ A tabela \ref{tab:stat-summ} apresenta os dados estatísticos das variáveis con
 &nbsp;
  
 ```{r stat-summ, echo=FALSE}
+# Tabela - Estatística descritiva - variáveis contínuas
+summ <- t(
+  stat.desc(select(dat, -c(id, class, mix_app))))
 caption <- "Estatística descritiva - variáveis contínuas"
 colnames(summ) <- c("Amostras", "Null", "NA", "Min", "Max", "Intervalo",
               "Soma", "Mediana", "Média", "Erro padrão  da média", 
@@ -506,6 +552,7 @@ kable(
   column_spec(c(1,10:15), width = "1.5cm")
 ```
 ```{r stat-summ-categorical, echo=FALSE, fig.height=4, fig.cap = cap}
+# Figura - Estatística descritiva - variáveis discretas
 cap <- "Estatística descritiva - variáveis discretas"
 name1 <- "Porcentagem"
 name2 <- "Porcentagem acumulada"
@@ -582,6 +629,8 @@ A figura \ref{fig:correlation} apresenta a correlação das variáveis para cada
 &nbsp;
  
 ```{r correlation, echo=F, fig.height=4, fig.cap=cap}
+# Figura - Correlações em cada idade
+cor_dat <- dat %>% select(-c(id))
 cap <- "Correlações em cada idade"
 f_lvl <- c("3 dias", "7 dias", "14 dias","28 dias", "56 dias", "100 dias")
 name <- "Correlação"
@@ -633,6 +682,7 @@ melt_dat_final %>%
         axis.line = element_line(colour = "black"))
 ```
 ```{r correlation-mpa, echo=F, fig.height=3, fig.cap=cap}
+# Figura - Correlações no tempo
 cap <- "Correlação das variáveis com a resistência à compressão no tempo"
 name <- "Correlação"
 melt_dat_final %>%
@@ -656,6 +706,7 @@ A interpretação da figura \ref{fig:correlation-mpa} sugere que a resistência 
 &nbsp;
  
 ```{r mix-app-mpa, echo=F, fig.cap=cap,fig.height=3.5, warning=FALSE}
+# Figura - Relação entre o traço aproximado, água, MPa e idade
 cap <- "Relação entre o traço aproximado, água, resistência à compressão e idade"
 d <- " dias"
 xlabel <- "Traço aproximado" 
@@ -673,7 +724,8 @@ mix_dat <- mix_dat %>%
                           `fine_aggregate_/_cement`,
                           `coarse_aggregate_/_cement`)) %>%
   drop_na()
-mix_dat$day <- factor(mix_dat$day)
+lvls <- paste("day_",c("3","7","14","28","56","100"), sep="")
+mix_dat$day <- factor(mix_dat$day, levels=lvls)
 levels(mix_dat$day) <- labs
 min_x <- min(mix_dat$`water_/_cement`)
 max_x <- max(mix_dat$`water_/_cement`)
@@ -700,6 +752,7 @@ mix_dat %>%
       axis.line = element_line(colour = "black"))
 ```
 ```{r mix-mpa, echo=F, fig.cap=cap, fig.height=3.5, warning=FALSE, message=F}
+# Figura - Relação das principais características do concreto
 cap <- "Relação das principais proporções do concreto"
 d <- " dias"
 xlabel <- "Água / Cimento"
@@ -742,6 +795,7 @@ A figura \ref{fig:vars-distribution} mostra a distribuição das variáveis nas 
 &nbsp;
  
 ```{r vars-distribution, echo=F, fig.height=10, fig.cap=cap, warning=FALSE, message = F}
+# Figura - Distribuição das variáveis  
 cap <- "Distribuição das variáveis"
 colnames_dat <- c("Cimento", "E.G.A.F.", "C.Volante", "Água",
                  "Superplastificante", "A.Graúdo", "A.Miúdo", "MPa",
@@ -770,6 +824,8 @@ dist_dat %>%
 ```
 De outra forma, a figura \ref{fig:vars-distribution-time} mostra a distribuição dos ingredientes e da resistência à compressão para cada conjunto de idades (\ref{show-vars-distribution-time}), ou seja, no caso dos 28 dias apresenta a mesma informação que a figura \ref{fig:vars-distribution}. Através dela é visualizado que como esperado, a resistência à compressão gradualmente aumenta ao longo do tempo. Além disso é visualizado que a concentração dos ingredientes podem variar muito quando estratíficado pelas idades.
 ```{r vars-distribution-time, echo=F, fig.height=10, fig.cap=cap, warning=FALSE, message=F}
+# Figura - Distribuição das variáveis agrupadas por idade  
+days_labs <- c("3","7","14","28","56","100")
 cap <- "Distribuição das variáveis em relação a idade"
 colnames_dat <- c("Cimento", "E.G.A.F.", "C.Volante", "Água",
                        "Superplastificante", "A.Graúdo", "A.Miúdo", 
@@ -804,6 +860,7 @@ dist_dat_2 %>%
 ### Análise de componente principal
 Na figura \ref{fig:pca}, utilizando uma classificação alternativa, foi realizada a análise de componente principal nos ingredientes das amostras (\ref{show-pca}). A classificação separa o concreto em 4 grupos de resistência a compressão diferentes, baixo até *20 MPa*, normal até *40 MPa*, médio até *70 MPa* e alto acima disso. É possivel perceber que os grupos se sobrepõem, mas existem uma diferenciação entre o grupo alto e baixo.
 ```{r pca, echo=F, fig.height=3, fig.cap=cap}
+# Figura - Análise componente principal nos ingredientes  
 cap <- "Análise componente principal nos ingredientes"
 colnames_dat <- c(
   "Cim.", "E.G.A.F.", "Ci.Vo.", "Águ.", "Sup.", "Ag.G.",
@@ -950,12 +1007,12 @@ Cada um dos conjuntos de dados foi separado em conjuntos de teste e treino, *20%
 ```{r split, echo=F, message=F, warning=F}
 # Separação em conjunto de teste e treino
 reg <- list(
-  dat_3 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_3$MPa),
-  dat_7 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_7$MPa),
-  dat_14 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_14$MPa),
-  dat_28 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_28$MPa),
-  dat_56 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_56$MPa),
-  dat_100 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_100$MPa)
+  dat_3 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_3$mpa),
+  dat_7 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_7$mpa),
+  dat_14 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_14$mpa),
+  dat_28 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_28$mpa),
+  dat_56 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_56$mpa),
+  dat_100 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_100$mpa)
 )
 reg_seed <- c(
   1111, # 3
@@ -988,10 +1045,10 @@ dens <- function(d, n){
   dens <- full_join(
       d$train %>%
         select(y) %>%
-        mutate(Grup = g1, day = str_sub(n, 2)),
+        mutate(Group = g1, day = str_sub(n, 2)),
       d$test %>%
         select(y) %>%
-        mutate(Grup = g2, day = str_sub(n, 2))
+        mutate(Group = g2, day = str_sub(n, 2))
     )
   dens
 }
@@ -1001,9 +1058,9 @@ densities <- imap(dats_reg, dens) %>%
 labs <- paste(c("3","7","14","28","56","100"), d_lab, sep="")
 levels(densities$day_f) <- labs
 densities %>%
-  ggplot(aes(y, fill = Grup)) +
+  ggplot(aes(y, fill = Group)) +
   geom_density(alpha = 0.5) +
-  facet_wrap(~dia_f, ncol=3) +
+  facet_wrap(~day_f, ncol=3) +
   xlab("MPa") +
   ylab(ylabel) +
   theme_bw() +
@@ -1045,7 +1102,7 @@ colNames = c("Idade", "Média $MPa$ (treino)", "RMSE (treino)", "RMSE (teste)")
 caption <- "Modelos ingênuos"
 kable(
     df_performance_reg,
-    col.names = colNames6,
+    col.names = colNames,
     escape = F,
     booktabs = T,
     caption = caption,
@@ -1247,10 +1304,10 @@ fit_100$bestTune # mtry = 8
 
 
 
-# Results
+# Resultados
 O *RMSE* de teste de cada modelo em ordem crescente de idade foi respectivamente `r round(RMSE_test_3,2)`, `r round(RMSE_test_7,2)`, `r round(RMSE_test_14,2)`, `r round(RMSE_test_28,2)`, `r round(RMSE_test_56,2)` e `r round(RMSE_test_100,2)`. A tabela \ref{tab:table-reg-models} apresenta os detalhes e resultados de cada modelo (\ref{show-table-reg-models}). A figura \ref{fig:results-comparison} compara os valores reais e previstos (\ref{show-results-comparison}), e as tabelas seguintes mostram os melhores e piores resultados de cada modelo (\ref{show-table-10}).
 ```{r table-reg-models, echo=F}
-# Tabela - Detalhes dos modelso
+# Tabela - Detalhes dos modelos
 colNames <- c("Modelo", "mtry", "CV", "Repetições", 
               "RMSE (treino)", "RMSE (teste)")
 caption <- "Resultados dos modelos de regressão"
@@ -1293,10 +1350,10 @@ gen_res_df <- function(ind){
 }
 res_df <- lapply(1:6, gen_res_df)
 res_df <- bind_rows(res_df)
-res_df$model <- factor(res_df$modelo,levels=modelos)
+res_df$model <- factor(res_df$model,levels=models)
 res_df %>%
   ggplot(aes(actual, pred)) +
-  facet_wrap(~ modelo, ncol=3) +
+  facet_wrap(~ model, ncol=3) +
   geom_point(alpha=0.5) +
   theme_bw() +
   geom_abline(slope=1, intercept=0) +
@@ -1454,8 +1511,7 @@ kable(p, booktabs = T) %>%
 
 
 # Appendix 2 - Repositório online {#appendix2}
-Todo o código utilizado para gerar esse trabalho está disponível no *GitHub* no link a seguir:
-- https://github.com/pedrobern/concrete-compressive-strength-prediction
+https://github.com/pedrobern/concrete-compressive-strength-prediction
 \newpage
 
 
@@ -1585,29 +1641,34 @@ Todo o código utilizado para gerar esse trabalho está disponível no *GitHub* 
 ```{r show-correlation, ref.label='correlation', ref='show-correlation', eval=FALSE}
 ```
 
-### Figura - Relação entre o traço aproximado, água, MPa e idade
+### Figura - Correlações no tempo
 
 ```{r show-correlation-mpa, ref.label='correlation-mpa', ref='show-correlation-mpa', eval=FALSE}
 ```
 
-### Figura - Relação das principais características do concreto
+### Figura - Relação entre o traço aproximado, água, MPa e idade
 
 ```{r show-mix-app-mpa, ref.label='mix-app-mpa', ref='show-mix-app-mpa', eval=FALSE}
 ```
 
-### Figura - Distribuição das variáveis
+### Figura - Relação das principais características do concreto
 
 ```{r show-mix-mpa, ref.label='mix-mpa', ref='show-mix-mpa', eval=FALSE}
 ```
 
-### Figura - Distribuição das variáveis agrupadas por idade
+### Figura - Distribuição das variáveis
 
 ```{r show-vars-distribution, ref.label='vars-distribution', ref='show-vars-distribution', eval=FALSE}
 ```
 
-### Figura - Análise componente principal nos ingredientes
+### Figura - Distribuição das variáveis agrupadas por idade
 
 ```{r show-vars-distribution-time, ref.label='vars-distribution-time', ref='show-vars-distribution-time', eval=FALSE}
+```
+
+### Figura - Análise componente principal nos ingredientes
+
+```{r show-pca, ref.label='pca', ref='show-pca', eval=FALSE}
 ```
 
 ## Modelos de machine learning
@@ -1671,8 +1732,8 @@ Todo o código utilizado para gerar esse trabalho está disponível no *GitHub* 
 ```{r show-reg-models, ref.label='reg-models', ref='show-reg-models', eval=FALSE}
 ```
 
-# Results
-### Tabela - Detalhes dos modelso
+## Resultados
+### Tabela - Detalhes dos modelos
 
 ```{r show-table-reg-models, ref.label='table-reg-models', ref='show-table-reg-models', eval=FALSE}
 ```
@@ -1687,7 +1748,7 @@ Todo o código utilizado para gerar esse trabalho está disponível no *GitHub* 
 ```{r show-table-10, ref.label='table-10', ref='show-table-10', eval=FALSE}
 ```
 
-# Discussão
+## Discussão
 ### Tabela - "Comparação dos estudos de outros autores"
 
 ```{r show-works-comparison, ref.label='works-comparison', ref='show-works-comparison', eval=FALSE}

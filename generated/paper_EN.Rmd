@@ -248,7 +248,7 @@ kable(
   add_header_above(header = colNames, line = F, align = "c") %>%
   kable_styling(latex_options = c("scale_down"))
 ```
-To facilitate the analysis of the samples, all samples that are the same in relation to the ingredients, have been assigned the same *id*. In addition, as the compressive strength at 28 days is the parameter to determine the grade of the concrete, only the elements containing that day among its samples were maintained. In the case of the same samples but with different results of compressive strength, the values were averaged. After all these changes (\ref{show-initial-data-cleaning}), the new total of samples was reduced to 970, containing 416 different settings for the proportions of ingredients (\ref{show-total-de-amostras-apos-processamento}).
+To facilitate the analysis of the samples, all samples that are the same in relation to the ingredients, have been assigned the same *id*. In addition, as the compressive strength at 28 days is the parameter to determine the grade of the concrete, only the elements containing that day among its samples were maintained. In the case of the same samples but with different results of compressive strength, the values were averaged. After all these changes (\ref{show-initial-data-cleaning}), the new total of samples was reduced to 970, containing 416 different settings for the proportions of ingredients.
 
 &nbsp;
  
@@ -371,7 +371,7 @@ For the reasons presented in the figures \ref{fig:boxplot}, \ref{fig:pca-90-91-1
 
 &nbsp;
  
-```{r join-90-91-100, echo=F, eval=F}
+```{r join-90-91-100, echo=F}
 # Joining 90, 91 and 100 days data
 ind_90 <- dat$id[which(dat$day == "90")]
 ind_91 <- dat$id[which(dat$day == "91")]
@@ -416,7 +416,7 @@ dat <- dat %>%
   select(-row_id)
 ```
 ```{r new-features, echo=F}
-# Table - First 6 samples after reorganization/EN>
+# Table - First 6 samples after reorganization
 caption <- "First 6 samples after reorganization"
 colNames2 = c("ID", "Cement", "B.F.S", "Fly ash", "Water",
              "Superp.", "Coarse Ag.", "Fine Ag.", "3 days", "7 days",
@@ -438,7 +438,7 @@ kable(
 ```
 The number of samples and distinct samples after all this manipulation remained the same, a total of 416 (\ref{show-total-samples-2}).
 ```{r total-samples-2, echo=F}
-# Total samples/EN>
+# Total samples
 n_samples <- nrow(dat) # 416
 n_distinct_samples <- n_distinct(dat$id) # 416
 ```
@@ -446,7 +446,7 @@ n_distinct_samples <- n_distinct(dat$id) # 416
 ### Adding new variables
 To finish the data preparation, new columns were added to the dataset (\ref{show-new-features-2}). Starting with the concrete class, for example if the compressive strength is between 25 and 30, it receives the class *C25*. The inclusion of the class was important because the compressive strength in *MPa* is a continuous variable, which will be used in the regression models, but the class as a discrete variable can provide another visualization of the data. The approximate mix of concrete was also added, which represents the proportions of aggregates (fine and coarse) for cement. Other proportions between the main ingredients were also added. The new variables are presented in the table ref{tab:new-features-table}.
 ```{r new-features-2, echo=F}
-# Adding New features/EN>
+# Adding New features
 concrete_class <- function(mpa){
   if (mpa >= 10) {
     s <- as.character(mpa)
@@ -483,7 +483,7 @@ dat$class <- factor(
   levels=c( "C5", sort(lvl[lvl!="C5"], decreasing=F)))
 ```
 ```{r new-features-table, echo=F}
-# Table - New features/EN>
+# Table - New features
 caption <- "New features"
 colNames7 = c("ID", "Class","Approximated Mix",
              "Water / Cement", "Fine Ag. / Cement", 
@@ -517,7 +517,7 @@ The table \ref{tab:stat-summ} presents the statistical data of the continuous va
 &nbsp;
  
 ```{r stat-summ, echo=FALSE}
-# Table - Descriptive statistics - continuous variables/EN>
+# Table - Descriptive statistics - continuous variables
 summ <- t(
   stat.desc(select(dat, -c(id, class, mix_app))))
 caption <- "Descriptive statistics - continuous variables"
@@ -543,7 +543,7 @@ kable(
   column_spec(c(1,10:15), width = "1.5cm")
 ```
 ```{r stat-summ-categorical, echo=FALSE, fig.height=4, fig.cap = cap}
-# Figure - Descriptive statistics - categorical variables/EN>
+# Figure - Descriptive statistics - categorical variables
 cap <- "Descriptive statistics - categorical variables"
 name1 <- "Percentage"
 name2 <- "Accumulated percentage"
@@ -620,7 +620,7 @@ The figure \ref{fig:correlation} shows the correlation of variables for each set
 &nbsp;
  
 ```{r correlation, echo=F, fig.height=4, fig.cap=cap}
-# Figure - Correlation grouped by age/EN>
+# Figure - Correlation grouped by age
 cor_dat <- dat %>% select(-c(id))
 cap <- "Correlations at each age"
 f_lvl <- c("3 days", "7 days", "14 days","28 days", "56 days", "100 days")
@@ -673,6 +673,7 @@ melt_dat_final %>%
         axis.line = element_line(colour = "black"))
 ```
 ```{r correlation-mpa, echo=F, fig.height=3, fig.cap=cap}
+# Figure - Correlation over time
 cap <- "Correlation of variables with compressive strength over time"
 name <- "Correlation"
 melt_dat_final %>%
@@ -696,7 +697,7 @@ The interpretation of the figure \ref{fig:correlation-mpa} suggests that the str
 &nbsp;
  
 ```{r mix-app-mpa, echo=F, fig.cap=cap,fig.height=3.5, warning=FALSE}
-# Figure - Relationship between approximated mix, water, MPa and age/EN>
+# Figure - Relationship between approximated mix, water, MPa and age
 cap <- "Relationship between approximated mix, water, MPa and age"
 d <- " days"
 xlabel <- "Approximated mix" 
@@ -714,7 +715,8 @@ mix_dat <- mix_dat %>%
                           `fine_aggregate_/_cement`,
                           `coarse_aggregate_/_cement`)) %>%
   drop_na()
-mix_dat$day <- factor(mix_dat$day)
+lvls <- paste("day_",c("3","7","14","28","56","100"), sep="")
+mix_dat$day <- factor(mix_dat$day, levels=lvls)
 levels(mix_dat$day) <- labs
 min_x <- min(mix_dat$`water_/_cement`)
 max_x <- max(mix_dat$`water_/_cement`)
@@ -741,7 +743,7 @@ mix_dat %>%
       axis.line = element_line(colour = "black"))
 ```
 ```{r mix-mpa, echo=F, fig.cap=cap, fig.height=3.5, warning=FALSE, message=F}
-# Figure - Relationship between concrete main features/EN>
+# Figure - Relationship between concrete main features
 cap <- "Relationship between concrete main features"
 d <- " days"
 xlabel <- "Water / Cement"
@@ -785,7 +787,7 @@ The figure\ref{fig:vars-distribution} shows the distribution of variables in the
 &nbsp;
  
 ```{r vars-distribution, echo=F, fig.height=10, fig.cap=cap, warning=FALSE, message = F}
-# Figure - Variables distribution/EN>
+# Figure - Variables distribution
   
 cap <- "Variables distribution"
 colnames_dat <- c("Cement", "B.F.S.", "Fly ash", "Water",
@@ -816,7 +818,7 @@ dist_dat %>%
 ```
 The figure \ref{fig:vars-distribution-time} shows the distribution of ingredients and compressive strength for each set of ages (\ref{show-vars-distribution-time}), in case of the 28 days it presents the same information as the figure \ref{fig:vars-distribution}. It shows that the resistance to compression gradually increases over time, as expected. Furthermore it is seen that the concentration of the ingredients can vary a lot when stratified by ages.
 ```{r vars-distribution-time, echo=F, fig.height=10, fig.cap=cap, warning=FALSE, message=F}
-# Figure - Variables distribution grouped by age/EN>
+# Figure - Variables distribution grouped by age
   
 days_labs <- c("3","7","14","28","56","100")
 cap <- "Variables distribution grouped by age"
@@ -855,7 +857,7 @@ dist_dat_2 %>%
 Na figura \ref{fig:pca}, utilizando uma classificação alternativa, foi realizada a análise de componente principal nos ingredientes das amostras (\ref{show-pca}). A classificação separa o concreto em 4 grupos de resistência a compressão diferentes, baixo até $20 MPa$, normal até $40 MPa$, médio até $70 MPa$ e alto acima disso. É possivel perceber que os grupos se sobrepõem, mas existem uma diferenciação entre o grupo alto e baixo.
 In the figure v, using an alternative classification, the principal component analysis was performed on the ingredients (\ref{show-pca}). The classification separates concrete into 4 different compressive strength groups, low up to *20 MPa*, normal up to *40 MPa*, medium up to *70 MPa* and high above that. It is possible to notice that the groups overlap, but there is a differentiation between the high and low group.
 ```{r pca, echo=F, fig.height=3, fig.cap=cap}
-# Figure - Principal component analysis on ingredients/EN>
+# Figure - Principal component analysis on ingredients
   
 cap <- "Principal component analysis on ingredients"
 colnames_dat <- c(
@@ -1005,12 +1007,12 @@ Each data set was separated into test and training sets, *20%* and *80%* respect
 ```{r split, echo=F, message=F, warning=F}
 # Test and train data split
 reg <- list(
-  dat_3 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_3$MPa),
-  dat_7 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_7$MPa),
-  dat_14 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_14$MPa),
-  dat_28 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_28$MPa),
-  dat_56 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_56$MPa),
-  dat_100 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_100$MPa)
+  dat_3 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_3$mpa),
+  dat_7 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_7$mpa),
+  dat_14 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_14$mpa),
+  dat_28 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_28$mpa),
+  dat_56 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_56$mpa),
+  dat_100 %>% select(-c(mpa, class, id)) %>% mutate(y = dat_100$mpa)
 )
 reg_seed <- c(
   1111, # 3
@@ -1043,10 +1045,10 @@ dens <- function(d, n){
   dens <- full_join(
       d$train %>%
         select(y) %>%
-        mutate(Grup = g1, day = str_sub(n, 2)),
+        mutate(Group = g1, day = str_sub(n, 2)),
       d$test %>%
         select(y) %>%
-        mutate(Grup = g2, day = str_sub(n, 2))
+        mutate(Group = g2, day = str_sub(n, 2))
     )
   dens
 }
@@ -1056,9 +1058,9 @@ densities <- imap(dats_reg, dens) %>%
 labs <- paste(c("3","7","14","28","56","100"), d_lab, sep="")
 levels(densities$day_f) <- labs
 densities %>%
-  ggplot(aes(y, fill = Grup)) +
+  ggplot(aes(y, fill = Group)) +
   geom_density(alpha = 0.5) +
-  facet_wrap(~dia_f, ncol=3) +
+  facet_wrap(~day_f, ncol=3) +
   xlab("MPa") +
   ylab(ylabel) +
   theme_bw() +
@@ -1100,7 +1102,7 @@ colNames = c("Age", "Mean $MPa$ (train)", "RMSE (train)", "RMSE (test)")
 caption <- "Naive models"
 kable(
     df_performance_reg,
-    col.names = colNames6,
+    col.names = colNames,
     escape = F,
     booktabs = T,
     caption = caption,
@@ -1348,10 +1350,10 @@ gen_res_df <- function(ind){
 }
 res_df <- lapply(1:6, gen_res_df)
 res_df <- bind_rows(res_df)
-res_df$model <- factor(res_df$modelo,levels=modelos)
+res_df$model <- factor(res_df$model,levels=models)
 res_df %>%
   ggplot(aes(actual, pred)) +
-  facet_wrap(~ modelo, ncol=3) +
+  facet_wrap(~ model, ncol=3) +
   geom_point(alpha=0.5) +
   theme_bw() +
   geom_abline(slope=1, intercept=0) +
@@ -1509,8 +1511,7 @@ kable(p, booktabs = T) %>%
 
 
 # Appendix 2 - Online repository {#appendix2}
-All the code used to generate this work is available on *GitHub* at the following link:
-- https://github.com/pedrobern/concrete-compressive-strength-prediction
+https://github.com/pedrobern/concrete-compressive-strength-prediction
 \newpage
 
 
@@ -1604,7 +1605,72 @@ All the code used to generate this work is available on *GitHub* at the followin
 ```{r show-reorganizing-dat, ref.label='reorganizing-dat', ref='show-reorganizing-dat', eval=FALSE}
 ```
 
+### Table - First 6 samples after reorganization
+
+```{r show-new-features, ref.label='new-features', ref='show-new-features', eval=FALSE}
+```
+
+### Total samples
+
+```{r show-total-samples-2, ref.label='total-samples-2', ref='show-total-samples-2', eval=FALSE}
+```
+
+### Adding New features
+
+```{r show-new-features-2, ref.label='new-features-2', ref='show-new-features-2', eval=FALSE}
+```
+
+### Table - New features
+
+```{r show-new-features-table, ref.label='new-features-table', ref='show-new-features-table', eval=FALSE}
+```
+
 ## Data visualization
+### Table - Descriptive statistics - continuous variables
+
+```{r show-stat-summ, ref.label='stat-summ', ref='show-stat-summ', eval=FALSE}
+```
+
+### Figure - Descriptive statistics - categorical variables
+
+```{r show-stat-summ-categorical, ref.label='stat-summ-categorical', ref='show-stat-summ-categorical', eval=FALSE}
+```
+
+### Figure - Correlation grouped by age
+
+```{r show-correlation, ref.label='correlation', ref='show-correlation', eval=FALSE}
+```
+
+### Figure - Correlation over time
+
+```{r show-correlation-mpa, ref.label='correlation-mpa', ref='show-correlation-mpa', eval=FALSE}
+```
+
+### Figure - Relationship between approximated mix, water, MPa and age
+
+```{r show-mix-app-mpa, ref.label='mix-app-mpa', ref='show-mix-app-mpa', eval=FALSE}
+```
+
+### Figure - Relationship between concrete main features
+
+```{r show-mix-mpa, ref.label='mix-mpa', ref='show-mix-mpa', eval=FALSE}
+```
+
+### Figure - Variables distribution
+
+```{r show-vars-distribution, ref.label='vars-distribution', ref='show-vars-distribution', eval=FALSE}
+```
+
+### Figure - Variables distribution grouped by age
+
+```{r show-vars-distribution-time, ref.label='vars-distribution-time', ref='show-vars-distribution-time', eval=FALSE}
+```
+
+### Figure - Principal component analysis on ingredients
+
+```{r show-pca, ref.label='pca', ref='show-pca', eval=FALSE}
+```
+
 ## Machine learning models
 ### Dummy variables
 
@@ -1666,7 +1732,7 @@ All the code used to generate this work is available on *GitHub* at the followin
 ```{r show-reg-models, ref.label='reg-models', ref='show-reg-models', eval=FALSE}
 ```
 
-# Results
+## Results
 ### Table - Models details
 
 ```{r show-table-reg-models, ref.label='table-reg-models', ref='show-table-reg-models', eval=FALSE}
@@ -1682,7 +1748,7 @@ All the code used to generate this work is available on *GitHub* at the followin
 ```{r show-table-10, ref.label='table-10', ref='show-table-10', eval=FALSE}
 ```
 
-# Discussion
+## Discussion
 ### Table - Comparison of other works
 
 ```{r show-works-comparison, ref.label='works-comparison', ref='show-works-comparison', eval=FALSE}
