@@ -189,9 +189,9 @@ cap <- "Correlations at each age"
 f_lvl <- c("3 days", "7 days", "14 days","28 days", "56 days", "100 days")
 name <- "Correlation"
 colnames_dat <- c("Cement", "B.F.S.", "Fly ash", "Water",
-                "Superplast.", "Coarse agg.", "Fine agg.", "3", "7",
-                "14", "28", "56", "100",
-                "W./C.", "F.A./C.", 
+                "Superplast.", "Coarse agg.", "Fine agg.",
+                "3", "7", "14", "28", "56", "100",
+                "class", "mix_app", "W./C.", "F.A./C.", 
                 "C.A./C.", "F.A./C.A.",
                 "W./C.A.", "W./F.A.")
 #</EN>

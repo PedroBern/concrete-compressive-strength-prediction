@@ -338,7 +338,7 @@ ind_90 <- dat$id[which(dat$day == "90")]
 ind_91 <- dat$id[which(dat$day == "91")]
 ind_100 <- dat$id[which(dat$day == "100")]
 
-sum(duplicated(c(ind_90, ind_91, ind_100))) # 0
+sum_duplicated <- sum(duplicated(c(ind_90, ind_91, ind_100))) # 0
 
 dat <- dat %>%
   ungroup() %>%
