@@ -1,7 +1,7 @@
 <EN>
 ## Obtaining the data
 
-The data was downloaded from the University of California Irvine website [@downloadData] (\ref{show-download-data}). In total there are 1030 samples with 9 columns. The samples were renamed and an id column was added to facilitate data manipulation (\ref{show-rename-dat-cols}). The columns were reordered to put the new id column in the first position (\ref{show-reorder-dat}). The first samples can be viewed in the table \ref{tab: first-samples}.
+The data was downloaded from the University of California Irvine website [@downloadData] (\ref{show-download-data}). In total there are 1030 samples with 9 columns. The samples were renamed and an id column was added to facilitate data manipulation (\ref{show-rename-dat-cols}). The columns were reordered to put the new id column in the first position (\ref{show-reorder-dat}). The first samples can be viewed in the table \ref{tab:first-samples}.
 </EN>
 
 <PT>
@@ -25,7 +25,7 @@ colnames(dat)
 ```
 
 ```{r rename-dat-cols, echo=F}
-#<EN># Ranaming the columns</EN>
+#<EN># Renaming the columns</EN>
 #<PT># Renomeando as colunas</PT>
 colnames(dat) <- c(
   "cement",
@@ -79,8 +79,8 @@ dfUnits <- c("", "$kg/m^3$", "$kg/m^3$","$kg/m^3$","$kg/m^3$",
 ```
 
 ```{r first-samples, echo=F}
-#<EN># Table First samples</EN>
-#<PT># Tabela Primeiras amostras</PT>
+#<EN># Table - First samples</EN>
+#<PT># Tabela - Primeiras amostras</PT>
 
 #<EN>
 caption <- "First 6 samples"

@@ -1,11 +1,9 @@
 <EN>
 ## Machine learning models
 
-The development of machine learning models was carried out with the *caret* package [@caret] and based on @irizarry2019 e @Kuhn2008.
+The development of machine learning models was carried out with the *caret* package [@caret] and based on @irizarry2019 and @Kuhn2008.
 
 ### Pre-processing and data separation
-
-Como existe a variável categórica para o traço aproximado do concreto, foi realizada a conversão dessa variável em variáveis fictiícias (*dummy vars*) (\ref{show-dummy-var}), passando de 22 colunas (id, classe, resistência à compressão e mais 19 *features*) para 45 colunas, uma adição de 23 variáveis, uma para cada traço aproximado. 
 
 As the approximate mix is a categorical variable, it was converted into dummy variables (\ref{show-dummy-var}), going from 22 columns (id, class, compressive strength and 19 more *features*) to 45 columns, an addition of 23 variables, one for each approximate mix.
 </EN>
@@ -37,7 +35,7 @@ dat <- dat %>%
 ```
 
 <EN>
-The samples were separated based on age. One dataset was created for each age value, totaling 6 different sets (\ref{show-preparation}). For illustrative purposes, the first 18 of 45 columns of the first 6 samples from the 28-day set are shown in the table \ref{tab:table-prepared-samples}.
+The samples were separated based on age. One dataset was created for each age value, totaling 6 different sets (\ref{show-preparation}). For illustrative purposes, the first 18 of 45 columns of the first 6 samples from the 28-day set are shown in the table \ref{tab:table-preparated-samples}.
 </EN>
 
 <PT>
@@ -104,10 +102,10 @@ caption <- "Primeiras 18 colunas das primeiras 6 amostras de 28 dias"
 #</PT>
 
 
-dat_tabela <- dat_28[1:18]
+dat_table <- dat_28[1:18]
 
 kable(
-    head(dat_tabela[order(dat_tabela$id),]),
+    head(dat_table[order(dat_table$id),]),
     col.names = dfUnits,
     escape = F,
     booktabs = T,
@@ -357,16 +355,16 @@ The *caret* [@caret] package exposes more than 200 different algorithms for buil
 ### Regression models
 
 As new variables were added throughout the processing (the relationships between the ingredients and a few more *dummy vars* for each age set), 5 possibilities for configuring the *features* for the models were studied:
-
+&nbsp;
 1. All *features*;
 2. All *features* without the *dummy vars*;
 3. Only the original *features*;
 4. Only new *features*;
 5. Only new *features*, without *dummy vars*;
-
+&nbsp;
 Building a model for each of these configurations using the set at 28 days (\ref{show-test-models-reg}), showed that the best option is configuration 2, the *dummy vars* were completely discarded, but the other new variables were kept.
 
-For illustrative purposes, the \ref{tab:table-done-samples-28} table shows the first 6 samples from the 28-day model training set. The samples of the other models, of the test and training sets are similar, the only difference being in the 7-day model, which excludes fly ash due to the variance close to zero, performed previously.
+For illustrative purposes, the table \ref{tab:table-done-samples-28} shows the first 6 samples from the 28-day model training set. The samples of the other models, of the test and training sets are similar, the only difference being in the 7-day model, which excludes fly ash due to the variance close to zero, performed previously.
 </EN>
 
 <PT>
@@ -377,13 +375,13 @@ O pacote *caret* [@caret] expõe mais de 200 algorítimos diferentes para criar 
 ### Modelos de regressão
 
 Como ao longo do processamento foram adicionadas novas variáveis (as relações entre os ingredientes e mais algumas *dummy vars* para cada conjunto de idade), foram estudadas 5 possibilidades de configurações das *features* para os modelos:
-
+&nbsp;
 1. Todas as *features*;
 2. Sem as *dummy vars*;
 3. Apenas *features* originais;
 4. Apenas *features* adicionadas;
 5. Apenas *features* adicionadas, sem as *dummy vars*;
-
+&nbsp;
 Construindo um modelo para cada uma dessas configurações utilizando o conjunto de amostras aos 28 dias (\ref{show-test-models-reg}), mostrou que a melhor opção é a configuração 2, ou seja, as *dummy vars* foram completamente descartadas, porém foram mantidas as outras novas varáveis.
 
 Para fins ilustrativos, a tabela \ref{tab:table-done-samples-28} mostra as primeiras 6 amostras do conjunto de treino do modelo de 28 dias. As amostras dos outros modelos, dos conjuntos de teste e treino são similares, sendo a única diferença no modelo de 7 dias, que exlcui a cinza volante devido a variância próxima a zero, realizado anteriormente.

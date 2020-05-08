@@ -5,7 +5,7 @@ In order to assess the need for further manipulation before building the models,
 
 ### Descriptive statistics
 
-The table \ref{tab:stat-summ} presents the statistical data of the continuous variables (\ ref {show-stat-summ}). The *Null* line represents the number of zeroed values for the ingredients, and the *NA* line represents the number of missing data. As the samples were filtered to maintain only sets of samples with known values of compressive strength at 28 days, the number of *NAs* is zero for that age. The figure \ref{fig:stat-summ-categorical} presents the statistical data of the discrete variables (\ref{show-stat-summ-categorical}).
+The table \ref{tab:stat-summ} presents the statistical data of the continuous variables (\ref {show-stat-summ}). The *Null* line represents the number of zeroed values for the ingredients, and the *NA* line represents the number of missing data. As the samples were filtered to maintain only sets of samples with known values of compressive strength at 28 days, the number of *NAs* is zero for that age. The figure \ref{fig:stat-summ-categorical} presents the statistical data of the discrete variables (\ref{show-stat-summ-categorical}).
 </EN>
 
 <PT>
@@ -417,8 +417,6 @@ The figures \ref{fig:mix-app-mpa} and \ref{fig:mix-mpa} show the relationship be
 
 ### Variables distribution
 
-A figura \ref{fig:vars-distribution} mostra a distribuição das variáveis nas amostras (\ref{show-vars-distribution}). Foi calculado utilizando apenas os dados aos 28 dias. 
-
 The figure\ref{fig:vars-distribution} shows the distribution of variables in the samples (\ref{show-vars-distribution}). It was calculated using data only at 28 days.
 </EN>
 
@@ -540,9 +538,7 @@ dist_dat_2 %>%
 <EN>
 ### Principal component analysis
 
-Na figura \ref{fig:pca}, utilizando uma classificação alternativa, foi realizada a análise de componente principal nos ingredientes das amostras (\ref{show-pca}). A classificação separa o concreto em 4 grupos de resistência a compressão diferentes, baixo até $20 MPa$, normal até $40 MPa$, médio até $70 MPa$ e alto acima disso. É possivel perceber que os grupos se sobrepõem, mas existem uma diferenciação entre o grupo alto e baixo.
-
-In the figure v, using an alternative classification, the principal component analysis was performed on the ingredients (\ref{show-pca}). The classification separates concrete into 4 different compressive strength groups, low up to *20 MPa*, normal up to *40 MPa*, medium up to *70 MPa* and high above that. It is possible to notice that the groups overlap, but there is a differentiation between the high and low group.
+In the figure \ref{fig:pca}, using an alternative classification, the principal component analysis was performed on the ingredients (\ref{show-pca}). The classification separates concrete into 4 different compressive strength groups, low up to *20 MPa*, normal up to *40 MPa*, medium up to *70 MPa* and high above that. It is possible to notice that the groups overlap, but there is a differentiation between the high and low group.
 </EN>
 
 <PT>

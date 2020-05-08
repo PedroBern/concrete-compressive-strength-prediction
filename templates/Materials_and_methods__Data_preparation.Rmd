@@ -35,7 +35,7 @@ n_samples <- nrow(dat)
 ```
 
 <EN>
-The data show the variables in the columns and samples in the rows. However it was found that some samples are identical in proportions of ingredients, changing only the value of age and compressive strngth, for example, samples 653, 654, 678 and 681, shown in the table \ref{tab:similar-samples}.
+The data show the variables in the columns and samples in the rows. However it was found that some samples are identical in proportions of ingredients, changing only the value of age and compressive strength, for example, samples 653, 654, 678 and 681, shown in the table \ref{tab:similar-samples}.
 </EN>
 
 <PT>
@@ -45,7 +45,7 @@ Os dados apresentam as variaveis nas colunas e amostras nas linhas. Porém foi v
 &nbsp; 
 
 ```{r similar-samples, echo=FALSE}
-#<EN># Tabela - Samples with same composition</EN>
+#<EN># Table - Samples with same composition</EN>
 #<PT># Tabela - Amostras com a mesma composição</PT>
 
 same_samples <- dat %>%
@@ -83,7 +83,7 @@ Além disso, também existem amostras com os mesmos valores e proporções de in
 &nbsp; 
 
 ```{r similar-samples-2, echo=FALSE}
-#<EN># Tabela - Same samples with different results</EN>
+#<EN># Table - Same samples with different results</EN>
 #<PT># Tabela - Amostras iguais com resultados diferentes</PT>
 
 same_samples_2 <- dat %>%
@@ -160,7 +160,7 @@ O resultado pode ser conferido na tabela \ref{tab:similar-samples-same-id}. Toda
 &nbsp; 
 
 ```{r similar-samples-same-id, echo=FALSE, include=TRUE}
-#<EN># Tabela - Previous samples after processing</EN>
+#<EN># Table - Previous samples after processing</EN>
 #<PT># Tabela - Amostras anteriores após processamento</PT>
 
 same_samples <- dat %>%
@@ -192,7 +192,7 @@ kable(
 <EN>
 ### Age selection
 
-As previously described, the main age for analysis of compressive strength is 28 days, but other ages can also be used to build forecasting models. However, it is necessary to verify how relevant the data of these other ages are. Starting with the distribution of the samples in relation to each age  (\ref{show-boxplot}) shown in the figure \ref{fig:boxplot}.
+As previously described, the main age for analysis of compressive strength is 28 days, but other ages can also be used to build predictive models. However, it is necessary to verify how relevant the data of these other ages are. Starting with the distribution of the samples in relation to each age  (\ref{show-boxplot}) shown in the figure \ref{fig:boxplot}.
 </EN>
 
 <PT>
@@ -232,7 +232,7 @@ It was observed that the ages of 90, 91 and 100 days probably represent extremes
 
 &nbsp; 
 
-This hypothesis was verified using the principal component analysis method, applied to samples of these 3 ages (\ref{show-pca-90-91-100}). The figure \ref{fig:pca-90-91-100} shows how the samples relate to each other (which are similar or different) and revealed how each variable contributes to the analysis. The first two dimensions represent $ 37 \% $ and $ 24 \% $ respectively of the variance.
+This hypothesis was verified using the principal component analysis method, applied to samples of these 3 ages (\ref{show-pca-90-91-100}). The figure \ref{fig:pca-90-91-100} shows how the samples relate to each other (which are similar or different) and revealed how each variable contributes to the analysis. The first two dimensions represent 37% and 24% $ respectively of the variance.
 </EN>
 
 <PT>
@@ -240,7 +240,7 @@ Foi observado que as idades de 90, 91 e 100 dias provavelmente representam extre
 
 &nbsp; 
 
-Essa hipótese foi verificada utilizando o método de análise de componente principal, aplicado às amostras dessas 3 idades (\ref{show-pca-90-91-100}). A fígura \ref{fig:pca-90-91-100} mostra como as amostras se relacionam umas com as outras (quais são parecidas ou diferentes) e revelou como cada variável contribui para a análise. As duas primeiras dimensões representam $37\%$ e $24\%$ respectivamente da variância.
+Essa hipótese foi verificada utilizando o método de análise de componente principal, aplicado às amostras dessas 3 idades (\ref{show-pca-90-91-100}). A fígura \ref{fig:pca-90-91-100} mostra como as amostras se relacionam umas com as outras (quais são parecidas ou diferentes) e revelou como cada variável contribui para a análise. As duas primeiras dimensões representam 37% e 24% respectivamente da variância.
 </PT>
 
 &nbsp; 
@@ -282,7 +282,7 @@ fviz_pca_biplot(
 ```
 
 <EN>
-Another important point considered, of the concrete nature itself, is the fact that the growth rate of its compressive strength decreases with time, reaching a certain stability value. The figure \ref{fig:mpa-on-time} shows the compressive strength over the days for samples with more than 5 data, that is, data available for at least 6 different ages (\ref{show-mpa-on-team}).
+Another important point considered, of the concrete nature itself, is the fact that the growth rate of its compressive strength decreases with time, reaching a certain stability value. The figure \ref{fig:mpa-on-time} shows the compressive strength over the days for samples with more than 5 data, that is, data available for at least 6 different ages (\ref{show-mpa-on-time}).
 </EN>
 
 <PT>
@@ -321,11 +321,11 @@ dat_duplicated_only %>%
 ```
 
 <EN>
-For the reasons presented in the figures \ref{fig:boxplot}, \ref{fig:pca-90-91-100} and \ref{fig:mpa-on-time}, it was considered that the ages of 90, 91 and 100 days can be grouped to improve reading and decrease sample noise. They were converted to the same value, the age of 100 days was chosen (\ref{show-join-90-91-100}. As shown in the figure \ref{fig:mpa-on-time}, the resistance only increases, after 100 days the resistance to compression will be greater than or equal to the value of 90 or 91 days.
+For the reasons presented in the figures \ref{fig:boxplot}, \ref{fig:pca-90-91-100} and \ref{fig:mpa-on-time}, it was considered that the ages of 90, 91 and 100 days can be grouped to improve reading and decrease sample noise. They were converted to the same value, the age of 100 days was chosen (\ref{show-join-90-91-100}). As shown in the figure \ref{fig:mpa-on-time}, the resistance only increases, after 100 days the resistance to compression will be greater than or equal to the value of 90 or 91 days.
 </EN>
 
 <PT>
-Pelos motivos apresentados nas figuras \ref{fig:boxplot}, \ref{fig:pca-90-91-100} e \ref{fig:mpa-on-time}, foi considerado que as idades de 90, 91 e 100 dias podem ser agrupadas para melhorar a leitura e diminuir o ruído das amostras. Elas foram convertidas para o mesmo valor, que no caso foi escolhido a idade de 100 dias (\ref{show-join-90-91-100}, pois como mostrado na figura \ref{fig:mpa-on-time}, a resistência apenas aumenta, logo aos 100 dias a resistência à compressão será maior ou igual ao valor de 90 ou 91 dias.
+Pelos motivos apresentados nas figuras \ref{fig:boxplot}, \ref{fig:pca-90-91-100} e \ref{fig:mpa-on-time}, foi considerado que as idades de 90, 91 e 100 dias podem ser agrupadas para melhorar a leitura e diminuir o ruído das amostras. Elas foram convertidas para o mesmo valor, que no caso foi escolhido a idade de 100 dias (\ref{show-join-90-91-100}), pois como mostrado na figura \ref{fig:mpa-on-time}, a resistência apenas aumenta, logo aos 100 dias a resistência à compressão será maior ou igual ao valor de 90 ou 91 dias.
 </PT>
 
 &nbsp; 
@@ -389,7 +389,7 @@ dat <- dat[dat$day %in% c(3, 7, 14, 28, 56, 100),]
 <EN>
 ### Data reorganization
 
-The samples were grouped to maintain only a separate sample from each set of configuration of the proportions of the ingredients, adding new variables/columns for resistance at each age (\ref{show-reorganizing-dat}). The result in the first samples after this processing is shown in the table \ref{tab:new-features}.
+The samples were grouped to maintain only one sample from each set of configuration of the proportions of the ingredients, adding new variables/columns for resistance at each age (\ref{show-reorganizing-dat}). The result in the first samples after this processing is shown in the table \ref{tab:new-features}.
 </EN>
 
 <PT>
@@ -464,7 +464,7 @@ n_distinct_samples <- n_distinct(dat$id) # 416
 <EN>
 ### Adding new variables
 
-To finish the data preparation, new columns were added to the dataset (\ref{show-new-features-2}). Starting with the concrete class, for example if the compressive strength is between 25 and 30, it receives the class *C25*. The inclusion of the class was important because the compressive strength in *MPa* is a continuous variable, which will be used in the regression models, but the class as a discrete variable can provide another visualization of the data. The approximate mix of concrete was also added, which represents the proportions of aggregates (fine and coarse) for cement. Other proportions between the main ingredients were also added. The new variables are presented in the table ref{tab:new-features-table}.
+To finish the data preparation, new columns were added to the dataset (\ref{show-new-features-2}). Starting with the concrete class, for example if the compressive strength is between 25 and 30, it receives the class *C25*. The inclusion of the class was important because the compressive strength in *MPa* is a continuous variable, which will be used in the regression models, but the class as a discrete variable can provide another visualization of the data. The approximate mix of concrete was also added, which represents the proportions of aggregates (fine and coarse) for cement. Other proportions between the main ingredients were also added. The new variables are presented in the table \ref{tab:new-features-table}.
 </EN>
 
 <PT>

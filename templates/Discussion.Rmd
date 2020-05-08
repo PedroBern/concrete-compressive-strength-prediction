@@ -1,7 +1,7 @@
 <EN>
 # Discussion
 
-The models built present satisfactory results and prove that the compressive strength of concrete can be predicted relatively easily. The alternative adopted to create a model for each set of age proved to be a valid method, managing to stratify to obtain specific results for each set. The studies cited in the introduction using the same dataset have similar results, as expected. The \ref{tab:works-comparison} table presents the results of these works (\ref{show-works-comparison}), and the table \ref{tab:results} presents the values found for easy comparison (\ref{show-results}) .
+The models built present satisfactory results and prove that the compressive strength of concrete can be predicted relatively easily. The alternative adopted to create a model for each set of age proved to be a valid method, managing to stratify to obtain specific results for each set. The studies cited in the introduction using the same dataset have similar results, as expected. The table \ref{tab:works-comparison} presents the results of these works (\ref{show-works-comparison}), and the table \ref{tab:results} presents the values found for easy comparison (\ref{show-results}) .
 </EN>
 
 <PT>
@@ -27,7 +27,7 @@ caption <- "Comparação dos estudos de outros autores"
 works <- data.frame(
   autor = c("Pierobon", "Hameed", "Raj","Modukuru" ,"Alshamiri", "Abban"),
   ano = c("2018", "2020", "2018","2020" ,"2020", "2016"),
-  modelo = c("Ensemble com 5 algorítimos", "Artificial Neural Networks", 
+  modelo = c("5 Algorithm Ensemble", "Artificial Neural Networks", 
           "Gradient Boosting Regressor","Random Forest Regressor" ,
           "Regularized Extreme Learning Machine",
           "Support Vector Machines with Radial Basis Function Kernel"),

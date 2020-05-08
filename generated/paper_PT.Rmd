@@ -4,8 +4,7 @@ title:
 date: "Abril 22, 2020"
 author: "Pedro Bernardino Alves Moreira"
 indent: true
-abstract:
-  A resistência à compressão é a principal característica do concreto. Esse trabalho utilizou um conjunto de amostras amplamente utilizado para construir 6 modelos de previsão dessa característica, cada um específicamente para uma idade, 3, 7, 14, 28, 56 e 100 dias a partir de 7 ingredientes (água, cimento, agregado miúdo, agregado graúdo, cinza volante, escória granulada de alto forno e superplastificantes) e 6 relações entre os principais ingredientes (água/cimento, agregado miúdo/cimento, agregado graúdo/cimento, agregado miúdo/agregado graúdo, água/agregado graúdo e água/agregado miúdo) para fazer a previsão. Foi utilizado o algorítimo *Parallel Random Forest* (*parRF* do pacote *caret* de linguagem *R*). Os resultados foram satisfatórios sendo o melhor para o modelo de 3 dias (*RMSE* de 3,31) e pior para o modelo de 100 dias (*RMSE* de 5,85). O modelo de 28 dias apresentou *RMSE* de 4,72. O trabalho indicou que a separação em um modelo para cada idade é promissora e foi capaz de gerar resultados compatíveis ou melhores que outros estudos, abrindo espaço para construção de novos modelos seguindo essa proposta, mas utilizando algorítimos diferentes ou a combinação de diversos algorítimos.
+abstract: "A resistência à compressão é a principal característica do concreto. A previsão correta desse parâmetro significa redução de custo e tempo. Esse trabalho construiu modelos de previsão em 6 idades diferentes de amostras de concreto (3, 7, 14, 28, 56, e 100 dias). Foi utilizado um conjunto de dados obtido em estudos anteriores, um total de 1030 amostras, com 9 variáveis: resistência à compressão, idade e 7 ingredientes (água, cimento, agregado miúdo, agregado graúdo, cinza volante, escória granulada de alto forno e superplastificantes). Outras 6 variáveis foram adicionadas para representar as proporções dos principais ingredientes em cada amostra (água/cimento, agregado miúdo/cimento, agregado graúdo/cimento, agregado miúdo/agregado graúdo, água/agregado graúdo e água/agregado miúdo). Os modelos de previsão foram desenvolvidos em linguagem *R*, utilizando o pacote *caret* com o algoritmo *Parallel Random Forest* e técnica de validação cruzada repetida para otimização dos parâmetros. Os resultados foram satisfatórios e compatíveis com outros estudos utilizando o mesmo conjunto de dados. O modelo mais importante, de 28 dias, obteve *RMSE* de 4,717. O modelo de 3 dias obteve o melhor resultado, *RMSE* de 3,310. O pior resultado foi o modelo de 56 dias, com *RMSE* de 5,939. O trabalho mostrou que a resistência à compressão do concreto pode ser prevista. A escolha de criar um modelo para cada idade, ao invés de utilizar a idade como característica para previsão, permitiu chegar a resultados compatíveis com os dados disponíveis de cada idade. Foi uma alternativa promissora, visto que bons resultados foram atingidos treinando com apenas um algoritmo. Esse trabalho facilita a exploração e novos esforços para previsão da resistência à compressão do concreto, ele pode ser replicado utilizando diferentes algoritmos ou a combinação de diversos."
 output:
   pdf_document:
     keep_tex: yes
@@ -19,7 +18,6 @@ header-includes:
 - \usepackage{supertabular}
 - \usepackage{array}
 - \usepackage{multirow}
-- \usepackage[table]{xcolor}
 - \usepackage{wrapfig}
 - \usepackage{colortbl}
 - \usepackage{pdflscape}
@@ -179,7 +177,7 @@ dfUnits <- c("", "$kg/m^3$", "$kg/m^3$","$kg/m^3$","$kg/m^3$",
              "$kg/m^3$","$kg/m^3$","$kg/m^3$","","$MPa$")
 ```
 ```{r first-samples, echo=F}
-# Tabela Primeiras amostras
+# Tabela - Primeiras amostras
 caption <- "Primeiras 6 amostras"
 kable(
     dat[1:6,],
@@ -328,7 +326,7 @@ Foi observado que as idades de 90, 91 e 100 dias provavelmente representam extre
 
 &nbsp;
  
-Essa hipótese foi verificada utilizando o método de análise de componente principal, aplicado às amostras dessas 3 idades (\ref{show-pca-90-91-100}). A fígura \ref{fig:pca-90-91-100} mostra como as amostras se relacionam umas com as outras (quais são parecidas ou diferentes) e revelou como cada variável contribui para a análise. As duas primeiras dimensões representam $37\%$ e $24\%$ respectivamente da variância.
+Essa hipótese foi verificada utilizando o método de análise de componente principal, aplicado às amostras dessas 3 idades (\ref{show-pca-90-91-100}). A fígura \ref{fig:pca-90-91-100} mostra como as amostras se relacionam umas com as outras (quais são parecidas ou diferentes) e revelou como cada variável contribui para a análise. As duas primeiras dimensões representam 37% e 24% respectivamente da variância.
 
 &nbsp;
  
@@ -375,7 +373,7 @@ dat_duplicated_only %>%
   theme_bw() +
   theme(legend.position = "none")
 ```
-Pelos motivos apresentados nas figuras \ref{fig:boxplot}, \ref{fig:pca-90-91-100} e \ref{fig:mpa-on-time}, foi considerado que as idades de 90, 91 e 100 dias podem ser agrupadas para melhorar a leitura e diminuir o ruído das amostras. Elas foram convertidas para o mesmo valor, que no caso foi escolhido a idade de 100 dias (\ref{show-join-90-91-100}, pois como mostrado na figura \ref{fig:mpa-on-time}, a resistência apenas aumenta, logo aos 100 dias a resistência à compressão será maior ou igual ao valor de 90 ou 91 dias.
+Pelos motivos apresentados nas figuras \ref{fig:boxplot}, \ref{fig:pca-90-91-100} e \ref{fig:mpa-on-time}, foi considerado que as idades de 90, 91 e 100 dias podem ser agrupadas para melhorar a leitura e diminuir o ruído das amostras. Elas foram convertidas para o mesmo valor, que no caso foi escolhido a idade de 100 dias (\ref{show-join-90-91-100}), pois como mostrado na figura \ref{fig:mpa-on-time}, a resistência apenas aumenta, logo aos 100 dias a resistência à compressão será maior ou igual ao valor de 90 ou 91 dias.
 
 &nbsp;
  
@@ -384,7 +382,7 @@ Pelos motivos apresentados nas figuras \ref{fig:boxplot}, \ref{fig:pca-90-91-100
 ind_90 <- dat$id[which(dat$day == "90")]
 ind_91 <- dat$id[which(dat$day == "91")]
 ind_100 <- dat$id[which(dat$day == "100")]
-sum(duplicated(c(ind_90, ind_91, ind_100))) # 0
+sum_duplicated <- sum(duplicated(c(ind_90, ind_91, ind_100))) # 0
 dat <- dat %>%
   ungroup() %>%
   mutate(day = ifelse(day %in% c(91, 90), 100, day))
@@ -951,9 +949,9 @@ dfUnits <- c("", "$kg/m^3$", "$kg/m^3$","$kg/m^3$","$kg/m^3$",
               "$kg/m^3$", "$kg/m^3$","$kg/m^3$","$MPa$","", "Ci.",
               "Ci.", "Ci.", "A.G.", "A.G.", "Ag.M.", "1:1:2", "1:2:2")
 caption <- "Primeiras 18 colunas das primeiras 6 amostras de 28 dias"
-dat_tabela <- dat_28[1:18]
+dat_table <- dat_28[1:18]
 kable(
-    head(dat_tabela[order(dat_tabela$id),]),
+    head(dat_table[order(dat_table$id),]),
     col.names = dfUnits,
     escape = F,
     booktabs = T,
@@ -1117,11 +1115,17 @@ O pacote *caret* [@caret] expõe mais de 200 algorítimos diferentes para criar 
 
 ### Modelos de regressão
 Como ao longo do processamento foram adicionadas novas variáveis (as relações entre os ingredientes e mais algumas *dummy vars* para cada conjunto de idade), foram estudadas 5 possibilidades de configurações das *features* para os modelos:
+
+&nbsp;
+
 1. Todas as *features*;
 2. Sem as *dummy vars*;
 3. Apenas *features* originais;
 4. Apenas *features* adicionadas;
 5. Apenas *features* adicionadas, sem as *dummy vars*;
+
+&nbsp;
+
 Construindo um modelo para cada uma dessas configurações utilizando o conjunto de amostras aos 28 dias (\ref{show-test-models-reg}), mostrou que a melhor opção é a configuração 2, ou seja, as *dummy vars* foram completamente descartadas, porém foram mantidas as outras novas varáveis.
 Para fins ilustrativos, a tabela \ref{tab:table-done-samples-28} mostra as primeiras 6 amostras do conjunto de treino do modelo de 28 dias. As amostras dos outros modelos, dos conjuntos de teste e treino são similares, sendo a única diferença no modelo de 7 dias, que exlcui a cinza volante devido a variância próxima a zero, realizado anteriormente.
 ```{r test-models-reg, echo=F, warning=F, message=F, include=F}
@@ -1539,7 +1543,7 @@ https://github.com/pedrobern/concrete-compressive-strength-prediction
 ```{r show-col-names-and-units, ref.label='col-names-and-units', ref='show-col-names-and-units', eval=FALSE}
 ```
 
-### Tabela Primeiras amostras
+### Tabela - Primeiras amostras
 
 ```{r show-first-samples, ref.label='first-samples', ref='show-first-samples', eval=FALSE}
 ```
