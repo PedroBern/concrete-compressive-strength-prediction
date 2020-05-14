@@ -13,4 +13,4 @@ Files inside the `generated` folder should not be edited. Work only with the `te
 
 ## CILAMCE
 
-This folder contains the version for the [CILAMCE](https://www.cilamce.com.br/index.php).
+This folder contains the version for the [CILAMCE](https://www.cilamce.com.br/index.php). Changes should be made in the `paper_EN.Rmd`.
