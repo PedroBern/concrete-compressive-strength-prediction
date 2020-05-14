@@ -8,3 +8,7 @@
 /generated/*_cache/
 /generated/*_files/
 *.Rproj
+*.log
+/CILAMCE/*_files/
+/CILAMCE/*_cache/
+/CILAMCE/*.tex
