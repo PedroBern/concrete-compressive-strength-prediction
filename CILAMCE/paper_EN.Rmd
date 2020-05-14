@@ -1,0 +1,159 @@
+---
+title: "INSTRUCTIONS FOR PREPARATION AND SUBMISSION OF FULL-PAPERS FOR PUBLICATION IN THE PROCEEDINGS OF XL CILAMCE"
+indent: true
+output:
+  pdf_document:
+   keep_tex: yes
+   number_sections: yes
+   template: CILAMCE_template.tex
+   citation_package: natbib
+   latex_engine: xelatex
+mainfont: Times New Roman
+bibliography: references.bib
+biblio-style: ./bib-cilamce
+---
+
+<!-- \usepackage[figureposition=bottom,tableposition=top]{caption} -->
+
+<!-- spacing before and after equations -->
+\setlength{\abovedisplayskip}{18pt}
+\setlength{\belowdisplayskip}{18pt}
+\setlength{\abovedisplayshortskip}{18pt}
+\setlength{\belowdisplayshortskip}{18pt}
+
+<!-- table row spacing -->
+\renewcommand{\arraystretch}{1.2}
+
+<!-- table and caption spacing -->
+\captionsetup[table]{skip=12pt}
+
+<!-- space before and after figures and tables -->
+\setlength\intextsep{13pt}
+
+```{r setup, include=FALSE, cache=F}
+# Install libraries, if not already installed
+if(!require(tidyverse)) install.packages("tidyverse")
+if(!require(ggplot2)) install.packages("ggplot2")
+if(!require(caret)) install.packages("caret")
+if(!require(knitr)) install.packages("knitr")
+if(!require(kableExtra)) install.packages("kableExtra")
+if(!require(gdata)) install.packages("gdata")
+if(!require(dplyr)) install.packages("dplyr")
+if(!require(tidyr)) install.packages("tidyr")
+if(!require(cowplot)) install.packages("cowplot")
+if(!require(pastecs)) install.packages("pastecs")
+if(!require(factoextra)) install.packages("factoextra")
+if(!require(reshape2)) install.packages("reshape2")
+if(!require(purrr)) install.packages("purrr")
+if(!require(gridExtra)) install.packages("gridExtra")
+if(!require(questionr)) install.packages("questionr")
+# Load libraries
+library(tidyverse)
+library(caret)
+library(ggplot2)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+library(tidyr)
+library(gdata)
+library(reshape2)
+library(cowplot)
+library(pastecs)
+library(factoextra)
+library(purrr)
+library(gridExtra)
+library(questionr)
+# Set global options
+options(pillar.sigfig = 5)
+options(knitr.kable.NA = '')
+opts_knit$set(eval.after = "fig.cap")
+opts_chunk$set(echo = TRUE, fig.align = 'center', cache=F, prompt=F, highlight=T )
+```
+
+# Lorem ipsum
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+
+# Lorem ipsum dolor
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+
+
+## Lorem ipsum Sub
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+
+## Lorem ipsum Sub 2
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+
+
+## Equations, symbols and units
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+
+
+\begin{center}
+\begin{equation}
+q_r = -4pr^2k\frac{dT}{dr}.
+\label{Eq1}
+\end{equation}
+\end{center}
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+
+\vspace{13pt}
+
+Cite as Eq. \ref{Eq1}.
+
+## Figures and tables
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+
+```{r table-example, echo=F, eval=T}
+
+df <- data.frame(
+   col1 = c("Turbulent tensor", "Turbulent tensor", "Lateral lift", "Virtual mass"),
+   col2 = c("C", "C", "C", "C"),
+   col2 = c(0.09, 0.69, 0.08, 0.8)
+)
+
+kable(
+    df,
+    "latex",
+    col.names = c("Constitutive relation", "Nomenclature", "Value"),
+    escape = F,
+    booktabs = T,
+    caption = "Coefficients in constitutive relations",
+    linesep = "",
+    align = "c"
+    ) %>%
+  kable_styling(latex_options = c("HOLD_position"))
+```
+
+
+Cite as Figure \ref{fig:plot-example} and Table \ref{tab:table-example}.
+
+```{r plot-example, echo=F, eval=T, fig.cap="Pressure variation along the nozzle: experimental data", fig.width=4, fig.height=3, fig.pos="!ht"}
+
+df <- data.frame(
+   x = 1:10,
+   y = (1:10)^2
+)
+
+df %>%
+  ggplot(aes(x, y)) +
+  geom_point()
+```
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+
+
+# References
+
+Example of reference: "@Yeh1998 proposed… @Hameed2020". Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+
