@@ -11,4 +11,3 @@
 *.log
 /CILAMCE/*_files/
 /CILAMCE/*_cache/
-/CILAMCE/*.tex
