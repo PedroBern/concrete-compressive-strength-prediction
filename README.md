@@ -10,3 +10,7 @@ The reports are generated with the files inside the `templates` folder using the
 
 Files inside the `generated` folder should not be edited. Work only with the `templates`.
 
+
+## CILAMCE
+
+This folder contains the version for the [CILAMCE](https://www.cilamce.com.br/index.php).
