@@ -78,6 +78,7 @@ knit_hooks$set(source = function(x, options) {
   ifelse(!is.null(options$codecap), paste0("\\captionof{chunk}{", options$codecap,"}", x), x)
 })
 ```
+
 \newpage
 \tableofcontents
 \newpage
@@ -85,8 +86,8 @@ knit_hooks$set(source = function(x, options) {
 \listoftables
 \newpage
 
-
 # Introduction
+
 Compressive strength is the main characteristic of concrete, measured by tests of international standards that consist of the breaking of specimens. Measurement at 28 days is mandatory and represents the grade of the concrete. Knowing in advance what the result will be obtained for a given age, based on the proportions of its ingredients, is of great interest to concrete manufacturers, construction companies, and civil engineers.
 
 &nbsp;
@@ -101,23 +102,18 @@ Many previous studies use the same dataset used by @Yeh1998 to predict the compr
 
 Unlike previous studies with this dataset, this work does data preparation differently. The age of the concrete is the most unique feature that contributes to its compressive strength. For this reason, age is treated separately in the machine learning models, creating models for each age group.
 
-
-
 # Materials and Methods
 
 ## Materials
-The methodology was carried out using RStudio software [@RStudio], an integrated virtual environment for code development in *R* [@RCore]. Throughout the process, all code executed was documented in the same order as its execution in [Appendix 3](#appendix3), and reference was always made to codes throughout the text. All relevant information related to the operating system and installed packages has been presented in [Appendix 1](#appendix1). In addition, an online and open-source repository was created in *Github*, housing all the code used to generate this work, the link was made available in [Appendix 2](#appendix2).
 
-
-
+The methodology was carried out using RStudio software [@RStudio], an integrated virtual environment for code development in *R* [@RCore]. Throughout the process, all code executed was documented in the same order as its execution in [Appendix 2](#appendix2), and reference was always made to codes throughout the text. All relevant information related to the operating system and installed packages has been presented in [Appendix 1](#appendix1).
 
 ## Reproducibility
-In order to guarantee reproducibility, whenever there was some code that could use probabilistic operations, a *seed* was defined before its execution, ensuring that when run on another machine, with the same version of *R* and the same *seed*, get the same result. The *seeds* can be checked throughout [Appendix 3](#appendix3) or directly on *Github*.
 
-
-
+In order to guarantee reproducibility, whenever there was some code that could use probabilistic operations, a *seed* was defined before its execution, ensuring that when run on another machine, with the same version of *R* and the same *seed*, get the same result. The *seeds* can be checked throughout [Appendix 2](#appendix2).
 
 ## Obtaining the data
+
 The data was downloaded from the University of California Irvine website [@downloadData] (\ref{show-download-data}). In total there are 1030 samples with 9 columns. The samples were renamed and an id column was added to facilitate data manipulation (\ref{show-rename-dat-cols}). The columns were reordered to put the new id column in the first position (\ref{show-reorder-dat}). The first samples can be viewed in the table \ref{tab:first-samples}.
 
 &nbsp;
@@ -131,6 +127,7 @@ dat <- read.xls("data.xls")
 n_inicial_samples <- nrow(dat)
 colnames(dat)
 ```
+
 ```{r rename-dat-cols, echo=F}
 # Renaming the columns
 colnames(dat) <- c(
@@ -146,6 +143,7 @@ colnames(dat) <- c(
   )
 dat$id <- seq.int(nrow(dat))
 ```
+
 ```{r reorder-dat, echo=F}
 # Reordering the data
 col_order <- c(
@@ -162,6 +160,7 @@ col_order <- c(
 )
 dat <- dat[, col_order]
 ```
+
 ```{r col-names-and-units, echo=F}
 # Defining column names and units
 colNames <- c("ID", "Cement", "B.F.S.", "Fly ash", "Water",
@@ -169,6 +168,7 @@ colNames <- c("ID", "Cement", "B.F.S.", "Fly ash", "Water",
 dfUnits <- c("", "$kg/m^3$", "$kg/m^3$","$kg/m^3$","$kg/m^3$",
              "$kg/m^3$","$kg/m^3$","$kg/m^3$","","$MPa$")
 ```
+
 ```{r first-samples, echo=F}
 # Table - First samples
 caption <- "First 6 samples"
@@ -185,12 +185,12 @@ kable(
     kable_styling(latex_options = c("HOLD_position", "scale_down"))
 ```
 
-
-
 ## Data preparation
+
 The preparation of the data consisted of transforming the sample set in order to maintain only relevant data for the subsequent studies. Data that were considered irrelevant or that had the potential to add undesirable noise to the analysis were removed. In addition, the relevant data has been transformed to better fit the studies in the next steps.
 
 ### Initial data cleaning
+
 Initially, there were 25 duplicate samples that were removed, resulting in a new total of 1005 samples (\ref{show-removing-duplicated-samples}).
 
 &nbsp;
@@ -202,6 +202,7 @@ n_duplicated_samples <- n_inicial_samples - n_distinct_samples
 dat <- dat[!duplicated(select(dat, -c(id))),]
 n_samples <- nrow(dat)
 ```
+
 The data show the variables in the columns and samples in the rows. However it was found that some samples are identical in proportions of ingredients, changing only the value of age and compressive strength, for example, samples 653, 654, 678 and 681, shown in the table \ref{tab:similar-samples}.
 
 &nbsp;
@@ -224,6 +225,7 @@ kable(
   add_header_above(header = colNames, line = F, align = "c") %>%
   kable_styling(latex_options = c("HOLD_position", "scale_down"))
 ```
+
 In addition, there are also samples with the same values and proportions of ingredients, but with different compressive strength, probably due to differences in the building process. This is the case, for example, of samples 472, 473 and 474, shown in the table  \ref{tab:similar-samples-2}.
 
 &nbsp;
@@ -246,6 +248,7 @@ kable(
   add_header_above(header = colNames, line = F, align = "c") %>%
   kable_styling(latex_options = c("scale_down"))
 ```
+
 To facilitate the analysis of the samples, all samples that are the same in relation to the ingredients, have been assigned the same *id*. In addition, as the compressive strength at 28 days is the parameter to determine the grade of the concrete, only the elements containing that day among its samples were maintained. In the case of the same samples but with different results of compressive strength, the values were averaged. After all these changes (\ref{show-initial-data-cleaning}), the new total of samples was reduced to 970, containing 416 different settings for the proportions of ingredients.
 
 &nbsp;
@@ -273,6 +276,7 @@ dat$id<-factor(dat$id)
 n_samples <- nrow(dat)
 n_distinct_samples <- n_distinct(dat$id)
 ```
+
 The result can be seen in the table \ref{tab:similar-samples-same-id}. All samples with equal ingredient settings have the same id, and when they had different results for the same days, they were transformed into just one sample, with the arithmetic mean in the compressive strength.
 
 &nbsp;
@@ -298,6 +302,7 @@ kable(
 ```
 
 ### Age selection
+
 As previously described, the main age for analysis of compressive strength is 28 days, but other ages can also be used to build predictive models. However, it is necessary to verify how relevant the data of these other ages are. Starting with the distribution of the samples in relation to each age  (\ref{show-boxplot}) shown in the figure \ref{fig:boxplot}.
 
 &nbsp;
@@ -315,6 +320,7 @@ dat %>%
   ylab(ylabel) +
   xlab(xlabel)
 ```
+
 It was observed that the ages of 90, 91 and 100 days probably represent extremes to each other in the ingredient configurations, since they are relatively close ages but with very different values, especially for 90 and 91.
 
 &nbsp;
@@ -344,6 +350,7 @@ fviz_pca_biplot(
   theme_bw() +
   coord_cartesian(xlim = c(-3, 3.5), ylim = c(3, -5))
 ```
+
 Another important point considered, of the concrete nature itself, is the fact that the growth rate of its compressive strength decreases with time, reaching a certain stability value. The figure \ref{fig:mpa-on-time} shows the compressive strength over the days for samples with more than 5 data, that is, data available for at least 6 different ages (\ref{show-mpa-on-time}).
 
 &nbsp;
@@ -365,6 +372,7 @@ dat_duplicated_only %>%
   theme_bw() +
   theme(legend.position = "none")
 ```
+
 For the reasons presented in the figures \ref{fig:boxplot}, \ref{fig:pca-90-91-100} and \ref{fig:mpa-on-time}, it was considered that the ages of 90, 91 and 100 days can be grouped to improve reading and decrease sample noise. They were converted to the same value, the age of 100 days was chosen (\ref{show-join-90-91-100}). As shown in the figure \ref{fig:mpa-on-time}, the resistance only increases, after 100 days the resistance to compression will be greater than or equal to the value of 90 or 91 days.
 
 &nbsp;
@@ -379,6 +387,7 @@ dat <- dat %>%
   ungroup() %>%
   mutate(day = ifelse(day %in% c(91, 90), 100, day))
 ```
+
 Another topic analyzed in the selection of ages was the observed frequency of each age value after this transformation from 90, 91 in 100 days, shown in the figure \ref{fig:freq-ages}. Some values of days have very low concentrations of samples, at the risk of damaging more than helping to create the models, so they were removed (\ref{show-remove-ages-lower-50}). The criterion adopted was to maintain only ages with a frequency greater than 50, only the values of 3, 7, 14, 28, 56 and 100 days.
 
 &nbsp;
@@ -395,12 +404,14 @@ dat %>%
   xlab(xlabel) +
   ylab(ylabel)
 ```
+
 ```{r remove-ages-lower-50, echo=F}
 # Removing ages with frequency lower than 50
 dat <- dat[dat$day %in% c(3, 7, 14, 28, 56, 100),]
 ```
 
 ### Data reorganization
+
 The samples were grouped to maintain only one sample from each set of configuration of the proportions of the ingredients, adding new variables/columns for resistance at each age (\ref{show-reorganizing-dat}). The result in the first samples after this processing is shown in the table \ref{tab:new-features}.
 
 &nbsp;
@@ -413,6 +424,7 @@ dat <- dat %>%
   spread(day, mpa, sep = "_") %>%
   select(-row_id)
 ```
+
 ```{r new-features, echo=F}
 # Table - First 6 samples after reorganization
 caption <- "First 6 samples after reorganization"
@@ -434,7 +446,9 @@ kable(
     add_header_above(header = colNames2, line = F, align = "c") %>%
     kable_styling(latex_options = c("HOLD_position", "scale_down"))
 ```
+
 The number of samples and distinct samples after all this manipulation remained the same, a total of 416 (\ref{show-total-samples-2}).
+
 ```{r total-samples-2, echo=F}
 # Total samples
 n_samples <- nrow(dat) # 416
@@ -442,7 +456,9 @@ n_distinct_samples <- n_distinct(dat$id) # 416
 ```
 
 ### Adding new variables
+
 To finish the data preparation, new columns were added to the dataset (\ref{show-new-features-2}). Starting with the concrete class, for example if the compressive strength is between 25 and 30, it receives the class *C25*. The inclusion of the class was important because the compressive strength in *MPa* is a continuous variable, which will be used in the regression models, but the class as a discrete variable can provide another visualization of the data. The approximate mix of concrete was also added, which represents the proportions of aggregates (fine and coarse) for cement. Other proportions between the main ingredients were also added. The new variables are presented in the table \ref{tab:new-features-table}.
+
 ```{r new-features-2, echo=F}
 # Adding New features
 concrete_class <- function(mpa){
@@ -480,6 +496,7 @@ dat$class <- factor(
   dat$class, 
   levels=c( "C5", sort(lvl[lvl!="C5"], decreasing=F)))
 ```
+
 ```{r new-features-table, echo=F}
 # Table - New features
 caption <- "New features"
@@ -503,13 +520,12 @@ kable(
   column_spec(4:9, width = "1.7cm")
 ```
 
-
-
-
 ## Data visualization
+
 In order to assess the need for further manipulation before building the models, in this step the 416 samples already processed were visualized and analyzed.
 
 ### Descriptive statistics
+
 The table \ref{tab:stat-summ} presents the statistical data of the continuous variables (\ref {show-stat-summ}). The *Null* line represents the number of zeroed values for the ingredients, and the *NA* line represents the number of missing data. As the samples were filtered to maintain only sets of samples with known values of compressive strength at 28 days, the number of *NAs* is zero for that age. The figure \ref{fig:stat-summ-categorical} presents the statistical data of the discrete variables (\ref{show-stat-summ-categorical}).
 
 &nbsp;
@@ -540,6 +556,7 @@ kable(
   kable_styling(latex_options = c("HOLD_position", "scale_down")) %>%
   column_spec(c(1,10:15), width = "1.5cm")
 ```
+
 ```{r stat-summ-categorical, echo=FALSE, fig.height=4, fig.cap = cap}
 # Figure - Descriptive statistics - categorical variables
 cap <- "Descriptive statistics - categorical variables"
@@ -613,6 +630,7 @@ grid.arrange(p1, p2, ncol=2)
 ```
 
 ### Correlation between ingredients and compressive strength
+
 The figure \ref{fig:correlation} shows the correlation of variables for each set of ages (\ref{show-correlation}). The figure \ref{fig:correlation-mpa} presents the same data, but instead of correlating them all, it only correlates with the compressive strength, showing the values in more detail (\ref{show-correlation-mpa}).
 
 &nbsp;
@@ -670,6 +688,7 @@ melt_dat_final %>%
         panel.grid.minor = element_blank(), 
         axis.line = element_line(colour = "black"))
 ```
+
 ```{r correlation-mpa, echo=F, fig.height=3, fig.cap=cap}
 # Figure - Correlation over time
 cap <- "Correlation of variables with compressive strength over time"
@@ -690,6 +709,7 @@ melt_dat_final %>%
         panel.grid.minor = element_blank(),
         axis.line = element_line(colour = "black"))
 ```
+
 The interpretation of the figure \ref{fig:correlation-mpa} suggests that the strength of the concrete is positively related mainly to the cement and superplasticizer ingredients and negatively to the water and fine aggregate. The smaller the amount of cement for aggregates and water, the more negatively they are correlated with compressive strength.
 
 &nbsp;
@@ -740,6 +760,7 @@ mix_dat %>%
   theme(panel.grid.minor = element_blank(),
       axis.line = element_line(colour = "black"))
 ```
+
 ```{r mix-mpa, echo=F, fig.cap=cap, fig.height=3.5, warning=FALSE, message=F}
 # Figure - Relationship between concrete main features
 cap <- "Relationship between concrete main features"
@@ -776,9 +797,11 @@ mix_dat %>%
   theme(panel.grid.minor = element_blank(),
       axis.line = element_line(colour = "black"))
 ```
+
 The figures \ref{fig:mix-app-mpa} and \ref{fig:mix-mpa} show the relationship between the main ingredients (known as mix) in relation to the compressive strength (\ref{show-mix-app-mpa} and \ref{show-mix-mpa}). The interpretation of these figures shows that the greater the amount of cement in relation to the other ingredients, the greater the resistance to compression.
 
 ### Variables distribution
+
 The figure\ref{fig:vars-distribution} shows the distribution of variables in the samples (\ref{show-vars-distribution}). It was calculated using data only at 28 days.
 
 &nbsp;
@@ -813,7 +836,9 @@ dist_dat %>%
         panel.grid.minor = element_blank(), 
         axis.line = element_line(colour = "black"))
 ```
+
 The figure \ref{fig:vars-distribution-time} shows the distribution of ingredients and compressive strength for each set of ages (\ref{show-vars-distribution-time}), in case of the 28 days it presents the same information as the figure \ref{fig:vars-distribution}. It shows that the resistance to compression gradually increases over time, as expected. Furthermore it is seen that the concentration of the ingredients can vary a lot when stratified by ages.
+
 ```{r vars-distribution-time, echo=F, fig.height=10, fig.cap=cap, warning=FALSE, message=F}
 # Figure - Variables distribution grouped by age
   
@@ -851,7 +876,9 @@ dist_dat_2 %>%
 ```
 
 ### Principal component analysis
+
 In the figure \ref{fig:pca}, using an alternative classification, the principal component analysis was performed on the ingredients (\ref{show-pca}). The classification separates concrete into 4 different compressive strength groups, low up to *20 MPa*, normal up to *40 MPa*, medium up to *70 MPa* and high above that. It is possible to notice that the groups overlap, but there is a differentiation between the high and low group.
+
 ```{r pca, echo=F, fig.height=3, fig.cap=cap}
 # Figure - Principal component analysis on ingredients
   
@@ -884,13 +911,12 @@ fviz_pca_ind(
   theme_bw()
 ```
 
-
-
-
 ## Machine learning models
+
 The development of machine learning models was carried out with the *caret* package [@caret] and based on @irizarry2019 and @Kuhn2008.
 
 ### Pre-processing and data separation
+
 As the approximate mix is a categorical variable, it was converted into dummy variables (\ref{show-dummy-var}), going from 22 columns (id, class, compressive strength and 19 more *features*) to 45 columns, an addition of 23 variables, one for each approximate mix.
 
 &nbsp;
@@ -904,6 +930,7 @@ dat <- dat %>%
   select(-c(mix_app)) %>%
   full_join(., dummyDat)
 ```
+
 The samples were separated based on age. One dataset was created for each age value, totaling 6 different sets (\ref{show-preparation}). For illustrative purposes, the first 18 of 45 columns of the first 6 samples from the 28-day set are shown in the table \ref{tab:table-preparated-samples}.
 
 &nbsp;
@@ -936,6 +963,7 @@ dat_100 <- dat %>%
   drop_na() %>%
   rename_at("day_100",~"mpa")
 ```
+
 ```{r table-preparated-samples, echo=F}
 # Table - First 18 columns of the 6 first samples of 28 days
 colNames = c("ID", "Cement", "B.F.S.", "Fly ash", "water",
@@ -960,6 +988,7 @@ kable(
     add_header_above(header = colNames, line = F, align = "c") %>%
     kable_styling(latex_options = c("HOLD_position", "scale_down"))
 ```
+
 For each of the 6 sets, the existence or not of variables with variance close to zero and their subsequent removal was verified (\ref{show-nzv}). Many of the 23 variables added referring to the approximate concrete mix were removed due to this fact. In addition to them, in the case of the 7-day set, the fly ash variable was also removed. Then it was verified that there are no variables with high correlation, above 0.999, in any of the 6 data sets (\ref{show-cors}). After these steps, the sample sets presented 24, 21, 23, 23, 24 and 25 columns respectively for ages in increasing sequence.
 
 &nbsp;
@@ -979,6 +1008,7 @@ dat_28 <- dat_28[,-nzv_28]
 dat_56 <- dat_56[,-nzv_56]
 dat_100 <- dat_100[,-nzv_100]
 ```
+
 ```{r cors, echo=F}
 # High correlation variables verification
 descr_cor_3 <- cor(select(dat_3, -c(mpa, id, class)))
@@ -994,11 +1024,13 @@ high_cor_28 <- sum(abs(descr_cor_28[upper.tri(descr_cor_28)]) > .999)
 high_cor_56 <- sum(abs(descr_cor_56[upper.tri(descr_cor_56)]) > .999)
 high_cor_100 <- sum(abs(descr_cor_100[upper.tri(descr_cor_100)]) > .999)
 ```
+
 The stage of centralization and normalization of the variables was carried out later, together with the application of the models, as it is simpler to do this with the *caret* package. If performed at this time, it would be necessary to manually undo these transformations in the predictions. The *caret* allows you to transform before training the models and already transforms the results back.
 
 &nbsp;
  
 Each data set was separated into test and training sets, *20%* and *80%* respectively (\ref{show-split}). The figure \ref{fig:dist-split} shows the distribution of data between the sets in relation to the compressive strength for each model (\ref{show-dist-split}).
+
 ```{r split, echo=F, message=F, warning=F}
 # Test and train data split
 reg <- list(
@@ -1029,6 +1061,7 @@ gen_dat <- function(n){
 dats_reg <- lapply(list(1,2,3,4,5,6), gen_dat)
 names(dats_reg) <- c("d3", "d7", "d14", "d28", "d56", "d100")
 ```
+
 ```{r dist-split, echo=F, message=F, warning=F, fig.height=3, fig.cap= cap}
 # Distribution of test and train data
 cap <- "Distribution of test and train data"
@@ -1066,10 +1099,13 @@ densities %>%
 ```
 
 ### Performance measures
+
 The performance evaluation of the models was performed by the Root Mean Square Error (*RMSE*). The *RMSE* is the measure used in all the works mentioned in the introduction and will allow the comparison of the models in the discussion.
 
 ### Naive models
+
 Before creating the real models, for comparison purposes, naive models were created. They simply predict that the compressive strength of the test set is the average compressive strength of the training set (\ref{show-naive-model-reg}). In other words, naive models are simply the best guess possible. The results can be checked in the table \ref{tab:table-naive-model-reg}.
+
 ```{r naive-model-reg, echo=F, message=F, warning=F}
 # Naive model
 res <- function(d, n){
@@ -1091,6 +1127,7 @@ rmses <- imap(dats_reg, get_rmse) %>%
 ing_model_df <- ing_model %>% reduce(rbind)
 df_performance_reg <- full_join(ing_model_df, rmses)
 ```
+
 ```{r table-naive-model-reg, echo=F}
 # Table - Naive models
 colNames = c("Age", "Mean $MPa$ (train)", "RMSE (train)", "RMSE (test)")
@@ -1108,9 +1145,11 @@ kable(
 ```
 
 ### Choice of algorithms
+
 The *caret* [@caret] package exposes more than 200 different algorithms for building *machine learning* models. The package documentation presents an initial code [@modelsClusters] as a suggestion to select a portfolio of the most distinct algorithms possible in relation to some pre-selected algorithm, but for agility and due to technical limitations, it was chosen to use an algorithm with the highest probability to achieve the best possible result. According to @Fernandez2014, who compared 179 algorithms in 121 different databases, the algorithm most likely to achieve the best possible results is the *Parallel Random Forest* (called *prRF * in *caret*).
 
 ### Regression models
+
 As new variables were added throughout the processing (the relationships between the ingredients and a few more *dummy vars* for each age set), 5 possibilities for configuring the *features* for the models were studied:
 
 &nbsp;
@@ -1125,6 +1164,7 @@ As new variables were added throughout the processing (the relationships between
 
 Building a model for each of these configurations using the set at 28 days (\ref{show-test-models-reg}), showed that the best option is configuration 2, the *dummy vars* were completely discarded, but the other new variables were kept.
 For illustrative purposes, the \ref{tab:table-done-samples-28} table shows the first 6 samples from the 28-day model training set. The samples of the other models, of the test and training sets are similar, the only difference being in the 7-day model, which excludes fly ash due to the variance close to zero, performed previously.
+
 ```{r test-models-reg, echo=F, warning=F, message=F, include=F}
 # Features selection
 data1 <- dats_reg$d28$train # full
@@ -1176,6 +1216,7 @@ min(fit_parRF5$results$RMSE) # 8.691755
 p_parRF5 <- predict(fit_parRF5, newdata = test5)
 RMSE(p_parRF5, test5$y) # 7.991537
 ```
+
 ```{r table-done-samples-28, echo=F}
 # Table - First 6 samples of train data of the 28 days model
 caption <- "First 6 samples of train data of the 28 days model"
@@ -1201,7 +1242,9 @@ kable(
     add_header_above(header = colNames2, line = T, align = "c") %>%
     kable_styling(latex_options = c("HOLD_position", "scale_down"))
 ```
+
 For each age set, a model was created using the *Parallel Random Forest* algorithm, previously defined (\ref{show-reg-models}). For each of the 6 models, the parameter *mtry* was optimized, and *repeated cross-validation * was performed, dividing into 10 or 30 parts and repeating 10 times.
+
 ```{r reg-models, echo=F, warning=F, message=F, include=F}
 # Regression models
 # no dummy vars:
@@ -1303,10 +1346,10 @@ RMSE_test_100 # 5.851088
 fit_100$bestTune # mtry = 8
 ```
 
-
-
 # Results
+
 The test *RMSE* for each model in ascending order of age was `r round(RMSE_test_3,2)`, `r round(RMSE_test_7,2)`, `r round(RMSE_test_14,2)`, `r round(RMSE_test_28,2)`, `r round(RMSE_test_56,2)` and `r round(RMSE_test_100,2)` respectively. The table \ref{tab:table-reg-models} presents the details and results of each model (\ref{show-table-reg-models}). The figure \ref{fig:results-comparison} compares the actual and predicted values (\ref{show-results-comparison}), and the following tables show the best and worst results for each model (\ref{show-table-10}).
+
 ```{r table-reg-models, echo=F}
 # Table - Models details
 colNames <- c("Model", "mtry", "CV", "Repetitions", 
@@ -1338,6 +1381,7 @@ kable(
     )  %>%
   kable_styling(latex_options = c("HOLD_position"))
 ```
+
 ```{r results-comparison, echo=F, message=F, warning=F, fig.height=4, fig.cap=cap}
 # Figure - Models comparison
 cap <- "Actual vs Predicted values in each model"
@@ -1361,6 +1405,7 @@ res_df %>%
   xlab(xlabel) +
   ylab(ylabel)
 ```
+
 ```{r table-10, echo=F}
 # Results tables of 10 best and worst results
 colNames1 = c("Actual", "Predicted", "Error", "","Actual", "Predicted", "Error") 
@@ -1415,10 +1460,10 @@ gen_kable(5)
 gen_kable(6)
 ```
 
+# Discussion and conclusion
 
-
-# Discussion
 The models built present satisfactory results and prove that the compressive strength of concrete can be predicted relatively easily. The alternative adopted to create a model for each set of age proved to be a valid method, managing to stratify to obtain specific results for each set. The studies cited in the introduction using the same dataset have similar results, as expected. The \ref{tab:works-comparison} table presents the results of these works (\ref{show-works-comparison}), and the table \ref{tab:results} presents the values found for easy comparison (\ref{show-results}) .
+
 ```{r works-comparison, echo=F}
 # Table - Comparison of other works
 colNames = c("Author","Year" ,"Algorithm", "RMSE") 
@@ -1443,6 +1488,7 @@ kable(
   )  %>%
     kable_styling(latex_options = c("HOLD_position"))
 ```
+
 ```{r results, echo=F}
 # Table - Final results
 colNames <- c("Model", "RMSE")
@@ -1464,18 +1510,19 @@ kable(
     )  %>%
   kable_styling(latex_options = c("HOLD_position"))
 ```
+
 Following the line of reasoning of this work, it can be performed with different algorithms, the results found here used only one (*Parallel Random Forest*), even though it was theoretically the "best" found, other algorithms can present even better results. Another option is to create an *ensemble* of various algorithms, just like @Pierobon2018, but with the separation of age sets proposed here. In addition, it can be performed with a larger dataset, ideally with the same number of samples in each age set, a more homogeneous distribution of compressive strength, and less variance between samples.
 
-
-
 # Literature cited
-<div id="refs"></div>
-\newpage
 
+<div id="refs"></div>
+
+\newpage
 
 # Appendix 1 - Virtual environment {#appendix1}
 
 ## Operational system
+
 ```{r system, echo=FALSE}
 v <- as.matrix(R.Version())
 kable(v, booktabs = T) %>%
@@ -1483,6 +1530,7 @@ kable(v, booktabs = T) %>%
 ```
 
 ## Packages
+
 ```{r packages, echo=FALSE}
 p <- matrix(
       c(
@@ -1511,12 +1559,7 @@ kable(p, booktabs = T) %>%
 \newpage
 
 
-# Appendix 2 - Online repository {#appendix2}
-https://github.com/pedrobern/concrete-compressive-strength-prediction
-\newpage
-
-
-# Appendix 3 - Code {#appendix3}
+# Appendix 2 - Code {#appendix2}
 
 
 ## Obtaining the data
@@ -1749,7 +1792,7 @@ https://github.com/pedrobern/concrete-compressive-strength-prediction
 ```{r show-table-10, ref.label='table-10', ref='show-table-10', eval=FALSE}
 ```
 
-## Discussion
+## Discussion and conclusion
 ### Table - Comparison of other works
 
 ```{r show-works-comparison, ref.label='works-comparison', ref='show-works-comparison', eval=FALSE}
