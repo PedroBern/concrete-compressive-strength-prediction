@@ -173,9 +173,9 @@ Concrete compressive strength prediction with machine learning}
 
 \noindent $^2$\textit{Assistant Professor, Dept. of Engineering, IBMEC/RJ}
 
-\noindent \textit{TODOVICTOR: Address, Zip-Code, State/Province, Country}
+\noindent \textit{TODO: Address, Zip-Code, State/Province, Country}
 
-\noindent \textit{TODOVICTOR: somebody3@somewhere.com}
+\noindent \textit{TODO: somebody3@somewhere.com}
 
 
 \vspace{18pt} % <- keep this vertical space!
@@ -196,17 +196,26 @@ TODO: REDUCE TO 200 WORDS, CURRENTRLY IT HAS 270. Compressive strength is the ma
 % --------------------------------------------------------------------------
 
 
+Compressive strength is the main characteristic of concrete, measured by tests of international standards that consist of the breaking of specimens. Measurement at 28 days is mandatory and represents the grade of the concrete. Knowing in advance what the result will be obtained for a given age, based on the proportions of its ingredients, is of great interest to concrete manufacturers, construction companies, and civil engineers.
+ 
+The compressive strength is a nonlinear function of its ingredients and age, making it difficult to establish an analytical formula, although some formulas have already been proposed. \citet{Hasan2011} proposed a mathematical model to predict from the results of tests of 7 and 14 days, and \citet{Kabir2012} from 7 days. However, machine learning techniques can be used to model this characteristic from real sample data, using only the ingredients.
+ 
+Many previous studies use the same dataset used by \citet{Yeh1998} to predict the compressive strength of concrete. \citet{Alshamiri2020} got good results with the regularized extreme learning machine (RELM) technique, and \citet{Hameed2020} got even better results with the Artificial Neural Networks and cross-validation technique. This set of samples is so well known that there are many pages on the internet of unpublished studies that use it and have good results, such as \citet{Abban2016}, \citet{Raj2018}, \citet{Modukuru2020} and \citet{Pierobon2018}. At the end of the work, the results found are compared to the works cited here.
+
+Unlike previous studies with this dataset, this work does data preparation differently. The age of the concrete is the most unique feature that contributes to its compressive strength. For this reason, age is treated separately in the machine learning models, creating models for each age group.
+
+
 % --------------------------------------------------------------------------
 \section{Materials and methods}\label{sec:MaterialsAndMethods}
 % --------------------------------------------------------------------------
 
 % --------------------------------------------------------------------------
-\subsection{Materials} \label{subsec:materials}
+\subsection{Materials and reproducibility} \label{subsec:materialsandreproducibility}
 % --------------------------------------------------------------------------
 
-% --------------------------------------------------------------------------
-\subsection{Reproducibility} \label{subsec:reproducibility}
-% --------------------------------------------------------------------------
+The methodology was carried out using RStudio software (\citet{RStudio}), an integrated virtual environment for code development in R language (\citet{RCore}). Throughout the process, all code executed was documented in the same order as its execution and pushed to the github repository (TODO: CREATE GITHUB REPO BIBLIO AND ADD HERE). The repository contains a longer version of this paper, including all the code, required packages and versions. In order to guarantee reproducibility, whenever there was code that uses probabilistic operations, a seed was defined before its execution, ensuring results consistency when running on another machine.
+
+
 
 % --------------------------------------------------------------------------
 \subsection{Obtaining the data} \label{subsec:Obtainingthedata}
