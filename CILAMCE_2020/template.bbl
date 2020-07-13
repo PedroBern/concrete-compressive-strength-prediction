@@ -1,0 +1,15 @@
+\begin{thebibliography}{}
+
+\bibitem[Drucker, 1951]{Drucker1951}
+Drucker, D.~C., 1951.
+\newblock A more fundamental approach to plastic stress-strain relations.
+\newblock In {\em Proceedings of the First National Congress of Applied
+  Mechanics}, pp.  487--491, Chicago, USA. ASME.
+
+\bibitem[Ba\v{z}ant and Lin, 1988]{Bazant1988}
+Ba\v{z}ant, P.~Z. \& Lin, F.~B., 1988.
+\newblock Non-local yield limit degradation.
+\newblock {\em International Journal for Numerical Methods in Engineering},
+  vol. 26, pp. 1805--1823.
+
+\end{thebibliography}
