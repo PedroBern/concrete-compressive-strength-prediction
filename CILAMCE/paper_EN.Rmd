@@ -67,18 +67,158 @@ library(questionr)
 options(pillar.sigfig = 5)
 options(knitr.kable.NA = '')
 opts_knit$set(eval.after = "fig.cap")
-opts_chunk$set(echo = TRUE, fig.align = 'center', cache=F, prompt=F, highlight=T )
+opts_chunk$set(echo = TRUE, fig.align = 'center', cache=T, prompt=F, highlight=T )
 ```
 
-# Lorem ipsum
+# Introduction
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+Compressive strength is the main characteristic of concrete, measured by tests of international standards that consist of the breaking of specimens. Measurement at 28 days is mandatory and represents the grade of the concrete. Knowing in advance what the result will be obtained for a given age, based on the proportions of its ingredients, is of great interest to concrete manufacturers, construction companies, and civil engineers.
 
-# Lorem ipsum dolor
+This compressive strength is a nonlinear function of its ingredients and age, making it difficult to establish an analytical formula, although some formulas have already been proposed. @Hasan2011 proposed a mathematical model to predict from the results of tests of 7 and 14 days, and @Kabir2012 from 7 days. However, machine learning techniques can be used to model this characteristic from real sample data, using only the ingredients.
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+```{r comentario-1, echo=T}
+# Aqui vale incluir um parágrafo para explicar o que é machine learning,
+# e por que é possível obter a resistência a partir apenas dos ingredientes.
+```
+
+Many previous studies use the same dataset used by @Yeh1998 to predict the compressive strength of concrete. @Alshamiri2020 got good results with the regularized extreme learning machine (RELM) technique, and @Hameed2020 got even better results with the Artificial Neural Networks and cross-validation technique. This set of samples is so well known that there are many pages on the internet of unpublished studies that use it and have good results, such as @Abban2016, @Raj2018, @Modukuru2020 and @Pierobon2018. At the end of the work, the results found are compared to the works cited here.
+
+Unlike previous studies with this dataset, this work does data preparation differently. The age of the concrete is the most unique feature that contributes to its compressive strength. For this reason, age is treated separately in the machine learning models, creating models for each age group.
+
+# Materials and Methods
+
+## Materials
+
+```{r comentario-2, echo=T}
+# Editar, porque não vai ter mais os apêndices
+```
+
+The methodology was carried out using RStudio software [@RStudio], an integrated virtual environment for code development in *R* [@RCore]. Throughout the process, all code executed was documented in the same order as its execution in Appendix 3, and reference was always made to codes throughout the text. All relevant information related to the operating system and installed packages has been presented in Appendix 1. In addition, an online and open-source repository was created in *Github*, housing all the code used to generate this work, the link was made available in[Appendix 2.
+
+## Reproducibility
+
+```{r comentario-3, echo=T}
+# Editar, porque não vai ter mais os apêndices
+# Definir o que é seed
+```
+
+In order to guarantee reproducibility, whenever there was some code that could use probabilistic operations, a *seed* was defined before its execution, ensuring that when run on another machine, with the same version of *R* and the same *seed*, get the same result. The *seeds* can be checked throughout Appendix 3 or directly on *Github*.
 
 
+## Obtaining the data
+The data was downloaded from the University of California Irvine website [@downloadData]. In total there are 1030 samples with 9 columns. The samples were renamed and an id column was added to facilitate data manipulation. The columns were reordered to put the new id column in the first position. The first samples can be viewed in the Table \ref{tab:first-samples}.
+
+```{r download-data, echo=F, include=F}
+# Data download
+url_base <- "https://archive.ics.uci.edu"
+url <-  "/ml/machine-learning-databases/concrete/compressive/Concrete_Data.xls"
+download.file(paste0(url_base, url), "data.xls")
+dat <- read.xls("data.xls")
+n_inicial_samples <- nrow(dat)
+colnames(dat)
+```
+```{r rename-dat-cols, echo=F}
+# Renaming the columns
+colnames(dat) <- c(
+  "cement",
+  "blast_furnace_slag",
+  "fly_ash",
+  "water",
+  "superplasticizers",
+  "coarse_aggregate",
+  "fine_aggregate",
+  "day",
+  "mpa"
+  )
+dat$id <- seq.int(nrow(dat))
+```
+```{r reorder-dat, echo=F}
+# Reordering the data
+col_order <- c(
+  "id",
+  "cement",
+  "blast_furnace_slag",
+  "fly_ash",
+  "water",
+  "superplasticizers",
+  "coarse_aggregate",
+  "fine_aggregate",
+  "day",
+  "mpa"
+)
+dat <- dat[, col_order]
+```
+```{r col-names-and-units, echo=F}
+# Defining column names and units
+colNames <- c("ID", "Cement", "B.F.S.", "Fly ash", "Water",
+             "Superp.", "C.Aggregate", "F.Aggregate", "Day", "Comp.Str.")
+dfUnits <- c("", "$kg/m^3$", "$kg/m^3$","$kg/m^3$","$kg/m^3$",
+             "$kg/m^3$","$kg/m^3$","$kg/m^3$","","$MPa$")
+```
+```{r first-samples, echo=F}
+# Table - First samples
+caption <- "First 6 samples"
+kable(
+    dat[1:6,],
+    col.names = dfUnits,
+    escape = F,
+    booktabs = T,
+    caption = caption,
+    linesep = "",
+    align = "c"
+    ) %>%
+    add_header_above(header = colNames, line = F, align = "c") %>%
+    kable_styling(latex_options = c("HOLD_position", "scale_down"))
+```
+
+
+## Data preparation
+
+The preparation of the data consisted of transforming the sample set in order to maintain only relevant data for the subsequent studies. Data that were considered irrelevant or that had the potential to add undesirable noise to the analysis were removed. In addition, the relevant data has been transformed to better fit the studies in the next steps.
+
+### Initial data cleaning
+
+Initially, there were 25 duplicate samples that were removed, resulting in a new total of 1005 samples.
+
+```{r removing-duplicated-samples, echo=F}
+# Removing duplicated samples
+n_distinct_samples <- dat %>% select(-c(id)) %>% n_distinct()
+n_duplicated_samples <- n_inicial_samples - n_distinct_samples
+dat <- dat[!duplicated(select(dat, -c(id))),]
+n_samples <- nrow(dat)
+```
+
+The data show the variables in the columns and samples in the rows. However it was found that some samples are identical in proportions of ingredients, changing only the value of age and compressive strength, for example, samples 653, 654, 678 and 681, shown in the Table \ref{tab:similar-samples}.
+
+```{r similar-samples, echo=FALSE}
+# Table - Samples with same composition
+same_samples <- dat %>%
+  filter(id %in% c(653, 678, 654, 681))
+caption <- "Samples with same composition"
+kable(
+  same_samples[order(same_samples$day),],
+  col.names = dfUnits,
+  escape = F,
+  booktabs = T,
+  caption = caption,
+  linesep = "\\addlinespace",
+  align = "c",
+  row.names = FALSE
+  ) %>%
+  add_header_above(header = colNames, line = F, align = "c") %>%
+  kable_styling(latex_options = c("HOLD_position", "scale_down"))
+```
+
+In addition, there are also samples with the same values and proportions of ingredients, but with different compressive strength, probably due to differences in the building process. This is the case, for example, of samples 472, 473 and 474, shown in the table  \ref{tab:similar-samples-2}.
+
+
+
+
+
+
+
+
+--- 
 ## Lorem ipsum Sub
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
@@ -153,7 +293,7 @@ df %>%
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
 
 
-# References
+# tes
 
-Example of reference: "@Yeh1998 proposed… @Hameed2020". Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+Example of reference: "@Yeh1998 proposed… @Hameed2020. @Alshamiri2020,  ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
 
