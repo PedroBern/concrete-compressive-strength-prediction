@@ -218,31 +218,87 @@ The methodology was carried out using RStudio software (\citet{RStudio}), an int
 
 
 % --------------------------------------------------------------------------
-\subsection{Obtaining the data} \label{subsec:Obtainingthedata}
+% \subsection{Obtaining the data} \label{subsec:Obtainingthedata}
 % --------------------------------------------------------------------------
 
 % --------------------------------------------------------------------------
-\subsection{Data preparation} \label{subsec:datapreparation}
+% \subsection{Data preparation} \label{subsec:datapreparation}
 % --------------------------------------------------------------------------
 
 % --------------------------------------------------------------------------
-\subsection{Data visualization} \label{subsec:datavisualization}
+% \subsection{Data visualization} \label{subsec:datavisualization}
 % --------------------------------------------------------------------------
 
 % --------------------------------------------------------------------------
-\subsection{Machine learning models} \label{subsec:machinelearningmodels}
+% \subsection{Machine learning models} \label{subsec:machinelearningmodels}
 % --------------------------------------------------------------------------
 
 % --------------------------------------------------------------------------
 \section{Results}\label{sec:Results}
 % --------------------------------------------------------------------------
+The test RMSE for each model in ascending order of age was 3.31, 4.36, 4.62, 4.72, 5.94 and 5.85 respectively. The table \ref{tab:results} presents the details and results of each model, including the naive one. The figure \ref{fig:results} compares the actual and predicted values for the final models.
+
+\vspace{8pt}
+\begin{table}[!ht]
+\centering
+\caption{Final models}
+\label{tab:results}
+\vspace{6pt}
+\begin{tabular}{ccccccc}
+\hline
+Model & mtry & CV & Repetitions & Naive RMSE (test) & Final RMSE (train) & Final RMSE (test)\\ \hline
+3 days & 6 & 30 & 10 & 9.303229 & 3.905196 & 3.310370\\
+7 days & 2 & 10 & 10 & 13.443646 & 4.475981 & 4.361987\\
+14 days & 13 & 30 & 10 & 7.593319 & 5.136687 & 4.620515\\
+28 days & 11 & 30 & 10 & 14.283824 & 5.847334 & 4.716698\\
+56 days & 8 & 30 & 10 & 12.702112 & 6.702565 & 5.939163\\
+100 days & 8 & 10 & 10 & 12.614652 & 6.381940 & 5.851088\\ \hline
+\end{tabular}
+\end{table}
+\vspace{8pt}
+
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[scale=0.8]{Figures/results.jpg}
+\vspace{12pt}
+\caption{Actual vs Predicted values for each model}
+\label{fig:results}
+\end{center}
+\end{figure}
+\vspace{8pt}
 
 % --------------------------------------------------------------------------
 \section{Discussion and conclusion}\label{sec:DiscussionAndConclusion}
 % --------------------------------------------------------------------------
 
+The models built present satisfactory results and prove that the compressive strength of concrete can be predicted relatively easily.The alternative adopted to create a model for each set of age proved to be a valid method, instead of using the age as a predictor along with the ingredients like all studies cited in the introduction with the same dataset. This stratification managed to obtain different results for each age group. Although the RMSE of these studies and the found here were close. The table \ref{tab:comparison} shows the comparison between these studies and the 28 days model developed here.
+
+\vspace{8pt}
+\begin{table}[!ht]
+\centering
+\caption{Comparison to other works with same dataset}
+\label{tab:comparison}
+\vspace{6pt}
+\begin{tabular}{cccl}
+\hline
+Author & Year & Algorithm & RMSE \\ \hline
+\citet{Pierobon2018} & 2018 & 5 algorithms Ensemble & 4.150\\
+This work & 2020 & Parallel Random Forest & 4.717 (28 day model)\\
+\citet{Hameed2020} & 2020 & Artificial Neural Networks & 4.736\\
+\citet{Raj2018} & 2018 & Gradient Boosting Regressor & 4.957\\
+\citet{Modukuru2020} & 2020 & Random Forest Regressor & 5.080\\
+\citet{Alshamiri2020} & 2020 & Regularized Extreme Learning Machine & 5.508\\
+\citet{Abban2016} & 2016 & Support Vector Machines with Radial Basis Function Kernel & 6.105\\ \hline
+\end{tabular}
+\end{table}
+\vspace{8pt}
+
+
+Following the line of reasoning of this work, it can be performed with different algorithms, the results found here used only one (Parallel Random Forest), other algorithms can present better results. Another option is to create an ensemble of various algorithms, just like \citet{Pierobon2018}, but with the separation of age sets proposed here. In addition, it can be performed with a larger dataset, ideally with a similar number of samples in each age group and a more homogeneous distribution of compressive strength.
+
 
 %--------------------------------------------------------------------------
+\vspace{20pt}
 \noindent \textbf{Authorship statement.} The authors hereby confirm that they are the sole liable persons responsible for the authorship of this work, and that all material that has been herein included as part of the present paper is either the property (and authorship) of the authors, or has the permission of the owners to be included here. 
 
 \bibliography{bibliography}
