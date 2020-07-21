@@ -82,7 +82,7 @@
 
 
 \makeatother
-\bibliographystyle{./bib-cilamce}
+\bibliographystyle{bib-cilamce}
 %\bibliographystyle{plain}
 
 
@@ -131,7 +131,7 @@ Foz do Iguaçu/PR, Brazil, November 16-19, 2020}}
 
 % --------------------------------------------------------------------------
 % PLEASE, EDIT THIS!
-\fancyhead[LE]{\footnotesize \textit{Template for CILAMCE 2020 Concrete compressive strength prediction with machine learning}}
+\fancyhead[LE]{\footnotesize \textit{CILAMCE 2020 Concrete compressive strength prediction with machine learning}}
 \fancyhead[RO]{\footnotesize \textit{P. Moreira, V. Silva}}
 % --------------------------------------------------------------------------
 
@@ -173,9 +173,9 @@ Concrete compressive strength prediction with machine learning}
 
 \noindent $^2$\textit{Assistant Professor, Dept. of Engineering, IBMEC/RJ}
 
-\noindent \textit{TODO: Address, Zip-Code, State/Province, Country}
+\noindent \textit{Avenida Armando Lombardi 940, 22640-000, Rio de Janeiro, Brazil}
 
-\noindent \textit{TODO: somebody3@somewhere.com}
+\noindent \textit{victor.silva@professores.ibmec.edu.br}
 
 
 \vspace{18pt} % <- keep this vertical space!
@@ -185,7 +185,7 @@ Concrete compressive strength prediction with machine learning}
 % --------------------------------------------------------------------------
 
 \noindent \textbf{Abstract.}
-TODO: REDUCE TO 200 WORDS, CURRENTRLY IT HAS 270. Compressive strength is the main characteristic of concrete. The correct prediction of this parameter means cost and time reduction. This work built predictive models for 6 different ages of concrete samples (3, 7, 14, 28, 56, and 100 days). A set of data obtained in previous studies was used, a total of 1030 samples, with 9 variables: compressive strength, age, and 7 ingredients (water, cement, fine aggregate, coarse aggregate, fly ash, blast furnace slag, and superplasticizers). Another 6 variables were added to represent the proportions of the main ingredients in each sample (water/cement, fine aggregate/cement, coarse aggregate/cement, fine aggregate/coarse aggregate, water/coarse aggregate, and water/fine aggregate). The predictive models were developed in R language, using the caret package with the Parallel Random Forest algorithm and repeated cross-validation technique to optimize the parameters. The results were satisfactory and compatible with other studies using the same data set. The most important model, 28 days old, obtained RMSE of 4.717. The 3-day model obtained the best result, RMSE of 3.310. The worst result was the 56-day model, with RMSE of 5.939. The work showed that the compressive strength of concrete can be predicted. The choice of creating a model for each age, instead of using age as a predictor, allowed to get compatible results with the available data at each age. It was a promising alternative since good results were achieved by training with just one algorithm. This work facilitates exploration and new efforts to predict the compressive strength of concrete, it can be used as a baseline to predict with different algorithms or the combination of several.
+TODO: REDUCE TO 200 WORDS, CURRENTRLY IT HAS 270. Compressive strength is the main characteristic of concrete. The correct prediction of this parameter means cost and time reduction. This work built predictive models for 6 different ages of concrete samples. A set of 1030 samples from previous studies was used, with 9 variables: compressive strength, age, and 7 ingredients. Another 6 variables were added to represent the proportions of the main ingredients in each sample (water/cement, fine aggregate/cement, coarse aggregate/cement, fine aggregate/coarse aggregate, water/coarse aggregate, and water/fine aggregate). The predictive models were developed in R language, using the caret package with the Parallel Random Forest algorithm and repeated cross-validation technique to optimize the parameters. The results were satisfactory and compatible with other studies using the same data set. The most important model, 28 days old, obtained a root mean square error (RMSE) of 4.717. The 3-day model obtained the best result, RMSE of 3.310. The worst result was the 56-day model, with RMSE of 5.939. The work showed that the compressive strength of concrete can be predicted. The choice of creating a model for each age, instead of using age as a predictor, allowed to get compatible results with the available data at each age. It was a promising alternative since good results were achieved by training with just one algorithm. This work facilitates exploration and new efforts to predict the compressive strength of concrete, it can be used as a baseline to predict with different algorithms or the combination of several.
 
 \vspace{18pt} % <- keep this vertical space!
 
@@ -196,13 +196,26 @@ TODO: REDUCE TO 200 WORDS, CURRENTRLY IT HAS 270. Compressive strength is the ma
 % --------------------------------------------------------------------------
 
 
-Compressive strength is the main characteristic of concrete, measured by tests of international standards that consist of the breaking of specimens. Measurement at 28 days is mandatory and represents the grade of the concrete. Knowing in advance what the result will be obtained for a given age, based on the proportions of its ingredients, is of great interest to concrete manufacturers, construction companies, and civil engineers.
+Compressive strength is the main characteristic of concrete, measured by tests of international standards that consist of the breaking of specimens (\citet{Gambhir1990}). Measurement at 28 days is mandatory and represents the grade of the concrete. Knowing in advance what the result will be obtained for a given age, based on the proportions of its ingredients, is of great interest to concrete manufacturers, construction companies, and civil engineers.
  
-The compressive strength is a nonlinear function of its ingredients and age, making it difficult to establish an analytical formula, although some formulas have already been proposed. \citet{Hasan2011} proposed a mathematical model to predict from the results of tests of 7 and 14 days, and \citet{Kabir2012} from 7 days. However, machine learning techniques can be used to model this characteristic from real sample data, using only the ingredients.
- 
-Many previous studies use the same dataset used by \citet{Yeh1998} to predict the compressive strength of concrete. \citet{Alshamiri2020} got good results with the regularized extreme learning machine (RELM) technique, and \citet{Hameed2020} got even better results with the Artificial Neural Networks and cross-validation technique. This set of samples is so well known that there are many pages on the internet of unpublished studies that use it and have good results, such as \citet{Abban2016}, \citet{Raj2018}, \citet{Modukuru2020} and \citet{Pierobon2018}. At the end of the work, the results found are compared to the works cited here.
+The compressive strength is a nonlinear function of its ingredients and age, making it difficult to establish an analytical formula, although some formulas have already been proposed (\cite{Hasan2011}, \cite{Kabir2012}). However, most of the studies have build models including the age as a feature along with the ingredients, but because of the non linearity between the compressive strength and age, we have find the need of further investigation of models that separate the age and analyse only the ingredients, then specify for each age. 
 
-Unlike previous studies with this dataset, this work does data preparation differently. The age of the concrete is the most unique feature that contributes to its compressive strength. For this reason, age is treated separately in the machine learning models, creating models for each age group.
+Therefore, the present study aims at building predictive models for the concrete compressive strength at different ages using only it's ingredients as features.
+
+
+% --------------------------------------------------------------------------
+\section{Related work}\label{sec:introduction}
+% --------------------------------------------------------------------------
+
+TODO: Estou com dúvida, se coloco os resultados dos outros trabalhos aqui, porque são apresentados na seção de conclusão e discussão.
+
+TODO: Essa seção ainda tem que ser mais desenvolvida.
+
+TODO: Focar nos que foram publicados/peer review.
+
+% \citet{Hasan2011} proposed a mathematical model to predict 28 day compressive strength from the results of tests of 7 and 14 days, and \citet{Kabir2012} from 7 days. These are analytical formulas, but use
+
+The data set used in this study was the one used originally by \citet{Yeh1998}, and then by many othe works. \citet{Alshamiri2020} got good results with the regularized extreme learning machine (RELM) technique, and \citet{Hameed2020} got even better results with the Artificial Neural Networks and cross-validation technique. This set of samples is so well known that there are many pages on the internet of unpublished studies that use it and have good results, such as \citet{Abban2016}, \citet{Raj2018}, \citet{Modukuru2020} and \citet{Pierobon2018}. Later in this paper all studies are compared with the results found here.
 
 
 % --------------------------------------------------------------------------
@@ -213,8 +226,16 @@ Unlike previous studies with this dataset, this work does data preparation diffe
 \subsection{Materials and reproducibility} \label{subsec:materialsandreproducibility}
 % --------------------------------------------------------------------------
 
-The methodology was carried out using RStudio software (\citet{RStudio}), an integrated virtual environment for code development in R language (\citet{RCore}). Throughout the process, all code executed was documented in the same order as its execution and pushed to the github repository (TODO: CREATE GITHUB REPO BIBLIO AND ADD HERE). The repository contains a longer version of this paper, including all the code, required packages and versions. In order to guarantee reproducibility, whenever there was code that uses probabilistic operations, a seed was defined before its execution, ensuring results consistency when running on another machine.
+The methodology was carried out using RStudio software (\citet{RStudio}), an integrated virtual environment for code development in R language (\citet{RCore}). Throughout the process, all code executed was documented in the same order as its execution and pushed to the github repository (TODO: CREATE GITHUB REPO BIBLIO AND ADD HERE). The repository contains an extended version of this paper, including all the code, required packages and versions. In order to guarantee reproducibility, whenever there was code that uses probabilistic operations, a seed was defined before its execution, ensuring results consistency when running on another machine.
 
+The main package used to build the machine learning models was the Caret Package (\citet{caret}). It provides all functionalities and utilities to build prediction models for any data set, has a straight and clear documentation that guides the process and provide around 200 different algorithms to build models. We used only one algorithm in this work, chosen by the highest probability to achieve the best possible result, according to \citet{Fernandez2014}, who compared 179 algorithms across 121 different databases, and find out that the most likely to achieve the best possible results is the Parallel Random Forest (called prRF in the caret).
+
+
+% --------------------------------------------------------------------------
+\subsection{TODO ...} \label{subsec:todo}
+% --------------------------------------------------------------------------
+
+...
 
 
 % --------------------------------------------------------------------------
@@ -236,7 +257,7 @@ The methodology was carried out using RStudio software (\citet{RStudio}), an int
 % --------------------------------------------------------------------------
 \section{Results}\label{sec:Results}
 % --------------------------------------------------------------------------
-The test RMSE for each model in ascending order of age was 3.31, 4.36, 4.62, 4.72, 5.94 and 5.85 respectively. The Table \ref{tab:results} presents the details and results of each model, including the naive one. The Fig. \ref{fig:results} compares the actual and predicted values for the final models.
+The test RMSE for each model in ascending order of age was 3.31, 4.36, 4.62, 4.72, 5.94 and 5.85 respectively. Table \ref{tab:results} presents the details and results of each model, including the naive one. Fig. \ref{fig:results} compares the actual and predicted values for the final models.
 
 \vspace{8pt}
 \begin{table}[!ht]
@@ -261,7 +282,7 @@ Model & mtry & CV & Repetitions & Naive RMSE (test) & Final RMSE (train) & Final
 \begin{center}
 \includegraphics[scale=0.8]{Figures/results-comparison.pdf}
 \vspace{12pt}
-\caption{Actual vs Predicted values for each model}
+\caption{TODO:(O que tem que atualizar aqui?) Actual vs predicted values for each model}
 \label{fig:results}
 \end{center}
 \end{figure}
@@ -271,7 +292,7 @@ Model & mtry & CV & Repetitions & Naive RMSE (test) & Final RMSE (train) & Final
 \section{Discussion and conclusion}\label{sec:DiscussionAndConclusion}
 % --------------------------------------------------------------------------
 
-The models built present satisfactory results and prove that the compressive strength of concrete can be predicted relatively easily.The alternative adopted to create a model for each set of age proved to be a valid method, instead of using the age as a predictor along with the ingredients like all studies cited in the introduction with the same dataset. This stratification managed to obtain different results for each age group. Although the RMSE of these studies and the found here were close. The Table \ref{tab:comparison} shows the comparison between these studies and the 28 days model developed here.
+The models built present satisfactory results and prove that the compressive strength of concrete can be predicted relatively easily.The alternative adopted, to create a model for each set of age proved to be a valid method, instead of using the age as a predictor along with the ingredients like the related studies with the same dataset. The adoption of this stratification achieved different results for each age group. However, the RMSE calculated in our work and the one obtained in the related works were close. Table \ref{tab:comparison} shows the comparison between these studies and the 28 days model developed here.
 
 \vspace{8pt}
 \begin{table}[!ht]
@@ -279,27 +300,30 @@ The models built present satisfactory results and prove that the compressive str
 \caption{Comparison to other works with same dataset}
 \label{tab:comparison}
 \vspace{6pt}
-\begin{tabular}{cccl}
+\begin{tabular}{lclcc}
 \hline
-Author & Year & Algorithm & RMSE \\ \hline
-\citet{Pierobon2018} & 2018 & 5 algorithms Ensemble & 4.150\\
-This work & 2020 & Parallel Random Forest & 4.717 (28 day model)\\
-\citet{Hameed2020} & 2020 & Artificial Neural Networks & 4.736\\
-\citet{Raj2018} & 2018 & Gradient Boosting Regressor & 4.957\\
-\citet{Modukuru2020} & 2020 & Random Forest Regressor & 5.080\\
-\citet{Alshamiri2020} & 2020 & Regularized Extreme Learning Machine & 5.508\\
-\citet{Abban2016} & 2016 & Support Vector Machines with Radial Basis Function Kernel & 6.105\\ \hline
+Author & Year & Algorithm & RMSE & Difference ({\%}) \\ \hline
+\citet{Pierobon2018} & 2018 & 5 algorithms Ensemble & 4.150 & -12\\
+\textbf{This work (28 day)} & \textbf{2020} & \textbf{Parallel Random Forest} & \textbf{4.717}  & \textbf{0}\\
+\citet{Hameed2020} & 2020 & Artificial Neural Networks & 4.736 & 0\\
+\citet{Raj2018} & 2018 & Gradient Boosting Regressor & 4.957  & +5\\
+\citet{Modukuru2020} & 2020 & Random Forest Regressor & 5.080  & +8\\
+\citet{Alshamiri2020} & 2020 & Regularized Extreme Learning Machine & 5.508 & +17\\
+\citet{Abban2016} & 2016 & SVM with Radial Basis Function Kernel & 6.105 & +29\\ \hline
 \end{tabular}
 \end{table}
 \vspace{8pt}
 
 
-Following the line of reasoning of this work, it can be performed with different algorithms, the results found here used only one (Parallel Random Forest), other algorithms can present better results. Another option is to create an ensemble of various algorithms, just like \citet{Pierobon2018}, but with the separation of age sets proposed here. In addition, it can be performed with a larger dataset, ideally with a similar number of samples in each age group and a more homogeneous distribution of compressive strength.
+Following the line of reasoning of this work, the same hypothesis can be evaluated using other algorithms besides the one used here (Parallel Random Forest), as they can present better results. Another option is to create an ensemble of various algorithms, just like \citet{Pierobon2018}, but with the separation of age sets proposed here. In addition, this study can be reproduced with a larger dataset, ideally with a similar number of samples in each age group and a more homogeneous distribution of compressive strength.
 
 
 %--------------------------------------------------------------------------
 \vspace{20pt}
 \noindent \textbf{Authorship statement.} The authors hereby confirm that they are the sole liable persons responsible for the authorship of this work, and that all material that has been herein included as part of the present paper is either the property (and authorship) of the authors, or has the permission of the owners to be included here. 
+
+\vspace{20pt}
+TODO: Na bibliografia, os ROI não entram por conta do modelo deles, que é inspirado no apa, o mais próximo que posso usar pra colocar o ROI é a chave "howpublished", mas ela não é usada em todas a bibliografias, depende do tipo, por exemplo @article, @inproceedings e @inbook não usam ela, acho que só a @misc usa (para publicacoes online), mas também não adianta porque as publicações online não tem ROI. Mas no geral atulizei as referencias e agora estão mais completas
 
 \bibliography{bibliography}
 
