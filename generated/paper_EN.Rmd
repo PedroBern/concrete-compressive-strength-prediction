@@ -50,6 +50,7 @@ if(!require(reshape2)) install.packages("reshape2")
 if(!require(purrr)) install.packages("purrr")
 if(!require(gridExtra)) install.packages("gridExtra")
 if(!require(questionr)) install.packages("questionr")
+if(!require(xlsx)) install.packages("xlsx")
 
 # Load libraries
 library(tidyverse)
@@ -67,6 +68,7 @@ library(factoextra)
 library(purrr)
 library(gridExtra)
 library(questionr)
+library("xlsx")
 
 # Set global options
 options(pillar.sigfig = 5)
@@ -412,6 +414,13 @@ dat %>%
 dat <- dat[dat$day %in% c(3, 7, 14, 28, 56, 100),]
 ```
 
+
+```{r dat-preparated, echo=F}
+dat_preparated <- dat
+```
+
+
+
 ### Data reorganization
 
 The samples were grouped to maintain only one sample from each set of configuration of the proportions of the ingredients, adding new variables/columns for resistance at each age (\ref{show-reorganizing-dat}). The result in the first samples after this processing is shown in the table \ref{tab:new-features}.
@@ -521,6 +530,20 @@ kable(
   column_spec(3, width = "2cm") %>%
   column_spec(4:9, width = "1.7cm")
 ```
+
+```{r dat-preparated-2, echo=F}
+dat_preparated_2 <- dat
+```
+
+```{r dat-preparated-to-xml, echo=F}
+dat_preparated_2 <- dat
+names(dat_preparated_2) <-  gsub("day_", "", names(dat_preparated_2))
+dat_preparated_2 <- dat_preparated_2 %>%
+  gather("age", "Mpa", "3":"100", na.rm = TRUE, convert = TRUE)
+
+
+```
+
 
 ## Data visualization
 
@@ -1063,6 +1086,7 @@ gen_dat <- function(n){
 dats_reg <- lapply(list(1,2,3,4,5,6), gen_dat)
 names(dats_reg) <- c("d3", "d7", "d14", "d28", "d56", "d100")
 ```
+
 
 ```{r dist-split, echo=F, message=F, warning=F, fig.height=3, fig.cap= cap}
 # Distribution of test and train data
