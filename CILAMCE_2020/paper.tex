@@ -219,7 +219,7 @@ Therefore, the present study aims at building predictive models for the concrete
 \citet{Hameed2020} compares Artificial Neural Network models with Multiple Linear Regression to predict a compressive strength force and have found that Artificial Neural Network models obtain much more accuracy than the Multiple Lenear Regression.
 
 In addition to these published studies, it is now very common to publish side projects on web pages. For easy access to this database and the growing interest in data science and machine learning, some unpublished studies using this same database include \citet{Modukuru2020}, \citet{Raj2018}, \citet{Abban2016} and  \citet{Pierobon2018}. Overall, they all followed standard steps in the development of machine learning models, the first two using the scikit-learn package in python language developed by \citet{pedregosa2011scikit} and both
-the latter used the caret package developed by \citet{caret} in R language.
+the latter used the caret package developed by \citet{caret} in R language \cite{RCore}.
 
 At the end of this work, in the discussion and conclusion section, the results found in this work are compared with all these related studies.
 
@@ -233,13 +233,52 @@ At the end of this work, in the discussion and conclusion section, the results f
 \subsection{Materials and reproducibility} \label{subsec:materialsandreproducibility}
 % --------------------------------------------------------------------------
 
-The methodology was carried out using RStudio software (\citet{RStudio}), an integrated virtual environment for code development in R language (\citet{RCore}). Throughout the process, all code executed was documented in the same order as its execution and pushed to the github repository (TODO: CREATE GITHUB REPO BIBLIO AND ADD HERE). The repository contains an extended version of this paper, including all the code, required packages and versions. In order to guarantee reproducibility, whenever there was code that uses probabilistic operations, a seed was defined before its execution, ensuring results consistency when running on another machine.
+The methodology was carried out using RStudio software \cite{RStudio}, an integrated virtual environment for code development in R language \cite{RCore}. Throughout the process, all code executed was documented in the same order as its execution and pushed to the github repository (TODO: CREATE GITHUB REPO BIBLIO AND ADD HERE). The repository contains an extended version of this paper, including all the code, required packages and versions. In order to guarantee reproducibility, whenever there was code that uses probabilistic operations, a seed was defined before its execution, ensuring results consistency when running on another machine.
 
-The main package used to build the machine learning models was the Caret Package (\citet{caret}). It provides all functionalities and utilities to build prediction models for any data set, has a straight and clear documentation that guides the process and provide around 200 different algorithms to build models. We used only one algorithm in this work, chosen by the highest probability to achieve the best possible result, according to \citet{Fernandez2014}, who compared 179 algorithms across 121 different databases, and find out that the most likely to achieve the best possible results is the Parallel Random Forest (called prRF in the caret).
+The main package used to build the machine learning models was the Caret Package \cite{caret}. It provides all functionalities and utilities to build prediction models for any data set, has a straight and clear documentation that guides the process and provide around 200 different algorithms to build models. We used only one algorithm in this work, chosen by the highest probability to achieve the best possible result, according to \citet{Fernandez2014}, who compared 179 algorithms across 121 different databases, and find out that the most likely to achieve the best possible results is the Parallel Random Forest (called prRF in the caret).
+
+% --------------------------------------------------------------------------
+\subsection{Dataset} \label{subsec:dataset}
+% --------------------------------------------------------------------------
+The data was downloaded from the University of California Irvine website \cite{downloadData}. The same dataset used by \citet{Yeh1998} and the related works. In total there are 1030 rows with 9 columns. Each row represents a sample with the variables: compressive strength, age, and 7 ingredients (water, cement, fine aggregate, coarse aggregate, fly ash, blast furnace slag, and superplasticizers).
+
+TODO: Possivel tabela das primeiras amostras aqui
+
+% --------------------------------------------------------------------------
+\subsection{Data preparation} \label{subsec:datapreparation}
+% --------------------------------------------------------------------------
+
+The related works used the data set in its entirety or performed a minimum of preparation. In a different way, in this work a specific step was dedicated just to clean the samples and prepare them for the next steps. The major steps executed in this section are listed below:
+
+\begin{enumerate}
+\item Duplicate samples were removed;
+
+\item Samples aggregated and identified (with a new ID column) by the proportion settings of ingredients, independent of its age;
+
+\item Ages of 90, 91, and 100 days were joined, transformed into 100 days. Three criteria were used to evaluate this step: First the plot of samples against a boxplot, that showed for example that most samples of 91 days have compressive strength between 60 and 80 MPa, while at the of age 90 days they are mostly between 30 and 50 MPa, but the difference of 1 day can't have such influence in the compressive strength. Then, because of the boxplot, a principal component analysis (PCA) of the ingredients were made, showing that the this fact is because the combination of ingredients among samples o 90 and 91 days are very distinct, same happens for 100 days. So it is very fair that we can join these ages without any prejudice to the predictions, in fact it can enhance the predictions by reducing noise. Finally, it was chosen to be 100 days because a plot of the compressive strength through time for IDs that have at least 5 different ages show that the compressive tends to increase through time, never decreases, as expected.
+
+\item For samples with same ID and the same age, but the different value of compressive strength, the compressive strength was averaged, unifying into only one row for each combination of ID and age;
+
+\item Only the IDs that include the age of 28 days among the ages for that ID were maintained;
+
+\item After joining the ages of 90, 91 and 100 days, the ages with a frequency less than 50 were removed, leaving only the ages of 3, 7, 14, 28, 56 and 100 days;
+
+\item The final number of samples has been reduced from 1030 rows to 916 rows, with 416 different ingredient configurations (IDs);
+
+\item Addition of 6 new continuous variables representing the proportions between the main ingredients that were used in the prediction models (water/cement, fine aggregate/cement, coarse aggregate/cement, fine aggregate/coarse aggregate, water/coarse aggregate and water/fine aggregate);
+
+\item Addition of 2 new categorical variables used to visualize the distribution of the samples (concrete class and approximate mix).
+\end{enumerate}
 
 
 % --------------------------------------------------------------------------
-\subsection{TODO ...} \label{subsec:todo}
+\subsection{Data visualization} \label{subsec:datavisualization}
+% --------------------------------------------------------------------------
+
+...
+
+% --------------------------------------------------------------------------
+\subsection{Machine learning models} \label{subsec:machinelearningmodels}
 % --------------------------------------------------------------------------
 
 ...
