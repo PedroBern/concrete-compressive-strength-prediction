@@ -185,11 +185,11 @@ Concrete compressive strength prediction with machine learning}
 % --------------------------------------------------------------------------
 
 \noindent \textbf{Abstract.}
-TODO: REDUCE TO 200 WORDS, CURRENTRLY IT HAS 270. Compressive strength is the main characteristic of concrete. The correct prediction of this parameter means cost and time reduction. This work built predictive models for 6 different ages of concrete samples. A set of 1030 samples from previous studies was used, with 9 variables: compressive strength, age, and 7 ingredients. Another 6 variables were added to represent the proportions of the main ingredients in each sample (water/cement, fine aggregate/cement, coarse aggregate/cement, fine aggregate/coarse aggregate, water/coarse aggregate, and water/fine aggregate). The predictive models were developed in R language, using the caret package with the Parallel Random Forest algorithm and repeated cross-validation technique to optimize the parameters. The results were satisfactory and compatible with other studies using the same data set. The most important model, 28 days old, obtained a root mean square error (RMSE) of 4.717. The 3-day model obtained the best result, RMSE of 3.310. The worst result was the 56-day model, with RMSE of 5.939. The work showed that the compressive strength of concrete can be predicted. The choice of creating a model for each age, instead of using age as a predictor, allowed to get compatible results with the available data at each age. It was a promising alternative since good results were achieved by training with just one algorithm. This work facilitates exploration and new efforts to predict the compressive strength of concrete, it can be used as a baseline to predict with different algorithms or the combination of several.
+Compressive strength is the main characteristic of concrete. The correct prediction of this parameter means cost and time reduction. This work built predictive models for 6 different ages of concrete samples. A set of 1030 samples from previous studies was used, with 9 variables. Another 6 variables were added to represent the proportions of the main ingredients in each sample. The predictive models were developed in R language, using the Parallel Random Forest algorithm and repeated cross-validation technique to optimize the parameters. The results were compatible with other studies using the same data set. The most important model, 28 days old, obtained a root mean square error (RMSE) of 4.717. The 3-day model obtained the best result, RMSE of 3.310. The work showed that the compressive strength of concrete can be predicted. The choice of creating a model for each age allowed to get compatible results with the available data at each age. It was a promising alternative since good results were achieved by training with just one algorithm. This work facilitates exploration and new efforts to predict the compressive strength of concrete, it can be used as a baseline to predict with different algorithms or the combination of several.
 
 \vspace{18pt} % <- keep this vertical space!
 
-\noindent \textbf{Keywords:} Concrete, Compressive Strength, Machine Learning, Prediction
+\noindent \textbf{Keywords:} Concrete, Compressive Strength, Machine Learning, Prediction, Parallel Random Forest
 
 % --------------------------------------------------------------------------
 \section{Introduction}\label{sec:introduction}
@@ -198,24 +198,31 @@ TODO: REDUCE TO 200 WORDS, CURRENTRLY IT HAS 270. Compressive strength is the ma
 
 Compressive strength is the main characteristic of concrete, measured by tests of international standards that consist of the breaking of specimens (\citet{Gambhir1990}). Measurement at 28 days is mandatory and represents the grade of the concrete. Knowing in advance what the result will be obtained for a given age, based on the proportions of its ingredients, is of great interest to concrete manufacturers, construction companies, and civil engineers.
  
-The compressive strength is a nonlinear function of its ingredients and age, making it difficult to establish an analytical formula, although some formulas have already been proposed (\cite{Hasan2011}, \cite{Kabir2012}). However, most of the studies have build models including the age as a feature along with the ingredients, but because of the non linearity between the compressive strength and age, we have find the need of further investigation of models that separate the age and analyse only the ingredients, then specify for each age. 
+The compressive strength is a nonlinear function of its ingredients and age, making it difficult to establish an analytical formula, although some formulas have already been proposed (\cite{Hasan2011}, \cite{Kabir2012}). However, most of the studies have build models including the age as a feature along with the ingredients, but due to the non linearity between the compressive strength and age, we have find the need of further investigation of models that separate the age and analyse only the ingredients, then specify for each age. 
 
 Therefore, the present study aims at building predictive models for the concrete compressive strength at different ages using only it's ingredients as features.
 
 
 % --------------------------------------------------------------------------
-\section{Related work}\label{sec:introduction}
+\section{Related work}\label{sec:RelatedWork}
 % --------------------------------------------------------------------------
-
-TODO: Estou com dúvida, se coloco os resultados dos outros trabalhos aqui, porque são apresentados na seção de conclusão e discussão.
-
-TODO: Essa seção ainda tem que ser mais desenvolvida.
-
-TODO: Focar nos que foram publicados/peer review.
 
 % \citet{Hasan2011} proposed a mathematical model to predict 28 day compressive strength from the results of tests of 7 and 14 days, and \citet{Kabir2012} from 7 days. These are analytical formulas, but use
 
-The data set used in this study was the one used originally by \citet{Yeh1998}, and then by many othe works. \citet{Alshamiri2020} got good results with the regularized extreme learning machine (RELM) technique, and \citet{Hameed2020} got even better results with the Artificial Neural Networks and cross-validation technique. This set of samples is so well known that there are many pages on the internet of unpublished studies that use it and have good results, such as \citet{Abban2016}, \citet{Raj2018}, \citet{Modukuru2020} and \citet{Pierobon2018}. Later in this paper all studies are compared with the results found here.
+%  This set of samples is so well known that there are many pages on the internet of unpublished studies that use it and have good results, such as \citet{Abban2016}, \citet{Raj2018}, \citet{Modukuru2020} and \citet{Pierobon2018}. Later in this paper all studies are compared with the results found here.
+
+
+\citet{Yeh1998} demonstrated the possibility of using Artificial Neural Networks to predict the compressive strength of concrete, concluding that it is a more accurate method than regression models. In this study, more than 1000 concrete samples were collected from 17 different sources. This data set was later used in several studies about concrete, some of which are mentioned below.
+
+\citet{Alshamiri2020} proposed a new Regularized Extreme Learning Machine (RELM) method to train Artificial Neural Networks models to predict the compressive strenght. The results were compared with several known algorithms running on the same dataset, including individual and essembles, and the proposed model had the best result by far.
+
+\citet{Hameed2020} compares Artificial Neural Network models with Multiple Linear Regression to predict a compressive strength force and have found that Artificial Neural Network models obtain much more accuracy than the Multiple Lenear Regression.
+
+In addition to these published studies, it is now very common to publish side projects on web pages. For easy access to this database and the growing interest in data science and machine learning, some unpublished studies using this same database include \citet{Modukuru2020}, \citet{Raj2018}, \citet{Abban2016} and  \citet{Pierobon2018}. Overall, they all followed standard steps in the development of machine learning models, the first two using the scikit-learn package in python language developed by \citet{pedregosa2011scikit} and both
+the latter used the caret package developed by \citet{caret} in R language.
+
+At the end of this work, in the discussion and conclusion section, the results found in this work are compared with all these related studies.
+
 
 
 % --------------------------------------------------------------------------
@@ -282,7 +289,7 @@ Model & mtry & CV & Repetitions & Naive RMSE (test) & Final RMSE (train) & Final
 \begin{center}
 \includegraphics[scale=0.8]{Figures/results-comparison.pdf}
 \vspace{12pt}
-\caption{TODO:(O que tem que atualizar aqui?) Actual vs predicted values for each model}
+\caption{Actual vs predicted values for each model}
 \label{fig:results}
 \end{center}
 \end{figure}
@@ -321,9 +328,6 @@ Following the line of reasoning of this work, the same hypothesis can be evaluat
 %--------------------------------------------------------------------------
 \vspace{20pt}
 \noindent \textbf{Authorship statement.} The authors hereby confirm that they are the sole liable persons responsible for the authorship of this work, and that all material that has been herein included as part of the present paper is either the property (and authorship) of the authors, or has the permission of the owners to be included here. 
-
-\vspace{20pt}
-TODO: Na bibliografia, os ROI não entram por conta do modelo deles, que é inspirado no apa, o mais próximo que posso usar pra colocar o ROI é a chave "howpublished", mas ela não é usada em todas a bibliografias, depende do tipo, por exemplo @article, @inproceedings e @inbook não usam ela, acho que só a @misc usa (para publicacoes online), mas também não adianta porque as publicações online não tem ROI. Mas no geral atulizei as referencias e agora estão mais completas
 
 \bibliography{bibliography}
 
