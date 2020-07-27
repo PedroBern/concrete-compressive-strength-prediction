@@ -535,12 +535,14 @@ kable(
 dat_preparated_2 <- dat
 ```
 
-```{r dat-preparated-to-xml, echo=F}
+```{r dat-preparated-to-xls, echo=F}
 dat_preparated_2 <- dat
 names(dat_preparated_2) <-  gsub("day_", "", names(dat_preparated_2))
 dat_preparated_2 <- dat_preparated_2 %>%
   gather("age", "Mpa", "3":"100", na.rm = TRUE, convert = TRUE)
 
+write.xlsx(dat_preparated_2, "data_2.xls", sheetName = "Sheet1", 
+  col.names = TRUE, row.names = TRUE, append = FALSE)
 
 ```
 
