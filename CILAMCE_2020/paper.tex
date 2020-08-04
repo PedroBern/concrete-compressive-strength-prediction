@@ -233,12 +233,12 @@ At the end of this work, in the discussion and conclusion section, the results f
 \subsection{Materials and reproducibility} \label{subsec:materialsandreproducibility}
 % --------------------------------------------------------------------------
 
-The methodology was carried out using RStudio software \cite{RStudio}, an integrated virtual environment for code development in R language \cite{RCore}. Throughout the process, all code executed was documented in the same order as its execution and pushed to the github repository (TODO: reference). The repository contains an extended version of this paper, including all the code, required packages and versions. In order to guarantee reproducibility, whenever there was code that uses probabilistic operations, a seed was defined before its execution, ensuring results consistency when running on another machine.
+The methodology was carried out using RStudio software \cite{RStudio}, an integrated virtual environment for code development in R language \cite{RCore}. Throughout the process, all code executed was documented in the same order as its execution and pushed to the github repository \cite{github}. The repository contains an extended version of this paper, including all the code, required packages and versions. In order to guarantee reproducibility, whenever there was code that uses probabilistic operations, a seed was defined before its execution, ensuring results consistency when running on another machine.
 
 % --------------------------------------------------------------------------
 \subsection{Dataset} \label{subsec:dataset}
 % --------------------------------------------------------------------------
-The data was downloaded from the University of California Irvine website \cite{downloadData}. The same dataset used by \citet{Yeh1998} and the related works. In total there are 1030 rows with 9 columns. Each row represents a sample with the variables: compressive strength, age, and 7 ingredients (water, cement, fine aggregate, coarse aggregate, fly ash, blast furnace slag, and superplasticizers). TODO: reference
+The data was downloaded from the University of California Irvine website \cite{downloadData}. In total there are 1030 rows with 9 columns. Each row represents a sample with the variables: compressive strength, age, and 7 ingredients (water, cement, fine aggregate, coarse aggregate, fly ash, blast furnace slag, and superplasticizers).
 
 % --------------------------------------------------------------------------
 \subsection{Data preparation} \label{subsec:datapreparation}
@@ -251,13 +251,15 @@ The related works used the data set in its entirety or performed a minimum of pr
 
 \item Samples aggregated and identified (with a new ID column) by the proportion settings of ingredients, independent of its age;
 
-\item Ages of 90, 91, and 100 days were joined, transformed into 100 days. Three criteria were used to evaluate this step: First the plot of samples against a boxplot grouped by age, shown in Fig. \ref{fig:boxplot}, that showed for example that most samples of 91 days have compressive strength between 60 and 80 MPa, while at the of age 90 days they are mostly between 30 and 50 MPa, but the difference of 1 day can't have such influence in the compressive strength. Then, because of the boxplot, a principal component analysis (PCA) of the ingredients were made in Fig. \ref{fig:pca}, showing that the this fact is because the combination of ingredients among samples o 90 and 91 days are very distinct, same happens for 100 days. So it is very fair that we can join these ages without any prejudice to the predictions, in fact it can enhance the predictions by reducing noise. Finally, it was chosen to be 100 days because a plot of the compressive strength through time for IDs that have at least 5 different ages show that the compressive tends to increase through time, never decreases, as expected.
+\item Ages of 90, 91, and 100 days were merged into a single 100-day category. This step was taken with the following development: First, plotting and analysing the boxplot grouped by age in Fig. \ref{fig:boxplot} showed that samples of 90, 91 and 100 days have distinct concentrations of compressive strength values. Then a principal component analysis (PCA) of the ingredients were made in Fig. \ref{fig:pca}, showing that the ingredients combination of these ages are very distinct. Due to they are very close ages it is reasonable that we can join these ages without any prejudice to the predictions. Finally, the 100-day mark was chosen because the analysis of samples that had data on at least five different ages showed that the compressive strength tends to increase through time. Therefore, an older age tends to provide more conservative results.
 
-\item For samples with same ID and the same age, but the different value of compressive strength, the compressive strength was averaged, unifying into only one row for each combination of ID and age;
 
-\item Only the IDs that include the age of 28 days among the ages for that ID were maintained;
 
 \item After joining the ages of 90, 91 and 100 days, the ages with a frequency less than 50 were removed, leaving only the ages of 3, 7, 14, 28, 56 and 100 days;
+
+\item For samples with the same ID and the same age, but with different values of compressive strength, the data was combined into a single row for each combination of ID and age, containing an average of the compressive strengths;
+
+\item Only the IDs that have data on the 28-day mark were kept;
 
 \item Addition of 6 new continuous variables representing the proportions between the main ingredients that were used in the prediction models (water/cement, fine aggregate/cement, coarse aggregate/cement, fine aggregate/coarse aggregate, water/coarse aggregate and water/fine aggregate);
 
@@ -266,7 +268,7 @@ The related works used the data set in its entirety or performed a minimum of pr
 
 \begin{figure}[!ht]
 \begin{center}
-\includegraphics[scale=0.7]{Figures/boxplot.pdf}
+\includegraphics[scale=0.9]{Figures/boxplot.pdf}
 \vspace{12pt}
 \caption{Boxplot - compressive strength grouped by age}
 \label{fig:boxplot}
@@ -276,7 +278,7 @@ The related works used the data set in its entirety or performed a minimum of pr
 
 \begin{figure}[!ht]
 \begin{center}
-\includegraphics[scale=0.7]{Figures/pca-90-91-100.pdf}
+\includegraphics[scale=0.9]{Figures/pca-90-91-100.pdf}
 \vspace{12pt}
 \caption{Principal component analysis - 90, 91 and 100 days}
 \label{fig:pca}
@@ -284,18 +286,18 @@ The related works used the data set in its entirety or performed a minimum of pr
 \end{figure}
 \vspace{8pt}
 
-After these manipulations, the final number of samples has been reduced from 1030 rows to 916 rows, with 416 different ingredient configurations (IDs). A xls file named "TODO" of the data at this point is available at the github repo (TODO: referencia).
+After these manipulations, the final number of samples was reduced from 1030 rows to 916 rows, with 416 different ingredient configurations (IDs). A xls file named "TODO" of the data at this point is available at the github repository \cite{github}.
 
 
 % --------------------------------------------------------------------------
 \subsection{Data visualization} \label{subsec:datavisualization}
 % --------------------------------------------------------------------------
 
-Several plots and tables were built to perform the exploration and visualization of the samples prepared in the previous step. Including analysis of the descriptive statistics of the continuous and categorical variables, the distribution of the variables in relation to the compressive strength, the correlation between the variables grouped by age, the relationship between the approximate mix and the compressive strength, the relationships between the main concrete ingredients and the compressive strength and principal component analysis (PCA) of the ingredients. All of these plots/tables are part of the extended version available on github. (TODO: reference). However, to keep the article short, here only the plots of the statistical analysis of the categorical variables are presented, in the Fig. \ref{fig:categorical}, which are used for an insight in the conclusion of this work.
+Several plots and tables were built to perform the exploration and visualization of the samples prepared in the previous step. Including analysis of the descriptive statistics of the continuous and categorical variables, the distribution of the variables in relation to the compressive strength, the correlation between the variables grouped by age, the relationship between the approximate mix and the compressive strength, the relationships between the main concrete ingredients and the compressive strength and principal component analysis (PCA) of the ingredients. The plots for the statistical analysis of the categorical variables are presented, in the Fig. \ref{fig:categorical}, which are used for an insight in the conclusion of this work.
 
 \begin{figure}[!ht]
 \begin{center}
-\includegraphics[scale=0.7]{Figures/stat-summ-categorical.pdf}
+\includegraphics[scale=0.8]{Figures/stat-summ-categorical.pdf}
 \vspace{12pt}
 \caption{Descriptive statistics of the categorical variables}
 \label{fig:categorical}
@@ -345,7 +347,7 @@ Model & Total samples & Train (80\%) & Test (20\%)\\ \hline
 
 \begin{figure}[!ht]
 \begin{center}
-\includegraphics[scale=0.7]{Figures/dist-split.pdf}
+\includegraphics[scale=0.9]{Figures/dist-split.pdf}
 \vspace{12pt}
 \caption{Distribution of the test and train data in relation to compressive strength}
 \label{fig:split-dist}
@@ -411,7 +413,7 @@ Model & mtry & CV & Repetitions & Naive RMSE (test) & Final RMSE (train) & Final
 
 \begin{figure}[!ht]
 \begin{center}
-\includegraphics[scale=0.8]{Figures/results-comparison.pdf}
+\includegraphics[scale=0.9]{Figures/results-comparison.pdf}
 \vspace{12pt}
 \caption{Actual vs predicted values for each model}
 \label{fig:results}
@@ -419,11 +421,13 @@ Model & mtry & CV & Repetitions & Naive RMSE (test) & Final RMSE (train) & Final
 \end{figure}
 \vspace{8pt}
 
+\pagebreak
+
 % --------------------------------------------------------------------------
 \section{Discussion and conclusion}\label{sec:DiscussionAndConclusion}
 % --------------------------------------------------------------------------
 
-The models built present satisfactory results and prove that the compressive strength of concrete can be predicted relatively easily.The alternative adopted, to create a model for each set of age proved to be a valid method, instead of using the age as a predictor along with the ingredients like the related studies with the same dataset. The adoption of this stratification achieved different results for each age group. However, the RMSE calculated in our work and the one obtained in the related works were close. Table \ref{tab:comparison} shows the comparison between these studies and the 28 days model developed here.
+The built models present satisfactory results and prove that the compressive strength of concrete can be predicted relatively easily.The alternative adopted, creating a model for each set of age proved to be a valid method, instead of using the age as a predictor along with the ingredients like the related studies with the same dataset. The adoption of this stratification achieved different results for each age group. However, the RMSE calculated in our work and the one obtained in the related works were close. Table \ref{tab:comparison} shows the comparison between these studies and the 28 days model developed here.
 
 \vspace{8pt}
 \begin{table}[!ht]
@@ -448,6 +452,7 @@ Author & Year & Algorithm & RMSE & Difference ({\%}) \\ \hline
 
 Following the line of reasoning of this work, the same hypothesis can be evaluated using other algorithms besides the one used here (Parallel Random Forest), as they can present better results. Another option is to create an ensemble of various algorithms, just like \citet{Pierobon2018}, but with the separation of age sets proposed here. In addition, this study can be reproduced with a larger dataset, ideally with a similar number of samples in each age group and a more homogeneous distribution of compressive strength and concrete class.
 
+\pagebreak
 
 %--------------------------------------------------------------------------
 \vspace{20pt}
