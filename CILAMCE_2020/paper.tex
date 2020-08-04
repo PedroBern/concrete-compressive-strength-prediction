@@ -196,9 +196,9 @@ Compressive strength is the main characteristic of concrete. The correct predict
 % --------------------------------------------------------------------------
 
 
-Compressive strength is the main characteristic of concrete, measured by tests of international standards that consist of the breaking of specimens (\citet{Gambhir1990}). Measurement at 28 days is mandatory and represents the grade of the concrete. Knowing in advance what the result will be obtained for a given age, based on the proportions of its ingredients, is of great interest to concrete manufacturers, construction companies, and civil engineers.
+Compressive strength is the main characteristic of concrete, measured by tests of international standards that consist of the breaking of specimens \cite{Gambhir1990}. Measurement at 28 days is mandatory and represents the grade of the concrete. Knowing in advance what the result will be obtained for a given age, based on the proportions of its ingredients, is of great interest to concrete manufacturers, construction companies, and civil engineers.
  
-The compressive strength is a nonlinear function of its ingredients and age, making it difficult to establish an analytical formula, although some formulas have already been proposed (\cite{Hasan2011}, \cite{Kabir2012}). However, most of the studies have build models including the age as a feature along with the ingredients, but due to the non linearity between the compressive strength and age, we have find the need of further investigation of models that separate the age and analyse only the ingredients, then specify for each age. 
+The compressive strength is a nonlinear function of its ingredients and age, making it difficult to establish an analytical formula, although some formulas have already been proposed by \citet{Hasan2011} and  \citet{Kabir2012}. However, most of the studies have build models including the age as a feature along with the ingredients, but due to the non linearity between the compressive strength and age, we have find the need of further investigation of models that separate the age and analyse only the ingredients, then specify for each age. 
 
 Therefore, the present study aims at building predictive models for the concrete compressive strength at different ages using only it's ingredients as features.
 
@@ -216,7 +216,7 @@ Therefore, the present study aims at building predictive models for the concrete
 
 \citet{Alshamiri2020} proposed a new Regularized Extreme Learning Machine (RELM) method to train Artificial Neural Networks models to predict the compressive strenght. The results were compared with several known algorithms running on the same dataset, including individual and essembles, and the proposed model had the best result by far.
 
-\citet{Hameed2020} compares Artificial Neural Network models with Multiple Linear Regression to predict a compressive strength force and have found that Artificial Neural Network models obtain much more accuracy than the Multiple Lenear Regression.
+\citet{Hameed2020} compares Artificial Neural Network models with Multiple Linear Regression to predict the compressive strength force and have found that Artificial Neural Network models obtain much more accuracy than the Multiple Linear Regression.
 
 In addition to these published studies, it is now very common to publish side projects on web pages. For easy access to this database and the growing interest in data science and machine learning, some unpublished studies using this same database include \citet{Modukuru2020}, \citet{Raj2018}, \citet{Abban2016} and  \citet{Pierobon2018}. Overall, they all followed standard steps in the development of machine learning models, the first two using the scikit-learn package in python language developed by \citet{pedregosa2011scikit} and both
 the latter used the caret package developed by \citet{caret} in R language \cite{RCore}.
@@ -251,7 +251,7 @@ The related works used the data set in its entirety or performed a minimum of pr
 
 \item Samples aggregated and identified (with a new ID column) by the proportion settings of ingredients, independent of its age;
 
-\item Ages of 90, 91, and 100 days were merged into a single 100-day category. This step was taken with the following development: First, plotting and analysing the boxplot grouped by age in Fig. \ref{fig:boxplot} showed that samples of 90, 91 and 100 days have distinct concentrations of compressive strength values. Then a principal component analysis (PCA) of the ingredients were made in Fig. \ref{fig:pca}, showing that the ingredients combination of these ages are very distinct. Due to they are very close ages it is reasonable that we can join these ages without any prejudice to the predictions. Finally, the 100-day mark was chosen because the analysis of samples that had data on at least five different ages showed that the compressive strength tends to increase through time. Therefore, an older age tends to provide more conservative results.
+\item Ages of 90, 91, and 100 days were merged into a single 100-day category. This step was taken with the following development: first, plotting and analysing the boxplot grouped by age in Fig. \ref{fig:boxplot} showed that samples of 90, 91 and 100 days have distinct concentrations of compressive strength values. Then a principal component analysis (PCA) of the ingredients were made in Fig. \ref{fig:pca}, showing that the ingredients combination of these ages are very distinct. As they are very close ages, it is reasonable that we can join these ages without any prejudice to the predictions. Finally, the 100-day mark was chosen because the analysis of samples that had data on at least five different ages showed that the compressive strength tends to increase through time. Therefore, an older age tends to provide more conservative results.
 
 
 
@@ -286,14 +286,16 @@ The related works used the data set in its entirety or performed a minimum of pr
 \end{figure}
 \vspace{8pt}
 
-After these manipulations, the final number of samples was reduced from 1030 rows to 916 rows, with 416 different ingredient configurations (IDs). A xls file named "TODO" of the data at this point is available at the github repository \cite{github}.
+After these manipulations, the final number of samples was reduced from 1030 rows to 916 rows, with 416 different ingredient configurations (IDs). A xls file of the data at this point is available for download at the github repository \cite{github}.
 
 
 % --------------------------------------------------------------------------
 \subsection{Data visualization} \label{subsec:datavisualization}
 % --------------------------------------------------------------------------
 
-Several plots and tables were built to perform the exploration and visualization of the samples prepared in the previous step. Including analysis of the descriptive statistics of the continuous and categorical variables, the distribution of the variables in relation to the compressive strength, the correlation between the variables grouped by age, the relationship between the approximate mix and the compressive strength, the relationships between the main concrete ingredients and the compressive strength and principal component analysis (PCA) of the ingredients. The plots for the statistical analysis of the categorical variables are presented, in the Fig. \ref{fig:categorical}, which are used for an insight in the conclusion of this work.
+Several plots and tables were built to perform the exploration and visualization of the samples prepared in the previous step. Including analysis of the descriptive statistics of the continuous and categorical variables, the distribution of the variables in relation to the compressive strength, the correlation between the variables grouped by age, the relationship between the approximate mix and the compressive strength, the relationships between the main concrete ingredients and the compressive strength and principal component analysis (PCA) of the ingredients.
+
+The plots for the statistical analysis of the categorical variables are presented, in the Fig. \ref{fig:categorical}.
 
 \begin{figure}[!ht]
 \begin{center}
@@ -367,7 +369,9 @@ Before building the real models, for comparison purposes, naive models were crea
 \subsection{Machine learning models} \label{subsec:machinelearningmodels}
 % --------------------------------------------------------------------------
 
-We used only one algorithm in this work, chosen by the highest probability to achieve the best possible result, according to \citet{Fernandez2014}, who compared 179 algorithms across 121 different databases, and find out that the most likely to achieve the best possible results is the Parallel Random Forest (called prRF in the caret \cite{caret}). Six different models were built, one for each age-set, the following steps were made for each one:
+We used only one algorithm in this work, chosen by the highest probability to achieve the best possible result, according to \citet{Fernandez2014}, who compared 179 algorithms across 121 different databases, and find out that the most likely to achieve the best possible results is the Parallel Random Forest, called prRF in the Caret Package \cite{caret}.
+
+Six different models were built, one for each age-set, the following steps were made for each one:
 
 
 \begin{enumerate}
@@ -427,7 +431,9 @@ Model & mtry & CV & Repetitions & Naive RMSE (test) & Final RMSE (train) & Final
 \section{Discussion and conclusion}\label{sec:DiscussionAndConclusion}
 % --------------------------------------------------------------------------
 
-The built models present satisfactory results and prove that the compressive strength of concrete can be predicted relatively easily.The alternative adopted, creating a model for each set of age proved to be a valid method, instead of using the age as a predictor along with the ingredients like the related studies with the same dataset. The adoption of this stratification achieved different results for each age group. However, the RMSE calculated in our work and the one obtained in the related works were close. Table \ref{tab:comparison} shows the comparison between these studies and the 28 days model developed here.
+The built models present satisfactory results and prove that the compressive strength of concrete can be predicted relatively easily. The alternative adopted, creating a model for each set of age proved to be a valid method, instead of using the age as a predictor along with the ingredients like the related studies with the same dataset. The adoption of this stratification achieved different results for each age group. The RMSE calculated in our work and the one obtained in the related works were close. Table \ref{tab:comparison} shows the comparison between these studies and the 28 days model developed here.
+
+Following the line of reasoning of this work, the same hypothesis can be evaluated using other algorithms besides the one used here (Parallel Random Forest), as they can present better results. Another option is to create an ensemble of various algorithms, just like \citet{Pierobon2018}, but with the separation of age sets proposed here. In addition, this study can be reproduced with a larger dataset, ideally with a similar number of samples in each age group and a more homogeneous distribution of compressive strength and concrete class, as seen in Fig. \ref{fig:categorical} that this dataset is very biased to concrete class between C25 and C35.
 
 \vspace{8pt}
 \begin{table}[!ht]
@@ -449,8 +455,6 @@ Author & Year & Algorithm & RMSE & Difference ({\%}) \\ \hline
 \end{table}
 \vspace{8pt}
 
-
-Following the line of reasoning of this work, the same hypothesis can be evaluated using other algorithms besides the one used here (Parallel Random Forest), as they can present better results. Another option is to create an ensemble of various algorithms, just like \citet{Pierobon2018}, but with the separation of age sets proposed here. In addition, this study can be reproduced with a larger dataset, ideally with a similar number of samples in each age group and a more homogeneous distribution of compressive strength and concrete class.
 
 \pagebreak
 
