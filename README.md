@@ -1,16 +1,20 @@
 # Concrete Compressive Strength Prediction With Machine Learning
 
-This repo contains all the source code of my Capstone Project in the [HarvardX Data Science Program](https://www.edx.org/professional-certificate/harvardx-data-science).
+This repo contains all the source code of my Capstone Project in the [HarvardX Data Science Program](https://www.edx.org/professional-certificate/harvardx-data-science) and my paper for [CILAMCE](https://www.cilamce.com.br/).
 
-The final reports and data are inside the `generated` folder.
+Below is the tree representation of the most important files in this project.
 
-> If you are going to run the .Rmd files, know in advance that it can take up to 2 hours depending on your machine.
+```bash
+root
+|   README.md
+├── CILAMCE_2020/
+│   └── paper.pdf
+├── data/
+│   ├── checkpoint.xls
+│   └── original.xls
+├── HarvardX_Data_Science_Capstone/
+│   ├── capstone.pdf
+│   ├── capstone.R
+│   └── capstone.Rmd
+```
 
-The reports are generated with the files inside the `templates` folder using the `generate_papers.py` script. It generates two versions, english and portuguese. All the contend inside the templates files are marked for translation with custom tags, including the code.
-
-Files inside the `generated` folder should not be edited. Work only with the `templates`.
-
-
-## CILAMCE
-
-This folder contains the version for the [CILAMCE](https://www.cilamce.com.br/index.php). Changes should be made in the `paper_EN.Rmd`.
