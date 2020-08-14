@@ -6,15 +6,15 @@ Below is the tree representation of the most important files in this project.
 
 ```bash
 root
-|   README.md
+│   README.md
 ├── CILAMCE_2020/
 │   └── paper.pdf
 ├── data/
 │   ├── checkpoint.xls
 │   └── original.xls
-├── HarvardX_Data_Science_Capstone/
-│   ├── capstone.pdf
-│   ├── capstone.R
-│   └── capstone.Rmd
+└── HarvardX_Data_Science_Capstone/
+    ├── capstone.pdf
+    ├── capstone.R
+    └── capstone.Rmd
 ```
 
