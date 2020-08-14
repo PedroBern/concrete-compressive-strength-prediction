@@ -352,6 +352,16 @@ kable(
 	column_spec(4:9, width = "1.7cm")
 
 
+# Save the data to a xls file
+dat_preparated_2 <- dat
+names(dat_preparated_2) <-  gsub("day_", "", names(dat_preparated_2))
+dat_preparated_2 <- dat_preparated_2 %>%
+	gather("age", "Mpa", "3":"100", na.rm = TRUE, convert = TRUE)
+
+write.xlsx(dat_preparated_2, "checkpoint.xls", sheetName = "Sheet1", 
+											col.names = TRUE, row.names = TRUE, append = FALSE)
+
+
 # Table - Descriptive statistics - continuous variables
 summ <- t(
 	stat.desc(select(dat, -c(id, class, mix_app))))

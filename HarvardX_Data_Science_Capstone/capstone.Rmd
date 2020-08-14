@@ -520,6 +520,21 @@ kable(
   column_spec(4:9, width = "1.7cm")
 ```
 
+```{r dat-preparated-2, echo=F}
+dat_preparated_2 <- dat
+```
+
+```{r dat-preparated-to-xls, echo=F}
+dat_preparated_2 <- dat
+names(dat_preparated_2) <-  gsub("day_", "", names(dat_preparated_2))
+dat_preparated_2 <- dat_preparated_2 %>%
+  gather("age", "Mpa", "3":"100", na.rm = TRUE, convert = TRUE)
+
+write.xlsx(dat_preparated_2, "checkpoint.xls", sheetName = "Sheet1", 
+  col.names = TRUE, row.names = TRUE, append = FALSE)
+
+```
+
 ## Data visualization
 
 In order to assess the need for further manipulation before building the models, in this step the 416 samples already processed were visualized and analyzed.
