@@ -1,0 +1,334 @@
+%% --------------------------------------------------------------------------
+% LaTeX template for the XLI CILAMCE.
+%
+% This latex document tries to copy the Microsoft Word template.
+% --------------------------------------------------------------------------
+\documentclass[a4paper,10pt]{book}
+
+% PACKAGES USED - packages that need to be previously installed on your computer
+\usepackage[lmargin=2.5cm, rmargin=2.5cm, tmargin=2.5cm, bmargin=2.5cm ]{geometry}
+\usepackage{graphicx}
+\usepackage{times}
+\usepackage{indentfirst}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage[english]{babel}
+\usepackage{parskip} 
+\usepackage{setspace}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% My Additional Packages
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[utf8]{inputenc}
+%\usepackage{amssymb} %Mathematics
+%\usepackage{amsfonts}%Mathematics
+%\usepackage{amsmath,amscd}%Mathematics
+%\usepackage{amsthm}%Mathematics
+%\usepackage{mathrsfs}%Mathematics font
+%\usepackage{xspace}
+%\usepackage{booktabs}
+%\usepackage{stmaryrd}%Particular Brackets
+%\usepackage{graphicx} %Tables and Figures
+%\usepackage{subfigure}
+%\usepackage{url}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{./pkg-crefNames}
+\usepackage[labelsep=period]{caption}
+
+%BibTeX compatible with the CILAMCE format
+\usepackage[numbers,sort&compress]{natbib}
+
+\setlength{\bibsep}{0pt plus 0.3ex}
+
+\renewcommand*{\bibfont}{\small}
+
+\makeatletter
+\renewcommand\bibsection
+{
+  \section*{References}
+}
+
+
+
+\renewenvironment{thebibliography}[1]
+      {\section*{\refname}%
+       \@mkboth{\MakeUppercase\refname}{\MakeUppercase\refname}%
+       \list{\@biblabel{\@arabic\c@enumiv}}%
+            {\settowidth\labelwidth{\@biblabel{#1}}%
+             \leftmargin\labelwidth
+             \advance\leftmargin-10pt% change 20 pt according to your needs
+             \advance\leftmargin\labelsep
+             \setlength\itemindent{10pt}% change using the inverse of the length used before
+             \@openbib@code
+             \usecounter{enumiv}%
+             \let\p@enumiv\@empty
+             \renewcommand\theenumiv{\@arabic\c@enumiv}}%
+       \sloppy
+       \clubpenalty4000
+       \@clubpenalty \clubpenalty
+       \widowpenalty4000%
+       \sfcode`\.\@m}
+      {\def\@noitemerr
+        {\@latex@warning{Empty `thebibliography' environment}}%
+       \endlist}
+\renewcommand\newblock{\hskip .11em\@plus.33em\@minus.07em}
+\makeatother
+
+
+
+
+\makeatother
+\bibliographystyle{./bib-cilamce}
+%\bibliographystyle{plain}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% CONFIGURATION
+\renewcommand*\arraystretch{1.5}
+\renewcommand*\thesection{\arabic{section}}
+%\hyphenpenalty=10000 % You can uncomment this to avoid hyphenization
+\titleformat*{\section}{\large\bfseries}
+\titleformat*{\subsection}{\bfseries}
+\titlespacing\section{0pt}{20pt plus 2pt minus 2pt}{12pt plus 2pt minus 2pt}
+\titlespacing\subsection{0pt}{20pt plus 0pt minus 0pt}{12pt plus 0pt minus 0pt}
+\setlength{\parskip}{0pt} % Spacing between paragraphs
+\setlength{\parindent}{0.75cm} % Paragraph identation
+\setlength\abovecaptionskip{6pt}
+
+% --------------------------------------------------------------------------
+% DO NOT EDIT - SPECIAL HEADINGS OF XLI CILAMCE
+% --------------------------------------------------------------------------
+\fancypagestyle{first}
+{
+\fancyhf{}
+\fancyfoot[RO]{\footnotesize \textit{CILAMCE 2020 \\
+Proceedings of the XLI Ibero-Latin-American Congress on Computational Methods in Engineering, ABMEC.\\
+Foz do Iguaçu/PR, Brazil, November 16-19, 2020}}
+\renewcommand{\headrulewidth}{.0pt}
+\renewcommand{\footrulewidth}{.5pt}
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[RO,LE]{}
+
+\fancyfoot[RO]{\footnotesize \textit{CILAMCE 2020 \\
+Proceedings of the XLI Ibero-Latin-American Congress on Computational Methods in Engineering, ABMEC.\\
+Foz do Iguaçu/PR, Brazil, November 16-19, 2020}}
+
+\fancyfoot[LE]{\footnotesize \textit{CILAMCE 2020 \\
+Proceedings of the XLI Ibero-Latin-American Congress on Computational Methods in Engineering, ABMEC.\\
+Foz do Iguaçu/PR, Brazil, November 16-19, 2020}}
+
+\renewcommand{\headrulewidth}{.5pt}
+\renewcommand{\footrulewidth}{.5pt}
+
+% --------------------------------------------------------------------------
+% PLEASE, EDIT THIS!
+\fancyhead[LE]{\footnotesize \textit{Template for CILAMCE 2020 (enter here the short title of your paper)}}
+\fancyhead[RO]{\footnotesize \textit{F. Author, S. Author, T. Author}}
+% --------------------------------------------------------------------------
+
+\begin{document}\thispagestyle{first}
+
+% --------------------------------------------------------------------------
+% DO NOT EDIT - LOGO OF XLI CILAMCE
+% --------------------------------------------------------------------------
+
+\begin{figure}[ht!]
+\vspace{-30pt}
+\flushright
+\includegraphics[width=5.5cm]{Figures/logoCILAMCE2020.png}
+%scale=0.25
+\end{figure}
+
+% --------------------------------------------------------------------------
+% TITLE OF PAPER
+% --------------------------------------------------------------------------
+
+\noindent
+\textbf{\Large
+Instructions for preparation and submission of full-papers for publication in the Proceedings of CILAMCE-2020} 
+\vspace{18pt} % <- keep this vertical space!
+
+% --------------------------------------------------------------------------
+% AUTHORS
+% --------------------------------------------------------------------------
+
+\noindent First A. Author$^1$, Second B. Author$^1$, Third C. Author$^2$
+
+\vspace{18pt} % <- keep this vertical space!
+
+\noindent $^1$\textit{Dept. of Something, University of Somewhere}
+
+\noindent \textit{Address, Zip-Code, State/Province, Country}
+
+\noindent \textit{somebody1@somewhere.com, somebody2@somewhere.com}
+
+\noindent $^2$\textit{Dept. of Something Else, University of Somewhere Else}
+
+\noindent \textit{Address, Zip-Code, State/Province, Country}
+
+\noindent \textit{somebody3@somewhere.com}
+
+
+\vspace{18pt} % <- keep this vertical space!
+
+% --------------------------------------------------------------------------
+% ABSTRACT
+% --------------------------------------------------------------------------
+
+\noindent \textbf{Abstract.}
+This document-template provides detailed text formatting for preparing your full-length paper to the XLI Ibero-Latin American Congress on Computational Methods in Engineering (CILAMCE-2020). It is strongly recommended that you use the pre-defined styles of this template file. Also, it is strongly encouraged that you write your full-length paper in English.
+
+\vspace{18pt} % <- keep this vertical space!
+
+\noindent \textbf{Keywords:} First keyword, Second keyword, Third keyword (up to 5 keywords)
+
+
+% --------------------------------------------------------------------------
+\section{Introduction}\label{sec:introduction}
+% --------------------------------------------------------------------------
+Only full-length papers that have been orally presented will be published in the congress proceedings. It is extremely important that you prepare your full-length paper in strict accordance with the text formatting of this document, which can be enforced either using the pre-defined styles of this template file or manually setting the specifications described in the next section. After the preparation of your paper, you should generate a PDF file for submission. Only PDF files will be accepted by the online submission system.
+
+% --------------------------------------------------------------------------
+\section{Format instructions}\label{sec:format}
+% --------------------------------------------------------------------------
+
+Please follow these general instructions carefully: (a) type the body of the paper in 
+single column; (b) use no more than 7 pages (5 pages for papers at the Research Beginners 
+Mini-symposium), A4-sized, with 2.5 cm margins on all sides, and do not insert page numbers;
+(c) use 10pt Times New Roman throughout the body of the text, with 15pt for the paper's title
+13pt for first-level headings and 10pt for second-level headings; (d) always use either
+exactly 13pt-spaced lines (preferred) or single-spaced lines, with justified alignment; 
+(e) type no more than 200 words in the abstract; (f) cite references by Name  [number],
+and list them consecutively in the reference list by the order of citation in the text 
+(the list should only include works that have been cited in the text); (g) provide good
+quality figures; (h) define all quantities, variables and symbols as soon as they first appear in the
+text; (i) use only SI units. We strongly encourage you to use the pre-defined styles of this template file. Also, we strongly encourage you to write your
+full-length paper in English. The general appearance of your paper should look like this
+document. 
+
+
+% --------------------------------------------------------------------------
+\subsection{Writing style} \label{subsec:writestyle}
+% --------------------------------------------------------------------------
+
+Please limit your paper by writing concisely, rather than by reducing figures or tables to a size at which symbols or labels would become difficult to read.
+
+% --------------------------------------------------------------------------
+\subsection{Additional specifications} \label{subsec:additionalspecifications}
+% --------------------------------------------------------------------------
+
+The first page must include the paper's title (in sentence case), authors, affiliations, abstract, keywords, as well as the beginning of the text itself (i.e., the first section, which is usually the introduction section). Do not insert a page break in between the keywords and the beginning of the text.
+
+\vspace{13pt}
+
+\noindent \textbf{\textit{Remark 1: Line spacing.}}. Please follow strictly the line spacing specifications defined next: either exactly 13pt spaced lines (preferred) or single-spaced lines for the body of the text, and 20pt space before and 12pt space after first-level and second-level headings.
+
+\vspace{13pt}
+
+\noindent \textbf{\textit{Remark 2: Author(s) and affiliation(s).}} Type authors' names in regular(plain) type, flush left, one per line, including first name, middle initial(s) and last name. Group the authors by their affiliations with a superscript number. Each name or group of names must be followed by the corresponding affiliations and emails, which should be both in italics. A 12pt space must be left between the authors’ names and their affiliations.
+
+\vspace{13pt}
+
+\noindent \textbf{\textit{Remark 3: Abstract and keywords.}} Type {``Abstract''} in boldface, flush left, followed by a period. On the same line, type the abstract in regular (plain) format, justified alignment. The abstract should be no longer than 200 words. Please pay attention to the line spacing between the authors' affiliations and the abstract, as well as between the abstract and the keywords. For the keywords, type the heading {``Keywords''}, followed by a colon, in boldface, flush left and type 3 to 5 keywords, separated by commas.
+
+\vspace{13pt}
+
+\noindent \textbf{\textit{Remark 4: Headings.}} First-level headings must be typed in sentence letters, 13 pt boldface type, flush left, as in Section 2 above. Use Arabic numbering (if you use this template's styles, the automatic numbering is already assigned to the first-level heading style). Notice the line spacing before and after first-level headings. For second-level headings, use sentence letters, 10 pt boldface type, flush left, with Arabic double numbering (if you use this template's styles, the automatic double numbering is already assigned to the second-level heading style. Notice the line spacing before and after second-level headings. Do not use third-level headings. Instead, at most, ``Remarks'' (or the like) are allowed, as shown here. These shall start with the word {``Remark''} (or the like) in boldface italics, followed by a number and title. The text that follows must be in regular (plain) format. Notice the line spacing before and after theses paragraphs. 
+
+\vspace{13pt}
+
+\noindent \textbf{\textit{Remark 5: Body of text.}} As said before, the body of the text should be typed in 10pt Times New Roman, using  exactly 13 pt spaced lines (preferred) or single-spaced, and justified alignment. Start each paragraph with an indentation of 0.75 cm from the left margin, and allow no space between paragraphs. 
+
+
+% --------------------------------------------------------------------------
+\subsection{Equations, symbols and units}\label{subsec:equationsSymbolsUnits}
+% --------------------------------------------------------------------------
+
+Equations must be centered, right-numbered, with numbers enclosed in parentheses and placed flush right. Allow 6 pt line spacing before and after an equation. For example:
+
+\vspace{6pt}
+\begin{center}
+\begin{equation}
+q_r = -4pr^2k\frac{dT}{dr}.
+\label{Eq1}
+\end{equation}
+\end{center}
+\vspace{6pt}
+
+Please pay attention to the punctuation after the equations, as equations are part of the text and must be punctuated accordingly.
+When referring to an equation in the text, write \cref{Eq1}, except at the beginning of a sentence, wherein Equation \ref{Eq1} should be used. Please describe the notation adopted and be careful as to define all quantities, variables and symbols as soon as they first appear in the text. A nomenclature section is not necessary.
+
+All data, including those shown in tables and figures, must be reported in SI units. Decimal points rather than commas should always indicate decimals.
+
+% --------------------------------------------------------------------------
+\subsection{Figures and tables}\label{subsec:figuresAndTables}
+% --------------------------------------------------------------------------
+
+Figures and tables should be inserted as close as possible to their mentioning in the text. Enclosed text and symbols must be clearly readable; avoid small symbols thus. Supply good quality pictures and illustrations. Figures and tables and their captions should be centered in the text. Place figure captions below the figures and allow 12 pt line spacing between both, and 20 pt line spacing after the caption (before the adjacent text). Place table title above the table, leaving 20 pt line spacing before the title and 6 pt between the title and the table. Leave 20pt line spacing after the table (before the subsequent text)
+\vspace{8pt}
+\begin{table}[!ht]
+\centering
+\caption{Coefficients in constitutive relations}
+\label{Table1}
+\vspace{6pt}
+\begin{tabular}{ccc}
+\hline
+Constitutive relation & Nomenclature & Value \\ \hline
+Turbulent tensor & C$_{\mu}$ & 0.09 \\
+Turbulent tensor & C$_{\mu b}$ & 0.69 \\
+Lateral lift & C$_{L}$ & 0.08 \\
+Virtual mass & C$_{VM}$ & 0.8 \\ \hline
+\end{tabular}
+\end{table}
+\vspace{8pt}
+Arabic numerals should be used in figures and tables (e.g., Figure \ref{Fig1}, Figure 2, Table \ref{Table1}, Table 2, etc). Refer to them in the text as ``Table \ref{Table1}'' and ``\cref{Fig1}'' (no quotation marks), except at the beginning of a sentence, wherein ``Figure \ref{Fig1}'' should be used (again, no quotation marks).
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[scale=1.0]{Figures/Figure1.png}
+\vspace{12pt}
+\caption{Pressure variation along the nozzle: experimental data}
+\label{Fig1}
+\end{center}
+\end{figure}
+\vspace{8pt}
+When constructing graphs or plots, do not forget to label coordinates and state the corresponding units. Similarly, label all columns/rows in tables and state corresponding units whenever applicable.
+
+% --------------------------------------------------------------------------
+\subsection{Permission}\label{subsec:permission}
+% --------------------------------------------------------------------------
+
+You are the sole responsible for making sure that you have the right to publish everything in your paper. If you use material from a copyrighted source, or from other authors, you may need to obtain permission from the copyright holder or the respective authors. An authorship statement must be placed at the end of your paper, immediately before the list of references, as shown further below. 
+
+% --------------------------------------------------------------------------
+\subsection{References}\label{subsec:references}
+% --------------------------------------------------------------------------
+
+References should be cited in the text by Name [number]. For example: ``In a recent work, \citet{Hasan2011} proposed… \citet{Hasan2011}''. Numbers must be Arabic, enclosed in square brackets and used consecutively. References must be listed at the end of the paper, in a separate section entitled ``References''. They must be listed consecutively by the order of citation in the text. Type the word {``References''} in boldface, 13 pt Times New Roman type from the left margin, leaving 18 pt line spacing before and after. Type the reference list below it, in 11 pt Times New Roman (please do not leave blank spaces between references). See examples below. The list should only include works that are cited in the text.
+
+% --------------------------------------------------------------------------
+\section{Conclusions}\label{sec:conclusion}
+% --------------------------------------------------------------------------
+
+Type your conclusions or closing remarks here. Please be as concise and objective as possible. Do not make a ``summary'' of the paper, but instead list the main findings and results, even if these are only partial conclusions so far.
+
+%-------------------------------------------------------------------------
+\vspace{20pt}
+\noindent \textbf{Acknowledgements.} This section should be positioned immediately after the Conclusion section. Type {Acknowledgements} in boldface, 10 pt Times New Roman type from left margin, leaving 20 pt line spacing before and 12pt after.
+\vspace{12pt}
+
+%--------------------------------------------------------------------------
+\noindent \textbf{Authorship statement.} This section is mandatory and should be positioned immediately before the References section. The text should be exactly as follows: The authors hereby confirm that they are the sole liable persons responsible for the authorship of this work, and that all material that has been herein included as part of the present paper is either the property (and authorship) of the authors, or has the permission of the owners to be included here. 
+
+\bibliography{bibliography_example}
+
+\end{document}
+% --------------------------------------------------------------------------
