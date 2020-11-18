@@ -4,4 +4,6 @@ This repo contains all the source code of my Capstone Project in the [HarvardX D
 
 - Paper at [paper.pdf](https://github.com/PedroBern/concrete-compressive-strength-prediction/blob/master/CILAMCE_2020/paper.pdf)
 - Code at [capstone.R](https://github.com/PedroBern/concrete-compressive-strength-prediction/blob/master/HarvardX_Data_Science_Capstone/capstone.R)
-- Report at [capstone.Rmd](https://github.com/PedroBern/concrete-compressive-strength-prediction/blob/master/HarvardX_Data_Science_Capstone/capstone.Rmd)
+- Report code at [capstone.Rmd](https://github.com/PedroBern/concrete-compressive-strength-prediction/blob/master/HarvardX_Data_Science_Capstone/capstone.Rmd)
+- Report file at [capstone.pdf](https://github.com/PedroBern/concrete-compressive-strength-prediction/blob/master/HarvardX_Data_Science_Capstone/capstone.pdf)
+- Dataset at [data.xls](https://github.com/PedroBern/concrete-compressive-strength-prediction/blob/master/HarvardX_Data_Science_Capstone/data.xls)
