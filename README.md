@@ -2,19 +2,6 @@
 
 This repo contains all the source code of my Capstone Project in the [HarvardX Data Science Program](https://www.edx.org/professional-certificate/harvardx-data-science) and my paper for [CILAMCE](https://www.cilamce.com.br/).
 
-Below is the tree representation of the most important files in this project. The `paper.pdf` is shorter and easier to follow than the `capstone.pdf`, but the capstone contains more information. If you just want the code, head to `capstone.R` or `capstone.Rmd`, but know in advance that it can take between 1 and 2 hours to run.
-
-```bash
-root
-│   README.md
-├── CILAMCE_2020/
-│   └── paper.pdf
-├── data/
-│   ├── checkpoint.xls
-│   └── original.xls
-└── HarvardX_Data_Science_Capstone/
-    ├── capstone.pdf
-    ├── capstone.R
-    └── capstone.Rmd
-```
-
+- Paper at [paper.pdf](https://github.com/PedroBern/concrete-compressive-strength-prediction/blob/master/CILAMCE_2020/paper.pdf)
+- Code at [capstone.R](https://github.com/PedroBern/concrete-compressive-strength-prediction/blob/master/HarvardX_Data_Science_Capstone/capstone.R)
+- Report at [capstone.Rmd](https://github.com/PedroBern/concrete-compressive-strength-prediction/blob/master/HarvardX_Data_Science_Capstone/capstone.Rmd)
